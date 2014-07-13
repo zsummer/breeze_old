@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ProtoTraits>
+  <MinNo>20000</MinNo>
+  <MaxNo>20100</MaxNo>
+  <UseLog4z>0</UseLog4z>
+</ProtoTraits>
+
+
+<Proto>
+
+  <struct name="AuthInfo" desc="认证信息">
+    <member name="user" type="string"   desc=""/>
+    <member name="pwd"  type="string" desc=""/>
+  </struct>
+
+
+
+  <proto from="C" to="AS" name="AuthReq" desc= "认证请求">
+    <member name="info" type="AuthInfo"   desc=""/>
+  </proto>
+
+  <proto from="AS" to="C" name="AuthAck" desc= "认证回复" >
+  	<member name="retCode" type="int"   desc=""/>
+  </proto>
+
+</Proto>
+
