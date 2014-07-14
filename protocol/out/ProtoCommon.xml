@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ProtoTraits>
+  <MinNo>0</MinNo>
+  <MaxNo>0</MaxNo>
+  <UseLog4z>0</UseLog4z>
+</ProtoTraits>
+
+
+<Proto>
+
+  <enum name="ErrorCode" desc="错误类型">
+    <member name="EC_SUCCESS" value="0"  desc="成功"/>
+    <member name="EC_UNKOWN_ERROR" value="1"  desc="未知错误"/>
+    <member name="EC_SERVER_ERROR"  value="2" desc=""/>
+    <member name="EC_NOT_FOUND_ACCCOUNT_NAME" value="3"  desc=""/>
+    <member name="EC_AUTH_ERROR"  value="4" desc=""/>
+    <member name="EC_AREADY_AUTH"  value="5" desc=""/>
+  </enum>
+
+</Proto>
+
