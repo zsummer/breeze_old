@@ -44,14 +44,8 @@
     <ClInclude Include="Application.h">
       <Filter>main</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\protocol\in\DefineProto.h">
-      <Filter>protocol</Filter>
-    </ClInclude>
     <ClInclude Include="logic\AuthHandler.h">
       <Filter>logic</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\protocol\out\C++\AuthProto.h">
-      <Filter>protocol</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

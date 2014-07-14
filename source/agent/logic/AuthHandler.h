@@ -18,8 +18,8 @@
 
 #ifndef _AUTH_HANDLER_H_
 #define _AUTH_HANDLER_H_
-#include <DefineProto.h>
-#include <AuthProto.h>
+#include <ProtoDefine.h>
+#include <ProtoAuth.h>
 #include <zsummerX/FrameMessageDispatch.h>
 #include <zsummerX/FrameTcpSessionManager.h>
 
