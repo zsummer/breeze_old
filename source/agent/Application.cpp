@@ -25,11 +25,7 @@ Appliction & Appliction::getRef()
 bool Appliction::Init(std::string filename, unsigned int index)
 {
 	bool ret = false;
-	ret = ILog4zManager::GetInstance()->Start();
-	if (!ret)
-	{
-		return ret;
-	}
+
 
 	ret = GlobalFacade::getRef().getServerConfig()->Load("agent", filename, index);
 	if (!ret)

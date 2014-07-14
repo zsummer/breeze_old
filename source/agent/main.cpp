@@ -54,7 +54,14 @@ signal( SIGXCPU, SIG_IGN );
 	{
 		serverIndex = atoi(argv[2]);
 	}
-	
+	bool ret = false;
+	ret = ILog4zManager::GetInstance()->Start();
+	if (!ret)
+	{
+		return ret;
+	}
+
+
 	Appliction app;
 	if (!app.Init(filename, serverIndex))
 	{

@@ -178,6 +178,7 @@ int main(int argc, char* argv[])
 		g_maxClient = atoi(argv[3]);
 
 	ILog4zManager::GetInstance()->Config("client.cfg");
+	ILog4zManager::GetInstance()->Start();
 
 
 	LOGI("g_remoteIP=" << g_remoteIP << ", g_remotePort=" << g_remotePort << ", g_maxClient=" << g_maxClient );
@@ -190,7 +191,7 @@ int main(int argc, char* argv[])
 	CTcpSessionManager::getRef().Start();
 
 
-	CTcpSessionManager::getRef().CreateTimer(5000, MonitorFunc);
+//	CTcpSessionManager::getRef().CreateTimer(5000, MonitorFunc);
 
 	//创建心跳管理handler的实例 只要创建即可, 构造函数中会注册对应事件
 	CStressHeartBeatManager statusManager;
