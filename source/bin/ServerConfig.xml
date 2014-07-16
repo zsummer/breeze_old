@@ -7,10 +7,12 @@
   <dbagent ip="0.0.0.0" port="10003" index="0" />
   <logic ip="0.0.0.0" port="10004" index="0" />
   <battle ip="0.0.0.0" port="10005" index="0" />
+  <auth ip="0.0.0.0" port="10006" index="0" />
 </listen>
 
 <connect>
   <agent server="center" ip="127.0.0.1" port="10002" connectID="0" />
+  <agent server="auth" ip="127.0.0.1" port="10006" connectID="0" />
   <center server="dbagent" ip="127.0.0.1" port="10003" connectID="0" />
 
 </connect>

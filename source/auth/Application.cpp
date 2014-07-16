@@ -28,10 +28,10 @@ bool Appliction::Init(std::string filename, unsigned int index)
 	bool ret = false;
 
 
-	ret = GlobalFacade::getRef().getServerConfig().Parse(AgentNode, filename, index);
+	ret = GlobalFacade::getRef().getServerConfig().Parse(AuthNode, filename, index);
 	if (!ret)
 	{
-		LOGE("getServerConfig failed.");
+		LOGE("getServerConfig failed." );
 		return ret;
 	}
 	ret = CTcpSessionManager::getRef().Start();

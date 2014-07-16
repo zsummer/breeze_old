@@ -22,7 +22,7 @@
 #include <zsummerX/FrameMessageDispatch.h>
 #include <unordered_map>
 using namespace zsummer::log4z;
-
+#include <iostream>
 #include "Application.h"
 
 

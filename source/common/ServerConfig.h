@@ -42,12 +42,17 @@ struct ConnectorConfig
 	unsigned short remotePort = 0;
 };
 
+const std::string AgentNode = "agent";
+const std::string AuthNode = "auth";
+const std::string CenterNode = "center";
+const std::string DBAgentNode = "dbagent";
+const std::string LogicNode = "logic";
 
 
 class ServerConfig
 {
 public:
-	bool Load(std::string serverName, std::string filename, unsigned int index)
+	bool Parse(std::string serverName, std::string filename, unsigned int index)
 	{
 		try
 		{
@@ -63,9 +68,13 @@ public:
 				lconfig.index = iter->second.get<unsigned int>("<xmlattr>.index");
 				if (serverName == server && lconfig.index == index)
 				{
-					if (server == "agent")
+					if (server == AgentNode)
 					{
 						m_AgentListen = lconfig;
+					}
+					else if (server == AuthNode)
+					{
+						m_AuthListen = lconfig;
 					}
 					LOGI("serverName=" << serverName << ", ip=" << lconfig.ip << ", port=" << lconfig.port << ", lconfig.index=" << lconfig.index);
 				}
@@ -80,7 +89,7 @@ public:
 				lconfig.dstServer = iter->second.get<std::string>("<xmlattr>.server");
 				lconfig.remoteIP = iter->second.get<std::string>("<xmlattr>.ip");
 				lconfig.remotePort = iter->second.get<unsigned short>("<xmlattr>.port");
-				if (server == serverName && serverName == "agent")
+				if (server == serverName && serverName == AgentNode)
 				{
 					m_AgentConnect.push_back(lconfig);
 				}
@@ -106,6 +115,7 @@ public:
 	}
 public:
 	inline ListenConfig & getAgentListen(){ return m_AgentListen; }
+	inline ListenConfig & getAuthListen(){ return m_AuthListen; }
 	inline ListenConfig & getCenterListen(){ return m_CenterListen; }
 	inline ListenConfig & getDBListen(){ return m_DBListen; }
 
@@ -115,6 +125,7 @@ private:
 	ListenConfig m_AgentListen;
 	ListenConfig m_CenterListen;
 	ListenConfig m_DBListen;
+	ListenConfig m_AuthListen;
 
 	std::vector<ConnectorConfig> m_AgentConnect;
 	std::vector<ConnectorConfig> m_CenterConnect;

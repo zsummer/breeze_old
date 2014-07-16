@@ -16,37 +16,43 @@
 * limitations under the License.
 */
 
-#ifndef _AUTH_HANDLER_H_
-#define _AUTH_HANDLER_H_
+#ifndef _NET_MANAGER_H_
+#define _NET_MANAGER_H_
+
 #include <ProtoDefine.h>
+#include <ProtoCommon.h>
+#include <ProtoInCommon.h>
 #include <ProtoAuth.h>
+#include "../core/GlobalFacade.h"
+#include <ServerConfig.h>
 #include <zsummerX/FrameMessageDispatch.h>
 #include <zsummerX/FrameTcpSessionManager.h>
 
 /*
-* 服务端handler类
+* NetManager
 */
-class AuthHandler
+
+
+class CNetManager
 {
 public:
-	AuthHandler()
-	{
-		CMessageDispatcher::getRef().RegisterSessionMessage(ID_C2AS_AuthReq,
-			std::bind(&AuthHandler::msg_AuthReq, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-	}
+	CNetManager();
+	//连接所有认证服务和中央服务
+	bool Start();
 
-	void msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs)
-	{
-		ProtoAuthReq req;
-		rs >> req;
-		LOGD("ID_C2AS_AuthReq user=" << req.info.user << ", pwd=" << req.info.pwd);
 
-		WriteStreamPack ws;
-		ProtoAuthAck ack;
-		ack.retCode = 0;
-		ws << ID_AS2C_AuthAck << ack;
-		CTcpSessionManager::getRef().SendOrgSessionData(aID, sID, ws.GetStream(), ws.GetStreamLen());
-	};
+	void event_OnSessionEstablished(AccepterID, SessionID);
+	void event_OnSessionDisconnect(AccepterID, SessionID);
+
+	void msg_ServerInit(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
+
+	void msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
+
+
+private:
+	tagAcceptorConfigTraits m_configListen; //保存监听配置
+	std::map<SessionID, std::pair<AccepterID,ui32> > m_onlineAgentSession;
+	std::map<ui32, std::pair<AccepterID, SessionID>> m_onlineAgentIndex;
 };
 
 
