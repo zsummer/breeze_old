@@ -22,6 +22,7 @@
 
   <proto from="AS" to="C" name="AuthAck" desc= "认证回复" >
   	<member name="retCode" type="int"   desc=""/>
+    <member name="accountID" type="ui64"   desc=""/>
   </proto>
 
 </Proto>

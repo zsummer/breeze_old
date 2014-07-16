@@ -30,6 +30,12 @@ typedef unsigned int ui32;
 typedef long long i64;
 typedef unsigned long long ui64;
 
+typedef ui64 AccountID;
+const ui64 InvalidAccountID = (AccountID) -1;
+typedef ui64 CharacterID;
+const ui64 InvalidCharacterID = (CharacterID)-1;
+typedef ui64 ItemID;
+const ui64 InvalidItemID = (ItemID)-1;
 
 // 服务器内部控制用通讯协议区间为[)
 const ui16 MIN_SERVER_CONTROL_PROTO_ID = 0;
@@ -80,22 +86,23 @@ inline bool isRouteToAgent(ui16 protoID){ return protoID >= MIN_C_R_AS_PROTO_ID 
 inline bool isRouteToCenter(ui16 protoID){ return protoID >= MIN_C_R_CS_PROTO_ID && protoID < MAX_C_R_CS_PROTO_ID; }
 inline bool isRouteToLogic(ui16 protoID) { return protoID >= MIN_C_R_LS_PROTO_ID && protoID < MAX_C_R_LS_PROTO_ID; }
 inline bool isRouteToBattle(ui16 protoID) { return protoID >= MIN_C_R_BS_PROTO_ID && protoID < MAX_C_R_BS_PROTO_ID; }
-
+inline bool isRouteToDBAgent(ui16 protoID) { return protoID >= MIN_C_R_DS_PROTO_ID && protoID < MAX_C_R_DS_PROTO_ID; }
 
 
 //定义服务器内部控制协议
 //心跳脉冲
-const ui16 PROTO_CONTROL_PULSE = 0;
+const ui16 ID_PROTO_CONTROL_PULSE = 0;
+const ui16 ID_PROTO_SERVER_INIT = 1;
 
 //内部服务路由到C
 const ui16 PROTO_SERVER_ROUTE_CLIENT = 10;
 
 //内部服务路由到制定服务
-const ui16 PROTO_SERVER_ROUTE_AGENT = 20;
-const ui16 PROTO_SERVER_ROUTE_CENTER = 21;
-const ui16 PROTO_SERVER_ROUTE_GAME = 22;
-const ui16 PROTO_SERVER_ROUTE_DBAGENT = 23;
-const ui16 PROTO_SERVER_ROUTE_BATTLE = 24;
+const ui16 ID_PROTO_SERVER_ROUTE_AGENT = 20;
+const ui16 ID_PROTO_SERVER_ROUTE_CENTER = 21;
+const ui16 ID_PROTO_SERVER_ROUTE_LOGIC = 22;
+const ui16 ID_PROTO_SERVER_ROUTE_DBAGENT = 23;
+const ui16 ID_PROTO_SERVER_ROUTE_BATTLE = 24;
 
 
 
