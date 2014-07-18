@@ -1,5 +1,5 @@
 #include "NetManager.h"
-
+#include <mongo/client/dbclient.h>
 CNetManager::CNetManager()
 {
 	CMessageDispatcher::getRef().RegisterSessionMessage(ID_C2AS_AuthReq,
@@ -56,6 +56,18 @@ void CNetManager::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Rea
 	ProtoAuthReq req;
 	rs >> info >> req;
 	LOGD("ID_C2AS_AuthReq user=" << req.info.user << ", pwd=" << req.info.pwd);
+
+	//debug
+
+	try {
+		mongo::DBClientConnection c;
+		c.connect("localhost");
+		std::cout << "connected ok" << std::endl;
+	}
+	catch (const mongo::DBException &e) {
+		std::cout << "caught " << e.what() << std::endl;
+	}
+	//end debug
 
 	ProtoAuthAck ack;
 	ack.retCode = EC_SUCCESS;
