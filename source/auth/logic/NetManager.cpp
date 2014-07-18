@@ -61,23 +61,28 @@ void CNetManager::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Rea
 	{
 		try 
 		{
-			mongo::DBClientConnection c;
-			c.connect(GlobalFacade::getRef().getServerConfig().getAuthMongoDB().ip + ":" + 
-				boost::lexical_cast<std::string>(GlobalFacade::getRef().getServerConfig().getAuthMongoDB().port));
 			std::string errorMsg;
-			c.auth(GlobalFacade::getRef().getServerConfig().getAuthMongoDB().db,
-				GlobalFacade::getRef().getServerConfig().getAuthMongoDB().user,
-				GlobalFacade::getRef().getServerConfig().getAuthMongoDB().pwd, 
-				errorMsg);
+			std::string dbhost = GlobalFacade::getRef().getServerConfig().getAuthMongoDB().ip;
+			dbhost += ":" +boost::lexical_cast<std::string>(GlobalFacade::getRef().getServerConfig().getAuthMongoDB().port);
+			std::string db = GlobalFacade::getRef().getServerConfig().getAuthMongoDB().db;
+			std::string user = GlobalFacade::getRef().getServerConfig().getAuthMongoDB().user;
+			std::string pwd = GlobalFacade::getRef().getServerConfig().getAuthMongoDB().pwd;
+			mongo::DBClientConnection c;
+			c.connect(dbhost);
+			if (!c.auth(db, user, pwd, errorMsg))
+			{
+				LOGI("auth failed. db=" << db << ", user=" << user << ", pwd=" << pwd << ", errMSG=" << errorMsg);
+				break;
+			}
 			mongo::BSONObjBuilder builder;
 			builder.append("_id", req.info.user);
 			auto cursor = c.query("auth.users", builder.obj());
 			if (cursor->more())
 			{
 				auto obj = cursor->next();
-				std::string pwd = obj.getField("pwd").toString(false);
+				std::string pwd = obj.getField("pwd").str();
 				AccountID accID = obj.getField("accountID").numberLong();
-				if (obj.getField("pwd").toString(false) == req.info.pwd)
+				if (pwd == req.info.pwd)
 				{
 					ack.accountID = accID;
 					ack.retCode = EC_SUCCESS;
