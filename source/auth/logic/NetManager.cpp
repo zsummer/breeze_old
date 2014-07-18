@@ -58,18 +58,44 @@ void CNetManager::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Rea
 	LOGD("ID_C2AS_AuthReq user=" << req.info.user << ", pwd=" << req.info.pwd);
 
 	//debug
+	ProtoAuthAck ack;
+	ack.retCode = EC_AUTH_ERROR;
 
-	try {
-		mongo::DBClientConnection c;
-		c.connect("localhost");
-		std::cout << "connected ok" << std::endl;
-	}
-	catch (const mongo::DBException &e) {
-		std::cout << "caught " << e.what() << std::endl;
-	}
+	do
+	{
+		try 
+		{
+			mongo::DBClientConnection c;
+			c.connect(GlobalFacade::getRef().getServerConfig().getAuthMongoDB().ip + ":" + 
+				boost::lexical_cast<std::string>(GlobalFacade::getRef().getServerConfig().getAuthMongoDB().port));
+			std::string errorMsg;
+			c.auth(GlobalFacade::getRef().getServerConfig().getAuthMongoDB().db,
+				GlobalFacade::getRef().getServerConfig().getAuthMongoDB().user,
+				GlobalFacade::getRef().getServerConfig().getAuthMongoDB().pwd, 
+				errorMsg);
+			LOGI(errorMsg);
+			mongo::BSONObjBuilder builder;
+			builder.append("_id", "zhangyawei");
+			auto cursor = c.query("auth.users", builder.obj());
+			if (cursor->more())
+			{
+				auto obj = cursor->next();
+				LOGI(obj.toString());
+				LOGI(obj.getField("pwd").toString(false));
+			}
+
+			LOGI("connect ok");
+		}
+		catch (const mongo::DBException &e)
+		{
+			LOGI("connect caught:" << e.what());
+
+		}
+	} while (0);
+
 	//end debug
 
-	ProtoAuthAck ack;
+	
 	ack.retCode = EC_SUCCESS;
 	ack.accountID = 100;
 	WriteStreamPack ws;

@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
+<mongo>
+	<auth ip="127.0.0.1" port="28017" user="zhangyawei" pwd="123" />
+</mongo>
+
 <listen>
   <agent ip="0.0.0.0" port="10000" index="0" />
   <agent ip="0.0.0.0" port="10001" index="1" />
@@ -14,6 +18,5 @@
   <agent server="center" ip="127.0.0.1" port="10002" connectID="0" />
   <agent server="auth" ip="127.0.0.1" port="10006" connectID="0" />
   <center server="dbagent" ip="127.0.0.1" port="10003" connectID="0" />
-
 </connect>
 
