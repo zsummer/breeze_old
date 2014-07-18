@@ -46,10 +46,6 @@ void CNetManager::event_OnSessionDisconnect(AccepterID aID, SessionID sID)
 }
 
 
-
-
-
-
 void CNetManager::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs)
 {
 	SessionInfo info;
@@ -73,31 +69,38 @@ void CNetManager::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Rea
 				GlobalFacade::getRef().getServerConfig().getAuthMongoDB().user,
 				GlobalFacade::getRef().getServerConfig().getAuthMongoDB().pwd, 
 				errorMsg);
-			LOGI(errorMsg);
 			mongo::BSONObjBuilder builder;
-			builder.append("_id", "zhangyawei");
+			builder.append("_id", req.info.user);
 			auto cursor = c.query("auth.users", builder.obj());
 			if (cursor->more())
 			{
 				auto obj = cursor->next();
-				LOGI(obj.toString());
-				LOGI(obj.getField("pwd").toString(false));
+				std::string pwd = obj.getField("pwd").toString(false);
+				AccountID accID = obj.getField("accountID").numberLong();
+				if (obj.getField("pwd").toString(false) == req.info.pwd)
+				{
+					ack.accountID = accID;
+					ack.retCode = EC_SUCCESS;
+				}
+				LOGD("auth success req user=" << req.info.user << ", req pwd=" << req.info.pwd << ", result pwd=" << pwd << ", result accID=" << accID);
 			}
-
-			LOGI("connect ok");
+			else
+			{
+				LOGI("auth failed. req user=" << req.info.user << ", req pwd=" << req.info.pwd << ", result empty.");
+			}
 		}
 		catch (const mongo::DBException &e)
 		{
-			LOGI("connect caught:" << e.what());
-
+			LOGW("connect caught:" << e.what());
+			break;
+		}
+		catch (...)
+		{
+			LOGW("connect UNKNOWN ERROR");
 		}
 	} while (0);
 
 	//end debug
-
-	
-	ack.retCode = EC_SUCCESS;
-	ack.accountID = 100;
 	WriteStreamPack ws;
 	ws << ID_AS2C_AuthAck << info << ack;
 	CTcpSessionManager::getRef().SendOrgSessionData(aID, sID, ws.GetStream(), ws.GetStreamLen());

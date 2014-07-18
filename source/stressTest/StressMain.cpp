@@ -27,12 +27,13 @@
 #include <ProtoDefine.h>
 #include <ProtoCommon.h>
 #include <ProtoAuth.h>
+#include <ServerConfig.h>
 using namespace zsummer::log4z;
 
 //! 默认启动参数
-std::string g_remoteIP = "0.0.0.0"; //如果作为服务端来使用 这里是监听地址
-unsigned short g_remotePort = 81; //同上
+
 unsigned short g_maxClient = 1; //如果是服务端 这里是限制客户端的个数 超出的会被踢掉, 如果是客户端 这里是启动的客户端总数.
+
 //!收发包测试统计数据
 unsigned long long g_totalEchoCount = 0;
 unsigned long long g_lastEchoCount = 0;
@@ -165,31 +166,34 @@ int main(int argc, char* argv[])
 		|| strcmp(argv[1], "/?") == 0))
 	{
 		cout << "please input like example:" << endl;
-		cout << "tcpTest remoteIP remotePort maxClient" << endl;
-		cout << "./tcpTest 0.0.0.0 81 1" << endl;
+		cout << "tcpTest maxClient" << endl;
+		cout << "./tcpTest 1" << endl;
 		cout << "maxClient: limit max" << endl;
 		return 0;
 	}
 	if (argc > 1)
-		g_remoteIP = argv[1];
-	if (argc > 2)
-		g_remotePort = atoi(argv[2]);
-	if (argc > 3)
-		g_maxClient = atoi(argv[3]);
+		g_maxClient = atoi(argv[1]);
+
 
 	ILog4zManager::GetInstance()->Config("client.cfg");
 	ILog4zManager::GetInstance()->Start();
 
 
-	LOGI("g_remoteIP=" << g_remoteIP << ", g_remotePort=" << g_remotePort << ", g_maxClient=" << g_maxClient );
+
 
 
 //	ILog4zManager::GetInstance()->SetLoggerLevel(LOG4Z_MAIN_LOGGER_ID, LOG_LEVEL_INFO);
-
-
+	ServerConfig serverConfig;
+	if (!serverConfig.Parse(AgentNode, "../ServerConfig.xml", 0))
+	{
+		LOGE("serverConfig.Parse failed");
+		return 0;
+	}
+	LOGI("g_remoteIP=" << "127.0.0.1" << ", g_remotePort=" << serverConfig.getAgentListen().port << ", g_maxClient=" << g_maxClient);
 
 	CTcpSessionManager::getRef().Start();
-
+	
+	
 
 //	CTcpSessionManager::getRef().CreateTimer(5000, MonitorFunc);
 
@@ -204,8 +208,8 @@ int main(int argc, char* argv[])
 	{
 		tagConnctorConfigTraits traits;
 		traits.cID = i;
-		traits.remoteIP = g_remoteIP;
-		traits.remotePort = g_remotePort;
+		traits.remoteIP = "127.0.0.1";
+		traits.remotePort = serverConfig.getAgentListen().port;
 		traits.reconnectInterval = 5000;
 		traits.reconnectMaxCount = 50;
 		CTcpSessionManager::getRef().AddConnector(traits);
