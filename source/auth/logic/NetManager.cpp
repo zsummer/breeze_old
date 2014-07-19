@@ -15,6 +15,39 @@ CNetManager::CNetManager()
 
 bool CNetManager::Start()
 {
+
+	if (m_authMongo)
+	{
+		return false;
+	}
+	m_authMongo = std::make_shared<mongo::DBClientConnection>(new mongo::DBClientConnection);
+	try
+	{
+		std::string errorMsg;
+		std::string dbhost = GlobalFacade::getRef().getServerConfig().getAuthMongoDB().ip;
+		dbhost += ":" + boost::lexical_cast<std::string>(GlobalFacade::getRef().getServerConfig().getAuthMongoDB().port);
+		std::string db = GlobalFacade::getRef().getServerConfig().getAuthMongoDB().db;
+		std::string user = GlobalFacade::getRef().getServerConfig().getAuthMongoDB().user;
+		std::string pwd = GlobalFacade::getRef().getServerConfig().getAuthMongoDB().pwd;
+		m_authMongo->connect(dbhost);
+		if (!m_authMongo->auth(db, user, pwd, errorMsg))
+		{
+			LOGI("auth failed. db=" << db << ", user=" << user << ", pwd=" << pwd << ", errMSG=" << errorMsg);
+			return false;
+		}
+	}
+	catch (const mongo::DBException &e)
+	{
+		LOGE("connect caught:" << e.what());
+		return false;
+	}
+	catch (...)
+	{
+		LOGE("connect mongo auth UNKNOWN ERROR");
+		return false;
+	}
+
+
 	m_configListen.aID = 1;
 	m_configListen.listenIP = GlobalFacade::getRef().getServerConfig().getAuthListen().ip;
 	m_configListen.listenPort = GlobalFacade::getRef().getServerConfig().getAuthListen().port;
@@ -53,7 +86,7 @@ void CNetManager::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Rea
 	rs >> info >> req;
 	LOGD("ID_C2AS_AuthReq user=" << req.info.user << ", pwd=" << req.info.pwd);
 
-	//debug
+
 	ProtoAuthAck ack;
 	ack.retCode = EC_AUTH_ERROR;
 
@@ -61,22 +94,9 @@ void CNetManager::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Rea
 	{
 		try 
 		{
-			std::string errorMsg;
-			std::string dbhost = GlobalFacade::getRef().getServerConfig().getAuthMongoDB().ip;
-			dbhost += ":" +boost::lexical_cast<std::string>(GlobalFacade::getRef().getServerConfig().getAuthMongoDB().port);
-			std::string db = GlobalFacade::getRef().getServerConfig().getAuthMongoDB().db;
-			std::string user = GlobalFacade::getRef().getServerConfig().getAuthMongoDB().user;
-			std::string pwd = GlobalFacade::getRef().getServerConfig().getAuthMongoDB().pwd;
-			mongo::DBClientConnection c;
-			c.connect(dbhost);
-			if (!c.auth(db, user, pwd, errorMsg))
-			{
-				LOGI("auth failed. db=" << db << ", user=" << user << ", pwd=" << pwd << ", errMSG=" << errorMsg);
-				break;
-			}
 			mongo::BSONObjBuilder builder;
 			builder.append("_id", req.info.user);
-			auto cursor = c.query("auth.users", builder.obj());
+			auto cursor = m_authMongo->query("auth.users", builder.obj());
 			if (cursor->more())
 			{
 				auto obj = cursor->next();
@@ -86,8 +106,12 @@ void CNetManager::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Rea
 				{
 					ack.accountID = accID;
 					ack.retCode = EC_SUCCESS;
+					LOGD("auth success req user=" << req.info.user << ", req pwd=" << req.info.pwd << ", result pwd=" << pwd << ", result accID=" << accID);
 				}
-				LOGD("auth success req user=" << req.info.user << ", req pwd=" << req.info.pwd << ", result pwd=" << pwd << ", result accID=" << accID);
+				else
+				{
+					LOGD("auth failed req user=" << req.info.user << ", req pwd=" << req.info.pwd << ", result pwd=" << pwd << ", result accID=" << accID);
+				}
 			}
 			else
 			{
@@ -96,16 +120,16 @@ void CNetManager::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Rea
 		}
 		catch (const mongo::DBException &e)
 		{
-			LOGW("connect caught:" << e.what());
+			LOGW("auth mongo caught:" << e.what());
 			break;
 		}
 		catch (...)
 		{
-			LOGW("connect UNKNOWN ERROR");
+			LOGW("auth mongo UNKNOWN ERROR");
+			break;
 		}
 	} while (0);
 
-	//end debug
 	WriteStreamPack ws;
 	ws << ID_AS2C_AuthAck << info << ack;
 	CTcpSessionManager::getRef().SendOrgSessionData(aID, sID, ws.GetStream(), ws.GetStreamLen());

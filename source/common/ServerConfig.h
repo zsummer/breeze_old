@@ -139,12 +139,12 @@ bool ServerConfig::Parse(std::string serverName, std::string filename, unsigned 
 		for (auto iter = mongoParse.begin(); iter != mongoParse.end(); ++iter)
 		{
 			MongoConfig lconfig;
-			lconfig.db = iter->first;
 			lconfig.ip = iter->second.get<std::string>("<xmlattr>.ip");
 			lconfig.port = iter->second.get<unsigned short>("<xmlattr>.port");
+			lconfig.db = iter->second.get<std::string>("<xmlattr>.db");
 			lconfig.user = iter->second.get<std::string>("<xmlattr>.user");
 			lconfig.pwd = iter->second.get<std::string>("<xmlattr>.pwd");
-			if (lconfig.db == AuthMongoDB)
+			if (iter->first == AuthMongoDB)
 			{
 				m_authMongo = lconfig;
 			}

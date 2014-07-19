@@ -26,6 +26,12 @@ using namespace zsummer::log4z;
 #include "Application.h"
 
 
+void sigInt(int sig)
+{
+	LOGI("catch SIGINT.");
+	Appliction::getRef().Stop();
+}
+
 int main(int argc, char* argv[])
 {
 
@@ -55,6 +61,7 @@ signal( SIGXCPU, SIG_IGN );
 		serverIndex = atoi(argv[2]);
 	}
 	bool ret = false;
+	ILog4zManager::GetInstance()->Config("log.config");
 	ret = ILog4zManager::GetInstance()->Start();
 	if (!ret)
 	{
@@ -63,13 +70,13 @@ signal( SIGXCPU, SIG_IGN );
 	}
 
 
-	Appliction app;
-	if (!app.Init(filename, serverIndex))
+	if (!Appliction::getRef().Init(filename, serverIndex))
 	{
 		LOGE("Appliction init false.");
 		return 1;
 	}
-	app.RunPump();
+	Appliction::getRef().RunPump();
+
 	LOGI("Appliction exit.");
 
 	return 0;

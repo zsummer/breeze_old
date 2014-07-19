@@ -133,6 +133,9 @@ void CNetManager::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Rea
 	ProtoAuthReq req;
 	rs >> req;
 	LOGD("ID_C2AS_AuthReq user=" << req.info.user << ", pwd=" << req.info.pwd);
+// 	//debug
+// 	m_mapSession.erase(sID);
+// 	//end
 	auto finditer = m_mapSession.find(sID);
 	if (finditer != m_mapSession.end())
 	{

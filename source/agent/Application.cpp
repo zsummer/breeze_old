@@ -54,3 +54,10 @@ void Appliction::RunPump()
 {
 	return CTcpSessionManager::getRef().Run();
 }
+
+void Appliction::Stop()
+{
+	CTcpSessionManager::getRef().Stop();
+}
+
+

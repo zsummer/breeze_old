@@ -128,22 +128,40 @@ public:
 		rs >> ack;
 		if (ack.retCode == EC_SUCCESS)
 		{
-			LOGI("Auth Success. cID=" << cID);
+			LOGD("Auth Success. cID=" << cID);
 		}
 		else
 		{
 			LOGE("Auth Failed. cID=" << cID);
+			return;
 		}
 		
 
 		g_totalRecvCount++;
 		g_totalEchoCount++;
 
+
+		//debug
+// 		WriteStreamPack ws;
+// 		ProtoAuthReq req;
+// 		req.info.user = "zhangyawei";
+// 		req.info.pwd = "123";
+// 		ws << ID_C2AS_AuthReq << req;
+// 		CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
+// 		LOGD("OnConnected. Send AuthReq. cID=" << cID << ", user=" << req.info.user << ", pwd=" << req.info.pwd);
+// 		g_totalSendCount++;
+		//!end
+
 	};
 private:
 	std::unordered_map<ConnectorID, bool> m_sessionStatus;
 };
 
+void sigInt(int sig)
+{
+	LOGI("catch SIGINT.");
+	CTcpSessionManager::getRef().Stop();
+}
 
 
 int main(int argc, char* argv[])
@@ -161,6 +179,7 @@ int main(int argc, char* argv[])
 	signal( SIGQUIT, SIG_IGN );
 	signal( SIGCHLD, SIG_IGN);
 #endif
+	signal(SIGINT, sigInt);
 	if (argc == 2 && 
 		(strcmp(argv[1], "--help") == 0 
 		|| strcmp(argv[1], "/?") == 0))
@@ -175,7 +194,7 @@ int main(int argc, char* argv[])
 		g_maxClient = atoi(argv[1]);
 
 
-	ILog4zManager::GetInstance()->Config("client.cfg");
+	ILog4zManager::GetInstance()->Config("log.config");
 	ILog4zManager::GetInstance()->Start();
 
 
@@ -195,7 +214,7 @@ int main(int argc, char* argv[])
 	
 	
 
-//	CTcpSessionManager::getRef().CreateTimer(5000, MonitorFunc);
+	CTcpSessionManager::getRef().CreateTimer(5000, MonitorFunc);
 
 	//创建心跳管理handler的实例 只要创建即可, 构造函数中会注册对应事件
 	CStressHeartBeatManager statusManager;

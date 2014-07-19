@@ -32,6 +32,10 @@
 * NetManager
 */
 
+namespace mongo
+{
+	class DBClientConnection;
+};
 
 class CNetManager
 {
@@ -53,6 +57,9 @@ private:
 	tagAcceptorConfigTraits m_configListen; //±£¥Êº‡Ã˝≈‰÷√
 	std::map<SessionID, std::pair<AccepterID,ui32> > m_onlineAgentSession;
 	std::map<ui32, std::pair<AccepterID, SessionID>> m_onlineAgentIndex;
+
+	//!auth mongo
+	std::shared_ptr<mongo::DBClientConnection> m_authMongo;
 };
 
 
