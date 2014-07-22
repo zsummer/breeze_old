@@ -4,10 +4,15 @@ CNetManager::CNetManager()
 {
 	CMessageDispatcher::getRef().RegisterSessionMessage(ID_C2AS_AuthReq,
 		std::bind(&CNetManager::msg_AuthReq, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+	CMessageDispatcher::getRef().RegisterSessionDefaultMessage(
+		std::bind(&CNetManager::msg_DefaultReq, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+	CMessageDispatcher::getRef().RegisterSessionOrgMessage(
+		std::bind(&CNetManager::msg_OrgMessageReq, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+
+
 	CMessageDispatcher::getRef().RegisterConnectorMessage(ID_AS2C_AuthAck,
 		std::bind(&CNetManager::msg_AuthAck, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-	CMessageDispatcher::getRef().RegisterSessionMessage(
-		std::bind(&CNetManager::msg_DefaultReq, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+
 
 	//×¢²áÊÂ¼þ
 	CMessageDispatcher::getRef().RegisterOnConnectorEstablished(std::bind(&CNetManager::event_OnConnect, this, std::placeholders::_1));
@@ -134,7 +139,7 @@ void CNetManager::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Rea
 	rs >> req;
 	LOGD("ID_C2AS_AuthReq user=" << req.info.user << ", pwd=" << req.info.pwd);
 // 	//debug
-// 	m_mapSession.erase(sID);
+ //	m_mapSession.erase(sID);
 // 	//end
 	auto finditer = m_mapSession.find(sID);
 	if (finditer != m_mapSession.end())
@@ -195,6 +200,22 @@ void CNetManager::msg_AuthAck(ConnectorID cID, ProtocolID pID, ReadStreamPack &r
 	CTcpSessionManager::getRef().SendOrgSessionData(founder->second->accepterID, founder->second->sessionID, ws.GetStream(), ws.GetStreamLen());
 }
 
+bool CNetManager::msg_OrgMessageReq(AccepterID aID, SessionID sID, const char * blockBegin,  FrameStreamTraits::Integer blockSize)
+{
+	ReadStreamPack pack(blockBegin, blockSize);
+	ProtocolID protoID = InvalidProtocolID;
+	pack >> protoID;
+	if (isClientPROTO(protoID) && isNeedAuthClientPROTO(protoID))
+	{
+		auto finditer = m_mapSession.find(sID);
+		if (finditer == m_mapSession.end() || finditer->second->accountID == InvalidAccountID)
+		{
+			LOGW("msg_OrgMessageReq check false. sID=" << sID);
+			return false;
+		}
+	}
+	return true;
+};
 
 void CNetManager::msg_DefaultReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs)
 {
@@ -247,3 +268,5 @@ void CNetManager::msg_DefaultReq(AccepterID aID, SessionID sID, ProtocolID pID, 
 	}
 
 };
+
+

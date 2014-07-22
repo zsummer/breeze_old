@@ -142,14 +142,28 @@ public:
 
 
 		//debug
-// 		WriteStreamPack ws;
-// 		ProtoAuthReq req;
-// 		req.info.user = "zhangyawei";
-// 		req.info.pwd = "123";
-// 		ws << ID_C2AS_AuthReq << req;
-// 		CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
-// 		LOGD("OnConnected. Send AuthReq. cID=" << cID << ", user=" << req.info.user << ", pwd=" << req.info.pwd);
-// 		g_totalSendCount++;
+// 		{
+// 			WriteStreamPack ws;
+// 			ProtoAuthReq req;
+// 			req.info.user = "zhangyawei";
+// 			req.info.pwd = "123";
+// 			ws << ID_C2AS_AuthReq << req;
+// 			CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
+// 			LOGD("OnConnected. Send AuthReq. cID=" << cID << ", user=" << req.info.user << ", pwd=" << req.info.pwd);
+// 			g_totalSendCount++;
+// 		}
+
+
+// 		{
+// 			WriteStreamPack ws;
+// 			ProtoAuthReq req;
+// 			req.info.user = "zhangyawei";
+// 			req.info.pwd = "123";
+// 			ws << MIN_C_R_AS_PROTO_ID << req;
+// 			CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
+// 			LOGD("OnConnected. Send AuthReq. cID=" << cID << ", user=" << req.info.user << ", pwd=" << req.info.pwd);
+// 			g_totalSendCount++;
+// 		}
 		//!end
 
 	};

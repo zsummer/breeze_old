@@ -49,8 +49,7 @@ public:
 	void msg_AuthAck(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs);
 
 	void msg_DefaultReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
-
-private:
+	bool msg_OrgMessageReq(AccepterID aID, SessionID sID, const char * blockBegin, FrameStreamTraits::Integer blockSize);
 	std::map<SessionID, std::shared_ptr<SessionInfo>> m_mapSession;
 	tagAcceptorConfigTraits m_configListen; //±£¥Êº‡Ã˝≈‰÷√
 
