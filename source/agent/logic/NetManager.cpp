@@ -68,14 +68,14 @@ void CNetManager::event_OnConnect(ConnectorID cID)
 	auto founder = m_configAuth.find(cID);
 	if (founder != m_configAuth.end())
 	{
-		m_onlineAuth.insert(cID);
+		m_onlineAuth.push_back(cID);
 		LOGI("event_OnConnect Auth. cID=" << cID << ", listenIP=" << founder->second.remoteIP << ", listenPort=" << founder->second.remotePort);
 
 	}
 	founder = m_configCenter.find(cID);
 	if (founder != m_configCenter.end())
 	{
-		m_onlineCenter.insert(cID);
+		m_onlineCenter.push_back(cID);
 		LOGI("event_OnConnect Center. cID=" << cID << ", listenIP=" << founder->second.remoteIP << ", listenPort=" << founder->second.remotePort);
 	}
 // 	if (m_configAuth.size() + m_configCenter.size() != m_onlineAuth.size() + m_onlineCenter.size())
@@ -101,13 +101,21 @@ void CNetManager::event_OnDisconnect(ConnectorID cID)
 	auto founder = m_configAuth.find(cID);
 	if (founder != m_configAuth.end())
 	{
-		m_onlineAuth.erase(founder->second.cID);
+		auto searchiter = std::find_if(m_onlineAuth.begin(), m_onlineAuth.end(), [&cID](ConnectorID ccID){ return ccID == cID; });
+		if (searchiter != m_onlineAuth.end())
+		{
+			m_onlineAuth.erase(searchiter);
+		}
 		LOGW("event_OnDisconnect Auth. cID=" << cID << ", listenIP=" << founder->second.remoteIP << ", listenPort=" << founder->second.remotePort);
 	}
 	founder = m_configCenter.find(cID);
 	if (founder != m_configCenter.end())
 	{
-		m_onlineCenter.erase(founder->second.cID);
+		auto searchiter = std::find_if(m_onlineCenter.begin(), m_onlineCenter.end(), [&cID](ConnectorID ccID){ return ccID == cID; });
+		if (searchiter != m_onlineCenter.end())
+		{
+			m_onlineCenter.erase(searchiter);
+		}
 		LOGW("event_OnDisconnect Center. cID=" << cID << ", listenIP=" << founder->second.remoteIP << ", listenPort=" << founder->second.remotePort);
 	}
 }
@@ -139,7 +147,7 @@ void CNetManager::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Rea
 	rs >> req;
 	LOGD("ID_C2AS_AuthReq user=" << req.info.user << ", pwd=" << req.info.pwd);
 // 	//debug
- //	m_mapSession.erase(sID);
+	m_mapSession.erase(sID);
 // 	//end
 	auto finditer = m_mapSession.find(sID);
 	if (finditer != m_mapSession.end())
@@ -173,7 +181,8 @@ void CNetManager::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Rea
 
 	WriteStreamPack ws;
 	ws << ID_C2AS_AuthReq << *sinfo << req ;
-	CTcpSessionManager::getRef().SendOrgConnectorData(*m_onlineAuth.begin(), ws.GetStream(), ws.GetStreamLen());
+	auto authID = m_onlineAuth.at(rand() % m_onlineAuth.size());
+	CTcpSessionManager::getRef().SendOrgConnectorData(authID, ws.GetStream(), ws.GetStreamLen());
 }
 
 void CNetManager::msg_AuthAck(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs)

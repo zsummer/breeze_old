@@ -57,8 +57,8 @@ public:
 	std::map<ConnectorID, tagConnctorConfigTraits> m_configAuth; //cID 对应的连接配置
 	std::map<ConnectorID, tagConnctorConfigTraits> m_configCenter;  //cID 对应的连接配置
 
-	std::set<ConnectorID> m_onlineAuth; //在线的认证服务, 主备关系 不均衡
-	std::set<ConnectorID> m_onlineCenter; //在线的中心服务, 主备关系 不均衡
+	std::vector<ConnectorID> m_onlineAuth; //在线的认证服务, 主备关系 不均衡
+	std::vector<ConnectorID> m_onlineCenter; //在线的中心服务, 主备关系 不均衡
 };
 
 

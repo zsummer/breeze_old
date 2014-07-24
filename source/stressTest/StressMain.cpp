@@ -32,7 +32,9 @@ using namespace zsummer::log4z;
 
 //! 默认启动参数
 
-unsigned short g_maxClient = 1; //如果是服务端 这里是限制客户端的个数 超出的会被踢掉, 如果是客户端 这里是启动的客户端总数.
+unsigned short g_agentIndex = 0; //
+unsigned short g_maxClient = 1; //如启动的客户端总数.
+
 
 //!收发包测试统计数据
 unsigned long long g_totalEchoCount = 0;
@@ -142,16 +144,16 @@ public:
 
 
 		//debug
-// 		{
-// 			WriteStreamPack ws;
-// 			ProtoAuthReq req;
-// 			req.info.user = "zhangyawei";
-// 			req.info.pwd = "123";
-// 			ws << ID_C2AS_AuthReq << req;
-// 			CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
-// 			LOGD("OnConnected. Send AuthReq. cID=" << cID << ", user=" << req.info.user << ", pwd=" << req.info.pwd);
-// 			g_totalSendCount++;
-// 		}
+		{
+			WriteStreamPack ws;
+			ProtoAuthReq req;
+			req.info.user = "zhangyawei";
+			req.info.pwd = "123";
+			ws << ID_C2AS_AuthReq << req;
+			CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
+			LOGD("OnConnected. Send AuthReq. cID=" << cID << ", user=" << req.info.user << ", pwd=" << req.info.pwd);
+			g_totalSendCount++;
+		}
 
 
 // 		{
@@ -205,7 +207,9 @@ int main(int argc, char* argv[])
 		return 0;
 	}
 	if (argc > 1)
-		g_maxClient = atoi(argv[1]);
+		g_agentIndex = atoi(argv[1]);
+	if (argc > 2)
+		g_maxClient = atoi(argv[2]);
 
 
 	ILog4zManager::GetInstance()->Config("log.config");
@@ -217,7 +221,7 @@ int main(int argc, char* argv[])
 
 //	ILog4zManager::GetInstance()->SetLoggerLevel(LOG4Z_MAIN_LOGGER_ID, LOG_LEVEL_INFO);
 	ServerConfig serverConfig;
-	if (!serverConfig.Parse(AgentNode, "../ServerConfig.xml", 0))
+	if (!serverConfig.Parse(AgentNode, "../ServerConfig.xml", g_agentIndex))
 	{
 		LOGE("serverConfig.Parse failed");
 		return 0;
