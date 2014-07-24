@@ -10,4 +10,4 @@ start agent.exe ../ServerConfig.xml 1
 ping 127.0.0.1 -n 3 >nul
 cd ..
 
-pause
+ping 127.0.0.1 -n 3 >nul

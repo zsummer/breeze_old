@@ -31,7 +31,7 @@ bool CNetManager::Start()
 		tag.cID = m_lastConnectID++;
 		tag.remoteIP = con.remoteIP;
 		tag.remotePort = con.remotePort;
-		tag.reconnectMaxCount = 720;
+		tag.reconnectMaxCount = 2;
 		tag.reconnectInterval = 5000;
 		tag.curReconnectCount = true;
 		if (con.dstServer == CenterNode)
@@ -78,10 +78,10 @@ void CNetManager::event_OnConnect(ConnectorID cID)
 		m_onlineCenter.push_back(cID);
 		LOGI("event_OnConnect Center. cID=" << cID << ", listenIP=" << founder->second.remoteIP << ", listenPort=" << founder->second.remotePort);
 	}
-// 	if (m_configAuth.size() + m_configCenter.size() != m_onlineAuth.size() + m_onlineCenter.size())
-// 	{
-// 		return;
-// 	}
+	if (m_configAuth.size()/* + m_configCenter.size()*/ != m_onlineAuth.size()/* + m_onlineCenter.size()*/)
+	{
+		return;
+	}
 
 	//init
 	WriteStreamPack ws;
@@ -94,7 +94,7 @@ void CNetManager::event_OnConnect(ConnectorID cID)
 		LOGE("AddAcceptor Failed. listenIP=" << m_configListen.listenIP << ", listenPort=" << m_configListen.listenPort);
 		return;
 	}
-	LOGE("AddAcceptor Success. listenIP=" << m_configListen.listenIP << ", listenPort=" << m_configListen.listenPort);
+	LOGI("AddAcceptor Success. listenIP=" << m_configListen.listenIP << ", listenPort=" << m_configListen.listenPort);
 }
 void CNetManager::event_OnDisconnect(ConnectorID cID)
 {
@@ -146,8 +146,8 @@ void CNetManager::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Rea
 	ProtoAuthReq req;
 	rs >> req;
 	LOGD("ID_C2AS_AuthReq user=" << req.info.user << ", pwd=" << req.info.pwd);
-// 	//debug
-	m_mapSession.erase(sID);
+// 	//debug 可以重复认证 做认证压测
+//	m_mapSession.erase(sID);
 // 	//end
 	auto finditer = m_mapSession.find(sID);
 	if (finditer != m_mapSession.end())

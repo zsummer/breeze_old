@@ -89,11 +89,16 @@ void CNetManager::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Rea
 
 	ProtoAuthAck ack;
 	ack.retCode = EC_AUTH_ERROR;
+	ack.accountID = InvalidAccountID;
 
 	do
 	{
 		try 
 		{
+// 			//debug 截断认证流程检测协议QPS速度
+// 			ack.retCode = EC_SUCCESS;
+// 			break;
+// 			//end debug
 			mongo::BSONObjBuilder builder;
 			builder.append("_id", req.info.user);
 			auto cursor = m_authMongo->query("auth.users", builder.obj());
