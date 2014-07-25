@@ -20,7 +20,7 @@ CNetManager::CNetManager()
 bool CNetManager::Start()
 {
 
-	auto connecters = GlobalFacade::getRef().getServerConfig().getCenterConnect();
+	auto connecters = GlobalFacade::getRef().getServerConfig().getConfigConnect(CenterNode);
 	for (auto con : connecters)
 	{
 		tagConnctorConfigTraits tag;
@@ -46,10 +46,14 @@ bool CNetManager::Start()
 	}
 
 	m_configListen.aID = 1;
-	m_configListen.listenIP = GlobalFacade::getRef().getServerConfig().getCenterListen().ip;
-	m_configListen.listenPort = GlobalFacade::getRef().getServerConfig().getCenterListen().port;
+	m_configListen.listenIP = GlobalFacade::getRef().getServerConfig().getConfigListen(CenterNode).ip;
+	m_configListen.listenPort = GlobalFacade::getRef().getServerConfig().getConfigListen(CenterNode).port;
 	m_configListen.maxSessions = 50;
-
+	if (CTcpSessionManager::getRef().AddAcceptor(m_configListen) == InvalidAccepterID)
+	{
+		LOGE("AddAcceptor Failed. listenIP=" << m_configListen.listenIP << ", listenPort=" << m_configListen.listenPort);
+		return false;
+	}
 	LOGI("CNetManager Init Success.");
 	return true;
 }
@@ -71,7 +75,7 @@ void CNetManager::event_OnConnect(ConnectorID cID)
 
 	//init
 	WriteStreamPack ws;
-	ws << ID_PROTO_SERVER_INIT << CenterNode << GlobalFacade::getRef().getServerConfig().getCenterListen().index;
+	ws << ID_PROTO_SERVER_INIT << CenterNode << GlobalFacade::getRef().getServerConfig().getConfigListen(CenterNode).index;
 	CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
 
 	//所有connector已经建立连接 此时打开客户端监听端口
@@ -129,7 +133,7 @@ void CNetManager::event_OnSessionDisconnect(AccepterID aID, SessionID sID)
 
 void CNetManager::msg_serverInit(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs)
 {
-	std::string node;
+	ServerNodeType node;
 	unsigned int index = 0;
 	rs >> node >> index;
 	if (node == AgentNode)

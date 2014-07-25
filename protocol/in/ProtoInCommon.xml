@@ -11,14 +11,13 @@
 
 
   <struct name="SessionInfo" desc="会话信息">
-    <member name="accountName" type="string"   desc=""/>
     <member name="accountID" type="ui64"   desc=""/>
-    <member name="charName" type="string"   desc=""/>
     <member name="charID" type="ui64"   desc=""/>
-    <member name="agentID" type="ui32" desc=""/>
+    <member name="agentIndex" type="ui32" desc=""/>
     <member name="accepterID"  type="ui32" desc=""/>
     <member name="sessionID"  type="ui32" desc=""/>
     <member name="lastLoginTime" type="ui64" desc=""/>
+    <member name="lastActiveTime" type="ui64" desc=""/>
   </struct>
 
 </Proto>

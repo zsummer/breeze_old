@@ -28,7 +28,7 @@ bool Appliction::Init(std::string filename, unsigned int index)
 	bool ret = false;
 
 
-	ret = GlobalFacade::getRef().getServerConfig().Parse(AgentNode, filename, index);
+	ret = GlobalFacade::getRef().getServerConfig().Parse(filename, index);
 	if (!ret)
 	{
 		LOGE("getServerConfig failed.");

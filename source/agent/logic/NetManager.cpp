@@ -24,7 +24,7 @@ CNetManager::CNetManager()
 bool CNetManager::Start()
 {
 
-	auto connecters = GlobalFacade::getRef().getServerConfig().getAgentConnect();
+	auto connecters = GlobalFacade::getRef().getServerConfig().getConfigConnect(AgentNode);
 	for (auto con : connecters)
 	{
 		tagConnctorConfigTraits tag;
@@ -54,8 +54,8 @@ bool CNetManager::Start()
 	}
 
 	m_configListen.aID = 1;
-	m_configListen.listenIP = GlobalFacade::getRef().getServerConfig().getAgentListen().ip;
-	m_configListen.listenPort = GlobalFacade::getRef().getServerConfig().getAgentListen().port;
+	m_configListen.listenIP = GlobalFacade::getRef().getServerConfig().getConfigListen(AgentNode).ip;
+	m_configListen.listenPort = GlobalFacade::getRef().getServerConfig().getConfigListen(AgentNode).port;
 	m_configListen.maxSessions = 5000;
 
 	LOGI("CNetManager Init Success.");
@@ -70,7 +70,6 @@ void CNetManager::event_OnConnect(ConnectorID cID)
 	{
 		m_onlineAuth.push_back(cID);
 		LOGI("event_OnConnect Auth. cID=" << cID << ", listenIP=" << founder->second.remoteIP << ", listenPort=" << founder->second.remotePort);
-
 	}
 	founder = m_configCenter.find(cID);
 	if (founder != m_configCenter.end())
@@ -78,17 +77,17 @@ void CNetManager::event_OnConnect(ConnectorID cID)
 		m_onlineCenter.push_back(cID);
 		LOGI("event_OnConnect Center. cID=" << cID << ", listenIP=" << founder->second.remoteIP << ", listenPort=" << founder->second.remotePort);
 	}
-	if (m_configAuth.size()/* + m_configCenter.size()*/ != m_onlineAuth.size()/* + m_onlineCenter.size()*/)
+	if (m_configAuth.size() + m_configCenter.size() != m_onlineAuth.size() + m_onlineCenter.size())
 	{
 		return;
 	}
 
 	//init
 	WriteStreamPack ws;
-	ws << ID_PROTO_SERVER_INIT << AgentNode << GlobalFacade::getRef().getServerConfig().getAgentListen().index;
+	ws << ID_PROTO_SERVER_INIT << AgentNode << GlobalFacade::getRef().getServerConfig().getConfigListen(AgentNode).index;
 	CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
 
-	//所有connector已经建立连接 此时打开客户端监听端口
+	//所有connector已经建立连接成功 并且是程序启动时的第一次 此时打开客户端监听端口
 	if (CTcpSessionManager::getRef().AddAcceptor(m_configListen) == InvalidAccepterID)
 	{
 		LOGE("AddAcceptor Failed. listenIP=" << m_configListen.listenIP << ", listenPort=" << m_configListen.listenPort);
@@ -147,7 +146,7 @@ void CNetManager::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Rea
 	rs >> req;
 	LOGD("ID_C2AS_AuthReq user=" << req.info.user << ", pwd=" << req.info.pwd);
 // 	//debug 可以重复认证 做认证压测
-//	m_mapSession.erase(sID);
+	m_mapSession.erase(sID);
 // 	//end
 	auto finditer = m_mapSession.find(sID);
 	if (finditer != m_mapSession.end())
@@ -161,9 +160,8 @@ void CNetManager::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Rea
 	}
 	std::shared_ptr<SessionInfo> sinfo(new SessionInfo);
 	sinfo->accountID = InvalidAccountID;
-	sinfo->accountName = req.info.user;
 	sinfo->charID = InvalidCharacterID;
-	sinfo->agentID = GlobalFacade::getRef().getServerConfig().getAgentListen().index;
+	sinfo->agentIndex = GlobalFacade::getRef().getServerConfig().getConfigListen(AgentNode).index;
 	sinfo->accepterID = aID;
 	sinfo->sessionID = sID;
 	sinfo->lastLoginTime = time(nullptr);
@@ -261,7 +259,7 @@ void CNetManager::msg_DefaultReq(AccepterID aID, SessionID sID, ProtocolID pID, 
 		if (inProtoID != InvalidProtocolID)
 		{
 			WriteStreamPack ws;
-			ws << inProtoID << *finditer->second << pID;
+			ws << inProtoID << pID << *finditer->second;
 			ws.AppendOriginalData(rs.GetStreamUnread(), rs.GetStreamUnreadLen());
 			CTcpSessionManager::getRef().SendOrgSessionData(aID, sID, ws.GetStream(), ws.GetStreamLen());
 			return;

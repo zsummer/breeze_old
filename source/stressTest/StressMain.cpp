@@ -221,12 +221,12 @@ int main(int argc, char* argv[])
 
 //	ILog4zManager::GetInstance()->SetLoggerLevel(LOG4Z_MAIN_LOGGER_ID, LOG_LEVEL_INFO);
 	ServerConfig serverConfig;
-	if (!serverConfig.Parse(AgentNode, "../ServerConfig.xml", g_agentIndex))
+	if (!serverConfig.Parse("../ServerConfig.xml", g_agentIndex))
 	{
 		LOGE("serverConfig.Parse failed");
 		return 0;
 	}
-	LOGI("g_remoteIP=" << "127.0.0.1" << ", g_remotePort=" << serverConfig.getAgentListen().port << ", g_maxClient=" << g_maxClient);
+	LOGI("g_remoteIP=" << "127.0.0.1" << ", g_remotePort=" << serverConfig.getConfigListen(AgentNode).port << ", g_maxClient=" << g_maxClient);
 
 	CTcpSessionManager::getRef().Start();
 	
@@ -246,7 +246,7 @@ int main(int argc, char* argv[])
 		tagConnctorConfigTraits traits;
 		traits.cID = i;
 		traits.remoteIP = "127.0.0.1";
-		traits.remotePort = serverConfig.getAgentListen().port;
+		traits.remotePort = serverConfig.getConfigListen(AgentNode).port;
 		traits.reconnectInterval = 5000;
 		traits.reconnectMaxCount = 50;
 		CTcpSessionManager::getRef().AddConnector(traits);

@@ -28,19 +28,45 @@
 #include <iostream>
 
 
+typedef unsigned int ServerNodeType;
+typedef unsigned int ServerIndexType;
+
+const ServerNodeType AgentNode = 0;
+const ServerNodeType AuthNode = 1;
+const ServerNodeType CenterNode = 2;
+const ServerNodeType DBAgentNode = 3;
+const ServerNodeType LogicNode = 4;
+
+
+
+const std::map<ServerNodeType, std::string>  configServerNode =
+{
+	{ AgentNode, "agent" },
+	{ AuthNode, "auth" },
+	{ CenterNode, "center" },
+	{ DBAgentNode, "dbagent" },
+	{ LogicNode, "logic" },
+};
+
+
+
 struct ListenConfig 
 {
 	std::string ip;
 	unsigned short port = 0;
-	unsigned int index = 0;
+	ServerIndexType index = 0;
 };
 
 struct ConnectorConfig 
 {
-	std::string dstServer;
+	ServerNodeType dstServer;
 	std::string remoteIP;
 	unsigned short remotePort = 0;
 };
+
+
+//Êý¾Ý¿â
+const std::string AuthMongoDB = "auth";
 
 struct MongoConfig 
 {
@@ -51,36 +77,44 @@ struct MongoConfig
 	std::string pwd;
 };
 
-const std::string AgentNode = "agent";
-const std::string AuthNode = "auth";
-const std::string CenterNode = "center";
-const std::string DBAgentNode = "dbagent";
-const std::string LogicNode = "logic";
-
-const std::string AuthMongoDB = "auth";
 
 class ServerConfig
 {
 public:
-	inline bool Parse(std::string serverName, std::string filename, unsigned int index);
+	inline bool Parse(std::string filename, unsigned int index);
 public:
-	inline ListenConfig & getAgentListen(){ return m_AgentListen; }
-	inline ListenConfig & getAuthListen(){ return m_AuthListen; }
-	inline ListenConfig & getCenterListen(){ return m_CenterListen; }
-	inline ListenConfig & getDBListen(){ return m_DBListen; }
+	inline const ListenConfig & getConfigListen(ServerNodeType nodeType, ServerIndexType index = (ServerIndexType) -1)
+	{
+		if (index == (ServerIndexType)-1)
+		{
+			index = m_index;
+		}
+		auto founder = m_configListen.find(std::make_pair(nodeType, index));
+		if (founder == m_configListen.end())
+		{
+			static ListenConfig lc;
+			return lc;
+		}
+		return founder->second;
+	}
 
-	inline std::vector<ConnectorConfig > &getAgentConnect(){ return m_AgentConnect; }
-	inline std::vector<ConnectorConfig> & getCenterConnect(){ return m_CenterConnect; }
+
+	inline std::vector<ConnectorConfig > &getConfigConnect(ServerNodeType nodeType)
+	{
+		auto founder = m_configConnect.find(nodeType);
+		if (founder == m_configConnect.end())
+		{
+			static std::vector<ConnectorConfig > vct;
+			return vct;
+		}
+		return founder->second; 
+	}
 
 	inline MongoConfig & getAuthMongoDB(){ return m_authMongo; }
 private:
-	ListenConfig m_AgentListen;
-	ListenConfig m_CenterListen;
-	ListenConfig m_DBListen;
-	ListenConfig m_AuthListen;
-
-	std::vector<ConnectorConfig> m_AgentConnect;
-	std::vector<ConnectorConfig> m_CenterConnect;
+	ServerIndexType m_index = 0;
+	std::map<std::pair<ServerNodeType, ServerIndexType>, ListenConfig> m_configListen;
+	std::map<ServerNodeType, std::vector<ConnectorConfig> > m_configConnect;
 
 	MongoConfig m_authMongo;
 };
@@ -92,8 +126,9 @@ private:
 
 
 
-bool ServerConfig::Parse(std::string serverName, std::string filename, unsigned int index)
+bool ServerConfig::Parse(std::string filename, unsigned int index)
 {
+	m_index = index;
 	try
 	{
 		boost::property_tree::ptree pt;
@@ -106,18 +141,15 @@ bool ServerConfig::Parse(std::string serverName, std::string filename, unsigned 
 			lconfig.ip = iter->second.get<std::string>("<xmlattr>.ip");
 			lconfig.port = iter->second.get<unsigned short>("<xmlattr>.port");
 			lconfig.index = iter->second.get<unsigned int>("<xmlattr>.index");
-			if (serverName == server && lconfig.index == index)
+			auto founder = std::find_if(configServerNode.begin(), 
+				configServerNode.end(), 
+				[server](std::map<ServerNodeType, std::string>::value_type v){return v.second == server; });
+			if (founder == configServerNode.end())
 			{
-				if (server == AgentNode)
-				{
-					m_AgentListen = lconfig;
-				}
-				else if (server == AuthNode)
-				{
-					m_AuthListen = lconfig;
-				}
-				LOGI("serverName=" << serverName << ", ip=" << lconfig.ip << ", port=" << lconfig.port << ", lconfig.index=" << lconfig.index);
+				continue;
 			}
+			m_configListen.insert(std::make_pair(std::make_pair(founder->first,lconfig.index), lconfig));
+			LOGI("serverName=" << server << ", ip=" << lconfig.ip << ", port=" << lconfig.port << ", lconfig.index=" << lconfig.index);
 		}
 
 
@@ -126,13 +158,27 @@ bool ServerConfig::Parse(std::string serverName, std::string filename, unsigned 
 		{
 			std::string server = iter->first;
 			ConnectorConfig lconfig;
-			lconfig.dstServer = iter->second.get<std::string>("<xmlattr>.server");
+			std::string dstServer = iter->second.get<std::string>("<xmlattr>.server");
+			auto founderDstServer = std::find_if(configServerNode.begin(),
+				configServerNode.end(),
+				[dstServer](std::map<ServerNodeType, std::string>::value_type v){return v.second == dstServer; });
+			if (founderDstServer == configServerNode.end())
+			{
+				continue;
+			}
+			lconfig.dstServer = founderDstServer->first;
+
 			lconfig.remoteIP = iter->second.get<std::string>("<xmlattr>.ip");
 			lconfig.remotePort = iter->second.get<unsigned short>("<xmlattr>.port");
-			if (server == serverName && serverName == AgentNode)
+			auto founder = std::find_if(configServerNode.begin(),
+				configServerNode.end(),
+				[server](std::map<ServerNodeType, std::string>::value_type v){return v.second == server; });
+			if (founder == configServerNode.end())
 			{
-				m_AgentConnect.push_back(lconfig);
+				continue;
 			}
+			m_configConnect[founder->first].push_back(lconfig);
+			LOGI("serverName=" << server << ", remoteIP=" << lconfig.remoteIP << ", remotePort=" << lconfig.remotePort << ", lconfig.dstServer=" << lconfig.dstServer);
 		}
 
 		auto mongoParse = pt.get_child("mongo");
