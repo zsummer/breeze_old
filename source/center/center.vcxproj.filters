@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="zsummer">
+      <UniqueIdentifier>{dc068f40-f692-4b3a-a8a6-b2ba925c1e89}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="main">
+      <UniqueIdentifier>{90323d0d-a637-4874-8f5e-bf757167f244}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="facade">
+      <UniqueIdentifier>{39638b08-90e6-42d8-8f50-0ed66591d23c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{c7ca9ebf-067b-41a5-81bd-638efd339894}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="logic">
+      <UniqueIdentifier>{546c4abc-2df1-4e1d-aea1-916c0808c8dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="protocol">
+      <UniqueIdentifier>{ea5187aa-f332-4296-aa80-b8ace9e7eab9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>main</Filter>
+    </ClCompile>
+    <ClCompile Include="core\GlobalFacade.cpp">
+      <Filter>facade</Filter>
+    </ClCompile>
+    <ClCompile Include="Application.cpp">
+      <Filter>main</Filter>
+    </ClCompile>
+    <ClCompile Include="logic\NetManager.cpp">
+      <Filter>logic</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="core\GlobalFacade.h">
+      <Filter>facade</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\ServerConfig.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="Application.h">
+      <Filter>main</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\protocol\in\ProtoDefine.h">
+      <Filter>protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="logic\NetManager.h">
+      <Filter>logic</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
