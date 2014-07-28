@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ProtoTraits>
+  <MinNo>10</MinNo>
+  <MaxNo>20</MaxNo>
+  <UseLog4z>0</UseLog4z>
+</ProtoTraits>
+
+
+<Proto>
+
+  <struct name="SessionInfo" desc="会话信息">
+    <member name="accountID" type="ui64"   desc=""/>
+    <member name="charID" type="ui64"   desc=""/>
+    <member name="agentIndex" type="ui32" desc=""/>
+    <member name="accepterID"  type="ui32" desc=""/>
+    <member name="sessionID"  type="ui32" desc=""/>
+    <member name="lastLoginTime" type="ui64" desc=""/>
+    <member name="lastActiveTime" type="ui64" desc=""/>
+  </struct>
+
+  <proto from="RT" to="OS" name="RouteToOtherServer" desc= "路由给其他服务">
+  	<member name="srcSessionInfo" type="SessionInfo"   desc=""/>
+    <member name="srcServer" type="ui32"   desc=""/>
+    <member name="srcIndex" type="ui32"   desc=""/>
+    <member name="srcServer" type="ui32"   desc=""/>
+    <member name="dstIndex" type="ui32"   desc=""/>
+  </proto>
+
+  <proto from="BCST" to="OS" name="BrodcastToOtherServer" desc= "广播给其他服务">
+  	<member name="srcSessionInfo" type="SessionInfo"   desc=""/>
+    <member name="srcServer" type="ui32"   desc=""/>
+    <member name="srcIndex" type="ui32"   desc=""/>
+    <member name="srcServer" type="ui32"   desc=""/>
+  </proto>
+
+  <proto from="RT" to="C" name="RouteToClient" desc= "路由给客户端">
+    <member name="srcServer" type="ui32"   desc=""/>
+    <member name="srcIndex" type="ui32"   desc=""/>
+    <member name="srcServer" type="ui32"   desc=""/>
+    <member name="dstIndex" type="ui32"   desc=""/>
+    <member name="dstCharID" type="ui64"   desc=""/>
+    <member name="dstSessionID" type="ui32"   desc=""/>
+    <member name="dstSessionInfo" type="SessionInfo"   desc=""/>
+  </proto>
+
+  <proto from="BCST" to="C" name="BroadcastToClient" desc= "广播给客户端">
+    <member name="srcServer" type="ui32"   desc=""/>
+    <member name="srcIndex" type="ui32"   desc=""/>
+    <member name="srcServer" type="ui32"   desc=""/>
+  </proto>
+
+</Proto>
+

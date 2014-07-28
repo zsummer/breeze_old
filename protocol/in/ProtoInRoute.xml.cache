@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF - 8"?>
+<CacheNo>
+	<cache key = "BroadcastToClient" No = "13" /> 
+	<cache key = "BrodcastToOtherServer" No = "11" /> 
+	<cache key = "RouteToClient" No = "12" /> 
+	<cache key = "RouteToOtherServer" No = "10" /> 
+</CacheNo>
