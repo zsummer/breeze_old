@@ -18,6 +18,11 @@
 
 #ifndef _NET_MANAGER_H_
 #define _NET_MANAGER_H_
+#ifdef WIN32
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x600
+#endif
+#endif
 
 #include <ProtoDefine.h>
 #include <ProtoCommon.h>
