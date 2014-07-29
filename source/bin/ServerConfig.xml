@@ -16,9 +16,9 @@
 </listen>
 
 <connect>
-  <agent server="center" ip="127.0.0.1" port="20002"  />
-  <agent server="auth" ip="127.0.0.1" port="20006"  />
-  <agent server="auth" ip="127.0.0.1" port="20007"  />
-  <center server="dbagent" ip="127.0.0.1" port="20003"  />
+  <agent dstNode="center" ip="127.0.0.1" port="20002"  />
+  <agent dstNode="auth" ip="127.0.0.1" port="20006"  />
+  <agent dstNode="auth" ip="127.0.0.1" port="20007"  />
+  <center dstNode="dbagent" ip="127.0.0.1" port="20003"  />
 </connect>
 

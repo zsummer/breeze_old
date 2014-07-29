@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ProtoTraits>
+  <MinNo>10</MinNo>
+  <MaxNo>20</MaxNo>
+  <UseLog4z>0</UseLog4z>
+</ProtoTraits>
+
+
+<Proto>
+
+  <!-- 一个经过center节点的标准内部协议格式  包头长度+路由协议ID+路由信息数据+原始协议ID+SessionInfo+原始信息数据 -->
+  <!-- 例如: 客户端发上来的包要经过添加SessionInfo,添加路由信息发送到center, 
+        center解包路由信息并根据路由数据获知目标节点服务, 然后去掉路由协议和路由信息 把'原始协议ID+SessionInfo+原始信息数据'路由至指定目标节点服务,
+        目标服务处理协议首先从流中流出SesssionInfo 其次才是原始信息数据,  返回协议参照请求协议流程 -->
+  <!-- 备注: 如果协议为广播, 或者玩家与玩家通讯 在推送/返回协议时 应忽略或者重新设置SessionInfo的信息内容 -->
+
+
+  <proto from="RT" to="OS" name="RouteToOtherServer" desc= "路由给其他服务">
+    <member name="srcServer" type="ui32"   desc="optional"/>
+    <member name="srcIndex" type="ui32"   desc="optional"/>
+    <member name="dstServer" type="ui32"   desc=""/>
+    <member name="routerType" type="ui32"   desc="0为指定dstIndex路由, 1为广播, 2位随机, 3为主备模式"/>
+    <member name="dstIndex" type="ui32"   desc="optional"/>
+  </proto>
+
+  <proto from="DT" to="OS" name="DirectServerInit" desc= "初始化节点连接信息">
+    <member name="srcServer" type="ui32"   desc="optional"/>
+    <member name="srcIndex" type="ui32"   desc="optional"/>
+  </proto>
+
+
+</Proto>
+

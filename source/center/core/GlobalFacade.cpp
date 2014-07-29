@@ -1,6 +1,6 @@
 #include "GlobalFacade.h"
 #include <ServerConfig.h>
-#include "../logic/NetManager.h"
+#include "NetManager.h"
 
 GlobalFacade::GlobalFacade()
 {

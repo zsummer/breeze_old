@@ -4,7 +4,7 @@
 #include <zsummerX/FrameMessageDispatch.h>
 #include "core/GlobalFacade.h"
 #include <ServerConfig.h>
-#include "logic/NetManager.h"
+#include "core/NetManager.h"
 using namespace zsummer::log4z;
 
 Appliction::Appliction()
@@ -28,7 +28,7 @@ bool Appliction::Init(std::string filename, unsigned int index)
 	bool ret = false;
 
 
-	ret = GlobalFacade::getRef().getServerConfig().Parse(filename, index);
+	ret = GlobalFacade::getRef().getServerConfig().Parse(filename, AgentNode, index);
 	if (!ret)
 	{
 		LOGE("getServerConfig failed.");

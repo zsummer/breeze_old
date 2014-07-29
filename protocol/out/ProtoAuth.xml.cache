@@ -2,4 +2,6 @@
 <CacheNo>
 	<cache key = "AuthAck" No = "20001" /> 
 	<cache key = "AuthReq" No = "20000" /> 
+	<cache key = "ID_AS2C_AuthAck" No = "20003" /> 
+	<cache key = "ID_C2AS_AuthReq" No = "20002" /> 
 </CacheNo>

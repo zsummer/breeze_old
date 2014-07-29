@@ -21,9 +21,9 @@
 
 #include <ProtoDefine.h>
 #include <ProtoCommon.h>
-#include <ProtoInCommon.h>
+#include <InProtoCommon.h>
 #include <ProtoAuth.h>
-#include "../core/GlobalFacade.h"
+#include "GlobalFacade.h"
 #include <ServerConfig.h>
 #include <zsummerX/FrameMessageDispatch.h>
 #include <zsummerX/FrameTcpSessionManager.h>
@@ -50,7 +50,7 @@ public:
 
 	void msg_DefaultReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
 	bool msg_OrgMessageReq(AccepterID aID, SessionID sID, const char * blockBegin, FrameStreamTraits::Integer blockSize);
-	std::map<SessionID, std::shared_ptr<SessionInfo>> m_mapSession;
+	std::map<SessionID, std::shared_ptr<AgentSessionInfo>> m_mapSession;
 	tagAcceptorConfigTraits m_configListen; //保存监听配置
 
 	ConnectorID m_lastConnectID = 0; //自动递增的connectorID.

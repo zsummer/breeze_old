@@ -4,7 +4,7 @@ CNetManager::CNetManager()
 {
 	CMessageDispatcher::getRef().RegisterSessionMessage(ID_C2AS_AuthReq,
 		std::bind(&CNetManager::msg_AuthReq, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-	CMessageDispatcher::getRef().RegisterSessionMessage(ID_PROTO_SERVER_INIT,
+	CMessageDispatcher::getRef().RegisterSessionMessage(ID_DT2OS_DirectServerInit,
 		std::bind(&CNetManager::msg_ServerInit, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 
 

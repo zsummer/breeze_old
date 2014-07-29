@@ -1,4 +1,6 @@
 #include "NetManager.h"
+#include <InProtoCommon.h>
+#include <ServerConfig.h>
 
 CNetManager::CNetManager()
 {
@@ -34,11 +36,11 @@ bool CNetManager::Start()
 		tag.reconnectMaxCount = 2;
 		tag.reconnectInterval = 5000;
 		tag.curReconnectCount = true;
-		if (con.dstServer == CenterNode)
+		if (con.dstNode == CenterNode)
 		{
 			m_configCenter.insert(std::make_pair(tag.cID, tag));
 		}
-		else if (con.dstServer == AuthNode)
+		else if (con.dstNode == AuthNode)
 		{
 			m_configAuth.insert(std::make_pair(tag.cID, tag));
 		}
@@ -84,7 +86,10 @@ void CNetManager::event_OnConnect(ConnectorID cID)
 
 	//init
 	WriteStreamPack ws;
-	ws << ID_PROTO_SERVER_INIT << AgentNode << GlobalFacade::getRef().getServerConfig().getConfigListen(AgentNode).index;
+	ProtoDirectServerInit init;
+	init.srcServer = GlobalFacade::getRef().getServerConfig().getOwnServerNode();
+	init.srcIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
+	ws << ID_DT2OS_DirectServerInit << init;
 	CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
 
 	//所有connector已经建立连接成功 并且是程序启动时的第一次 此时打开客户端监听端口
@@ -158,13 +163,10 @@ void CNetManager::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Rea
 		CTcpSessionManager::getRef().SendOrgSessionData(aID, sID, ws.GetStream(), ws.GetStreamLen());
 		return;
 	}
-	std::shared_ptr<SessionInfo> sinfo(new SessionInfo);
-	sinfo->accountID = InvalidAccountID;
-	sinfo->charID = InvalidCharacterID;
-	sinfo->agentIndex = GlobalFacade::getRef().getServerConfig().getConfigListen(AgentNode).index;
-	sinfo->accepterID = aID;
-	sinfo->sessionID = sID;
-	sinfo->lastLoginTime = time(nullptr);
+	std::shared_ptr<AgentSessionInfo> sinfo(new AgentSessionInfo);
+	sinfo->sInfo.agentIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
+	sinfo->sInfo.aID = aID;
+	sinfo->sInfo.sID = sID;
 	m_mapSession.insert(std::make_pair(sID, sinfo));
 
 	if (m_onlineAuth.empty())
@@ -178,7 +180,7 @@ void CNetManager::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Rea
 	}
 
 	WriteStreamPack ws;
-	ws << ID_C2AS_AuthReq << *sinfo << req ;
+	ws << ID_C2AS_AuthReq << sinfo->sInfo << req ;
 	auto authID = m_onlineAuth.at(rand() % m_onlineAuth.size());
 	CTcpSessionManager::getRef().SendOrgConnectorData(authID, ws.GetStream(), ws.GetStreamLen());
 }
@@ -190,21 +192,21 @@ void CNetManager::msg_AuthAck(ConnectorID cID, ProtocolID pID, ReadStreamPack &r
 	rs >> info;
 	rs >> ack;
 
-	auto founder = m_mapSession.find(info.sessionID);
+	auto founder = m_mapSession.find(info.sID);
 	if (founder == m_mapSession.end())
 	{
-		LOGE("msg_AuthAck can not found session ID.  sID=" << info.sessionID);
+		LOGE("msg_AuthAck can not found session ID.  sID=" << info.sID);
 		return;
 	}
 
 	if (ack.retCode == EC_SUCCESS)
 	{
-		founder->second->accountID = ack.accountID;
+		founder->second->sInfo.accID = ack.accountID;
 	}
 
 	WriteStreamPack ws;
 	ws << ID_AS2C_AuthAck << ack;
-	CTcpSessionManager::getRef().SendOrgSessionData(founder->second->accepterID, founder->second->sessionID, ws.GetStream(), ws.GetStreamLen());
+	CTcpSessionManager::getRef().SendOrgSessionData(founder->second->sInfo.aID, founder->second->sInfo.sID, ws.GetStream(), ws.GetStreamLen());
 }
 
 bool CNetManager::msg_OrgMessageReq(AccepterID aID, SessionID sID, const char * blockBegin,  FrameStreamTraits::Integer blockSize)
@@ -215,7 +217,7 @@ bool CNetManager::msg_OrgMessageReq(AccepterID aID, SessionID sID, const char * 
 	if (isClientPROTO(protoID) && isNeedAuthClientPROTO(protoID))
 	{
 		auto finditer = m_mapSession.find(sID);
-		if (finditer == m_mapSession.end() || finditer->second->accountID == InvalidAccountID)
+		if (finditer == m_mapSession.end() || finditer->second->sInfo.accID == InvalidAccountID)
 		{
 			LOGW("msg_OrgMessageReq check false. sID=" << sID);
 			return false;
@@ -230,7 +232,7 @@ void CNetManager::msg_DefaultReq(AccepterID aID, SessionID sID, ProtocolID pID, 
 	ProtoAuthAck ack;
 	ack.retCode = EC_SUCCESS;
 	ack.accountID = InvalidAccountID;
-	if (finditer == m_mapSession.end() || finditer->second->accountID == InvalidAccountID)
+	if (finditer == m_mapSession.end() || finditer->second->sInfo.accID == InvalidAccountID)
 	{
 		ack.retCode = EC_AUTH_ERROR;
 	}
@@ -239,33 +241,20 @@ void CNetManager::msg_DefaultReq(AccepterID aID, SessionID sID, ProtocolID pID, 
 		ProtocolID inProtoID = InvalidProtocolID;
 		if (isNeedAuthClientPROTO(pID))
 		{
-			if (isRouteToCenter(pID))
-			{
-				inProtoID = ID_PROTO_SERVER_ROUTE_CENTER;
-			}
-			else if (isRouteToBattle(pID))
-			{
-				inProtoID = ID_PROTO_SERVER_ROUTE_BATTLE;
-			}
-			else if (isRouteToLogic(pID))
-			{
-				inProtoID = ID_PROTO_SERVER_ROUTE_LOGIC;
-			}
-			else if (isRouteToDBAgent(pID))
-			{
-				inProtoID = ID_PROTO_SERVER_ROUTE_DBAGENT;
-			}
-		}
-		if (inProtoID != InvalidProtocolID)
-		{
+			inProtoID = ID_RT2OS_RouteToOtherServer;
+			ProtoRouteToOtherServer route;
+			route.srcIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
+			route.srcServer = GlobalFacade::getRef().getServerConfig().getOwnServerNode();
+			route.dstServer = LogicNode;
+			route.routerType = 3;
+			route.dstIndex = 0;
 			WriteStreamPack ws;
-			ws << inProtoID << pID << *finditer->second;
+			ws << inProtoID << route << pID << finditer->second->sInfo;
 			ws.AppendOriginalData(rs.GetStreamUnread(), rs.GetStreamUnreadLen());
 			CTcpSessionManager::getRef().SendOrgSessionData(aID, sID, ws.GetStream(), ws.GetStreamLen());
 			return;
 		}
 	}
-
 
 	if (ack.retCode != EC_SUCCESS)
 	{

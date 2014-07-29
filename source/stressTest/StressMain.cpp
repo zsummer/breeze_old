@@ -221,7 +221,7 @@ int main(int argc, char* argv[])
 
 //	ILog4zManager::GetInstance()->SetLoggerLevel(LOG4Z_MAIN_LOGGER_ID, LOG_LEVEL_INFO);
 	ServerConfig serverConfig;
-	if (!serverConfig.Parse("../ServerConfig.xml", g_agentIndex))
+	if (!serverConfig.Parse("../ServerConfig.xml", AgentNode, g_agentIndex))
 	{
 		LOGE("serverConfig.Parse failed");
 		return 0;

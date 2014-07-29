@@ -21,7 +21,7 @@
 
 #include <ProtoDefine.h>
 #include <ProtoCommon.h>
-#include <ProtoInCommon.h>
+#include <InProtoCommon.h>
 #include <ProtoAuth.h>
 #include "../core/GlobalFacade.h"
 #include <ServerConfig.h>
@@ -32,10 +32,6 @@
 * NetManager
 */
 
-namespace mongo
-{
-	class DBClientConnection;
-};
 
 class CNetManager
 {
@@ -43,23 +39,25 @@ public:
 	CNetManager();
 	//连接所有认证服务和中央服务
 	bool Start();
-
+	void event_OnConnect(ConnectorID cID);
+	void event_OnDisconnect(ConnectorID cID);
 
 	void event_OnSessionEstablished(AccepterID, SessionID);
 	void event_OnSessionDisconnect(AccepterID, SessionID);
 
-	void msg_ServerInit(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
-
-	void msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
+	void msg_serverInit(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
 
 
-private:
+	void msg_DefaultReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
+	bool msg_OrgMessageReq(AccepterID aID, SessionID sID, const char * blockBegin, FrameStreamTraits::Integer blockSize);
+
+	typedef std::map<SessionID, std::pair<AccepterID, unsigned int /*index*/> > OnlineServerType;
+	OnlineServerType m_onlineAgent;
+	OnlineServerType m_onlineLogic;
 	tagAcceptorConfigTraits m_configListen; //保存监听配置
-	std::map<SessionID, std::pair<AccepterID,ui32> > m_onlineAgentSession;
-	std::map<ui32, std::pair<AccepterID, SessionID>> m_onlineAgentIndex;
-
-	//!auth mongo
-	std::shared_ptr<mongo::DBClientConnection> m_authMongo;
+	ConnectorID m_lastConnectID = 0; //自动递增的connectorID.
+	std::map<ConnectorID, tagConnctorConfigTraits> m_configDBAgent; //cID 对应的连接配置
+	std::vector<ConnectorID> m_onlineDBAgent; //在线的认证服务, 主备关系 不均衡
 };
 
 

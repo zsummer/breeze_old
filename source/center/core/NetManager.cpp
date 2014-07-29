@@ -2,7 +2,7 @@
 
 CNetManager::CNetManager()
 {
-	CMessageDispatcher::getRef().RegisterSessionMessage(ID_PROTO_SERVER_INIT,
+	CMessageDispatcher::getRef().RegisterSessionMessage(ID_DT2OS_DirectServerInit,
 		std::bind(&CNetManager::msg_serverInit, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 	CMessageDispatcher::getRef().RegisterSessionDefaultMessage(
 		std::bind(&CNetManager::msg_DefaultReq, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
@@ -30,7 +30,7 @@ bool CNetManager::Start()
 		tag.reconnectMaxCount = 2;
 		tag.reconnectInterval = 5000;
 		tag.curReconnectCount = true;
-		if (con.dstServer == DBAgentNode)
+		if (con.dstNode == DBAgentNode)
 		{
 			m_configDBAgent.insert(std::make_pair(tag.cID, tag));
 		}
@@ -75,7 +75,10 @@ void CNetManager::event_OnConnect(ConnectorID cID)
 
 	//init
 	WriteStreamPack ws;
-	ws << ID_PROTO_SERVER_INIT << CenterNode << GlobalFacade::getRef().getServerConfig().getConfigListen(CenterNode).index;
+	ProtoDirectServerInit init;
+	init.srcServer = GlobalFacade::getRef().getServerConfig().getOwnServerNode();
+	init.srcIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
+	ws << ID_DT2OS_DirectServerInit<< init;
 	CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
 
 	//所有connector已经建立连接 此时打开客户端监听端口
@@ -133,8 +136,8 @@ void CNetManager::event_OnSessionDisconnect(AccepterID aID, SessionID sID)
 
 void CNetManager::msg_serverInit(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs)
 {
-	ServerNodeType node;
-	unsigned int index = 0;
+	ServerNode node;
+	NodeIndex index = 0;
 	rs >> node >> index;
 	if (node == AgentNode)
 	{
