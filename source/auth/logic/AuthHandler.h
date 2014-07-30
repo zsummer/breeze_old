@@ -35,7 +35,7 @@ class CAuthHandler : public CBaseHandler
 public:
 	CAuthHandler(){}
 	~CAuthHandler(){}
-	virtual bool Init() final;
+	virtual bool Init() override final;
 	void msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
 private:
 	//!auth mongo
