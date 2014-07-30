@@ -134,7 +134,7 @@ static ServerNode toServerNode(std::string strNode)
 	{
 		return LogicNode;
 	}
-	else if (strNode == "dbAgent")
+	else if (strNode == "dbagent")
 	{
 		return DBAgentNode;
 	}

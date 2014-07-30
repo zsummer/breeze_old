@@ -4,8 +4,19 @@ start auth.exe ../ServerConfig.xml 1
 rem set /p wait=
 ping 127.0.0.1 -n 2 >nul
 
+cd ../dbagent
+start dbagent.exe ../ServerConfig.xml 0
+rem set /p wait=
+ping 127.0.0.1 -n 2 >nul
+
+
 cd ../center
 start center.exe ../ServerConfig.xml 0
+rem set /p wait=
+ping 127.0.0.1 -n 2 >nul
+
+cd ../logic
+start logic.exe ../ServerConfig.xml 0
 rem set /p wait=
 ping 127.0.0.1 -n 2 >nul
 

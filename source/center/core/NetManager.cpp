@@ -54,11 +54,7 @@ bool CNetManager::Start()
 	m_configListen.listenIP = GlobalFacade::getRef().getServerConfig().getConfigListen(CenterNode).ip;
 	m_configListen.listenPort = GlobalFacade::getRef().getServerConfig().getConfigListen(CenterNode).port;
 	m_configListen.maxSessions = 50;
-	if (CTcpSessionManager::getRef().AddAcceptor(m_configListen) == InvalidAccepterID)
-	{
-		LOGE("AddAcceptor Failed. listenIP=" << m_configListen.listenIP << ", listenPort=" << m_configListen.listenPort);
-		return false;
-	}
+
 	LOGI("CNetManager Init Success.");
 	return true;
 }
@@ -147,6 +143,15 @@ void CNetManager::msg_ConnectServerAuth(ConnectorID cID, ProtocolID pID, ReadStr
 		sac.node = auth.srcNode;
 		sac.index = auth.srcIndex;
 		m_onlineDBAgent.push_back(sac);
+	}
+
+	if (m_configDBAgent.size() == m_onlineDBAgent.size())
+	{
+		if (CTcpSessionManager::getRef().AddAcceptor(m_configListen) == InvalidAccepterID)
+		{
+			LOGE("AddAcceptor Failed. listenIP=" << m_configListen.listenIP << ", listenPort=" << m_configListen.listenPort);
+			return;
+		}
 	}
 }
 
