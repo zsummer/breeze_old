@@ -20,8 +20,8 @@ CNetManager::CNetManager()
 	//×¢²áÊÂ¼þ
 	CMessageDispatcher::getRef().RegisterOnConnectorEstablished(std::bind(&CNetManager::event_OnConnect, this, std::placeholders::_1));
 	CMessageDispatcher::getRef().RegisterOnConnectorDisconnect(std::bind(&CNetManager::event_OnDisconnect, this, std::placeholders::_1));
-	CMessageDispatcher::getRef().RegisterOnSessionEstablished(std::bind(&CNetManager::event_OnSessionEstablished, this, std::placeholders::_1, std::placeholders::_1));
-	CMessageDispatcher::getRef().RegisterOnSessionDisconnect(std::bind(&CNetManager::event_OnSessionDisconnect, this, std::placeholders::_1, std::placeholders::_1));
+	CMessageDispatcher::getRef().RegisterOnSessionEstablished(std::bind(&CNetManager::event_OnSessionEstablished, this, std::placeholders::_1, std::placeholders::_2));
+	CMessageDispatcher::getRef().RegisterOnSessionDisconnect(std::bind(&CNetManager::event_OnSessionDisconnect, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 bool CNetManager::Start()
@@ -68,22 +68,6 @@ bool CNetManager::Start()
 
 void CNetManager::event_OnConnect(ConnectorID cID)
 {
-	{
-		auto founder = m_configAuth.find(cID);
-		if (founder != m_configAuth.end())
-		{
-			LOGI("event_OnConnect Auth Server. cID=" << cID << ", listenIP=" << founder->second.remoteIP << ", listenPort=" << founder->second.remotePort);
-		}
-	}
-
-	{
-		auto founder = m_configCenter.find(cID);
-		if (founder != m_configCenter.end())
-		{
-			LOGI("event_OnConnect Center Server. cID=" << cID << ", listenIP=" << founder->second.remoteIP << ", listenPort=" << founder->second.remotePort);
-		}
-	}
-
 	//auth
 	WriteStreamPack ws;
 	ProtoDirectServerAuth auth;
@@ -91,7 +75,10 @@ void CNetManager::event_OnConnect(ConnectorID cID)
 	auth.srcIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
 	ws << ID_DT2OS_DirectServerAuth << auth;
 	CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
+	LOGI("send ProtoDirectServerAuth cID=" << cID << ", node=" << auth.srcNode << ", index=" << auth.srcIndex)
 }
+
+
 void CNetManager::event_OnDisconnect(ConnectorID cID)
 {
 	auto founder = m_configAuth.find(cID);
@@ -148,7 +135,8 @@ void CNetManager::msg_ConnectServerAuth(ConnectorID cID, ProtocolID pID, ReadStr
 {
 	ProtoDirectServerAuth auth;
 	rs >> auth;
-	LOGI("msg_ConnectServerAuth. Node=" << auth.srcNode << ", index=" << auth.srcIndex);
+	LOGI("msg_ConnectServerAuth. cID=" << cID << ", Node=" << auth.srcNode << ", index=" << auth.srcIndex);
+
 
 	if (auth.srcNode == AuthNode)
 	{

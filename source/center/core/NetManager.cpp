@@ -18,8 +18,8 @@ CNetManager::CNetManager()
 	//×¢²áÊÂ¼þ
 	CMessageDispatcher::getRef().RegisterOnConnectorEstablished(std::bind(&CNetManager::event_OnConnect, this, std::placeholders::_1));
 	CMessageDispatcher::getRef().RegisterOnConnectorDisconnect(std::bind(&CNetManager::event_OnDisconnect, this, std::placeholders::_1));
-	CMessageDispatcher::getRef().RegisterOnSessionEstablished(std::bind(&CNetManager::event_OnSessionEstablished, this, std::placeholders::_1, std::placeholders::_1));
-	CMessageDispatcher::getRef().RegisterOnSessionDisconnect(std::bind(&CNetManager::event_OnSessionDisconnect, this, std::placeholders::_1, std::placeholders::_1));
+	CMessageDispatcher::getRef().RegisterOnSessionEstablished(std::bind(&CNetManager::event_OnSessionEstablished, this, std::placeholders::_1, std::placeholders::_2));
+	CMessageDispatcher::getRef().RegisterOnSessionDisconnect(std::bind(&CNetManager::event_OnSessionDisconnect, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 bool CNetManager::Start()
@@ -72,6 +72,7 @@ void CNetManager::event_OnConnect(ConnectorID cID)
 	auth.srcIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
 	ws << ID_DT2OS_DirectServerAuth << auth;
 	CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
+	LOGI("send ProtoDirectServerAuth cID=" << cID << ", node=" << auth.srcNode << ", index=" << auth.srcIndex)
 }
 
 void CNetManager::event_OnDisconnect(ConnectorID cID)
@@ -101,6 +102,7 @@ void CNetManager::event_OnSessionEstablished(AccepterID aID, SessionID sID)
 	auth.srcIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
 	ws << ID_DT2OS_DirectServerAuth << auth;
 	CTcpSessionManager::getRef().SendOrgSessionData(aID, sID, ws.GetStream(), ws.GetStreamLen());
+	LOGD("send ProtoDirectServerAuth aID=" << aID << ", sID=" << sID << ", node=" << auth.srcNode << ", index=" << auth.srcIndex);
 }
 
 void CNetManager::event_OnSessionDisconnect(AccepterID aID, SessionID sID)
@@ -130,6 +132,8 @@ void CNetManager::msg_ConnectServerAuth(ConnectorID cID, ProtocolID pID, ReadStr
 {
 	ProtoDirectServerAuth auth;
 	rs >> auth;
+	LOGI("msg_ConnectServerAuth. cID=" << cID << ", Node=" << auth.srcNode << ", index=" << auth.srcIndex);
+
 	if (auth.srcNode == DBAgentNode)
 	{
 		auto founder = std::find_if(m_onlineDBAgent.begin(), m_onlineDBAgent.end(),
@@ -151,6 +155,8 @@ void CNetManager::msg_SessionServerAuth(AccepterID aID, SessionID sID, ProtocolI
 {
 	ProtoDirectServerAuth auth;
 	rs >> auth;
+	LOGI("msg_SessionServerAuth. aID=" << aID << ", sID=" << sID << ", Node=" << auth.srcNode << ", index=" << auth.srcIndex);
+
 	ServerAuthSession sas;
 	sas.aID = aID;
 	sas.sID = sID;
@@ -166,7 +172,6 @@ void CNetManager::msg_SessionServerAuth(AccepterID aID, SessionID sID, ProtocolI
 			m_onlineAgent.erase(founder);
 		}
 		m_onlineAgent.push_back(sas);
-		return;
 	}
 	else if (auth.srcNode == LogicNode)
 	{
@@ -177,7 +182,6 @@ void CNetManager::msg_SessionServerAuth(AccepterID aID, SessionID sID, ProtocolI
 			m_onlineLogic.erase(founder);
 		}
 		m_onlineLogic.push_back(sas);
-		return;
 	}
 }
 

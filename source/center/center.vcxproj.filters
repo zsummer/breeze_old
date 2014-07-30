@@ -50,5 +50,8 @@
     <ClInclude Include="core\NetManager.h">
       <Filter>core</Filter>
     </ClInclude>
+    <ClInclude Include="..\common\BaseHander.h">
+      <Filter>common</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

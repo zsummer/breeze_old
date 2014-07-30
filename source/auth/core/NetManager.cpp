@@ -3,11 +3,11 @@
 CNetManager::CNetManager()
 {
 	CMessageDispatcher::getRef().RegisterSessionMessage(ID_DT2OS_DirectServerAuth,
-		std::bind(&CNetManager::msg_ConnectServerAuth, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+		std::bind(&CNetManager::msg_SessionServerAuth, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 
 	//×¢²áÊÂ¼þ
-	CMessageDispatcher::getRef().RegisterOnSessionEstablished(std::bind(&CNetManager::event_OnSessionEstablished, this, std::placeholders::_1, std::placeholders::_1));
-	CMessageDispatcher::getRef().RegisterOnSessionDisconnect(std::bind(&CNetManager::event_OnSessionDisconnect, this, std::placeholders::_1, std::placeholders::_1));
+	CMessageDispatcher::getRef().RegisterOnSessionEstablished(std::bind(&CNetManager::event_OnSessionEstablished, this, std::placeholders::_1, std::placeholders::_2));
+	CMessageDispatcher::getRef().RegisterOnSessionDisconnect(std::bind(&CNetManager::event_OnSessionDisconnect, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 bool CNetManager::Start()
@@ -34,6 +34,7 @@ void CNetManager::event_OnSessionEstablished(AccepterID aID, SessionID sID)
 	auth.srcIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
 	ws << ID_DT2OS_DirectServerAuth << auth;
 	CTcpSessionManager::getRef().SendOrgSessionData(aID, sID, ws.GetStream(), ws.GetStreamLen());
+	LOGD("send ProtoDirectServerAuth aID=" << aID << ", sID=" << sID << ", node=" << auth.srcNode << ", index=" << auth.srcIndex);
 }
 
 void CNetManager::event_OnSessionDisconnect(AccepterID aID, SessionID sID)
@@ -50,10 +51,13 @@ void CNetManager::event_OnSessionDisconnect(AccepterID aID, SessionID sID)
 }
 
 
-void CNetManager::msg_ConnectServerAuth(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs)
+void CNetManager::msg_SessionServerAuth(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs)
 {
 	ProtoDirectServerAuth auth;
 	rs >> auth;
+	LOGI("msg_SessionServerAuth. aID=" << aID << ", sID=" << sID << ", Node=" << auth.srcNode << ", index=" << auth.srcIndex);
+
+
 	ServerAuthSession sac;
 	sac.aID = aID;
 	sac.sID = sID;
@@ -69,7 +73,6 @@ void CNetManager::msg_ConnectServerAuth(AccepterID aID, SessionID sID, ProtocolI
 		m_onlineAgent.erase(founder);
 	}
 	m_onlineAgent.push_back(sac);
-	LOGI("msg_ServerInit agent sID=" << sID << ", index=" << auth.srcIndex);
 }
 
 

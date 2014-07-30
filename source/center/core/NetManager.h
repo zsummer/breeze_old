@@ -42,8 +42,8 @@ public:
 	void event_OnConnect(ConnectorID cID);
 	void event_OnDisconnect(ConnectorID cID);
 
-	void event_OnSessionEstablished(AccepterID, SessionID);
-	void event_OnSessionDisconnect(AccepterID, SessionID);
+	void event_OnSessionEstablished(AccepterID aID, SessionID sID);
+	void event_OnSessionDisconnect(AccepterID aID, SessionID sID);
 
 	void msg_ConnectServerAuth(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs);
 	void msg_SessionServerAuth(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);

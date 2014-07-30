@@ -165,6 +165,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\protocol\in\ProtoDefine.h" />
+    <ClInclude Include="..\common\BaseHander.h" />
     <ClInclude Include="..\common\ServerConfig.h" />
     <ClInclude Include="Application.h" />
     <ClInclude Include="core\GlobalFacade.h" />

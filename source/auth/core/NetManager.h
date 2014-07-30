@@ -47,7 +47,7 @@ public:
 
 	void event_OnSessionEstablished(AccepterID, SessionID);
 	void event_OnSessionDisconnect(AccepterID, SessionID);
-	void msg_ConnectServerAuth(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
+	void msg_SessionServerAuth(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
 
 private:
 	tagAcceptorConfigTraits m_configListen; //±£¥Êº‡Ã˝≈‰÷√
