@@ -45,6 +45,8 @@ public:
 	void event_OnSessionEstablished(AccepterID, SessionID);
 	void event_OnSessionDisconnect(AccepterID, SessionID);
 
+	void msg_ConnectServerAuth(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs);
+
 	void msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
 	void msg_AuthAck(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs);
 
@@ -57,8 +59,8 @@ public:
 	std::map<ConnectorID, tagConnctorConfigTraits> m_configAuth; //cID 对应的连接配置
 	std::map<ConnectorID, tagConnctorConfigTraits> m_configCenter;  //cID 对应的连接配置
 
-	std::vector<ConnectorID> m_onlineAuth; //在线的认证服务, 主备关系 不均衡
-	std::vector<ConnectorID> m_onlineCenter; //在线的中心服务, 主备关系 不均衡
+	std::vector<ServerAuthConnect> m_onlineAuth; //在线的认证服务
+	std::vector<ServerAuthConnect> m_onlineCenter; //在线的中心服务, 主备关系 不均衡
 };
 
 

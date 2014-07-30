@@ -1,15 +1,18 @@
 cd auth
 start auth.exe ../ServerConfig.xml 0
 start auth.exe ../ServerConfig.xml 1
+rem set /p wait=
+ping 127.0.0.1 -n 2 >nul
+
 cd ../center
 start center.exe ../ServerConfig.xml 0
-ping 127.0.0.1 -n 3 >nul
-cd ..
+rem set /p wait=
+ping 127.0.0.1 -n 2 >nul
 
-cd agent
+cd ../agent
 start agent.exe ../ServerConfig.xml 0
 start agent.exe ../ServerConfig.xml 1
-ping 127.0.0.1 -n 3 >nul
-cd ..
 
-ping 127.0.0.1 -n 3 >nul
+
+cd ..
+ping 127.0.0.1 -n 2 >nul

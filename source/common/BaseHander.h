@@ -16,45 +16,24 @@
 * limitations under the License.
 */
 
-#ifndef _NET_MANAGER_H_
-#define _NET_MANAGER_H_
+#ifndef _BASE_HANDLER_H_
+#define _BASE_HANDLER_H_
 
 #include <ProtoDefine.h>
 #include <ProtoCommon.h>
 #include <InProtoCommon.h>
-#include <ProtoAuth.h>
-#include "../core/GlobalFacade.h"
 #include <ServerConfig.h>
 #include <zsummerX/FrameMessageDispatch.h>
 #include <zsummerX/FrameTcpSessionManager.h>
 
-/*
-* NetManager
-*/
 
-namespace mongo
-{
-	class DBClientConnection;
-};
 
-class CNetManager
+class CBaseHandler
 {
 public:
-	CNetManager();
-	//连接所有认证服务和中央服务
-	bool Start();
-
-
-	void event_OnSessionEstablished(AccepterID, SessionID);
-	void event_OnSessionDisconnect(AccepterID, SessionID);
-	void msg_ConnectServerAuth(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
-
-private:
-	tagAcceptorConfigTraits m_configListen; //保存监听配置
-
-	std::vector<ServerAuthSession> m_onlineAgent;
-
-
+	CBaseHandler(){}
+	virtual ~CBaseHandler(){};
+	virtual bool Init() = 0;
 };
 
 

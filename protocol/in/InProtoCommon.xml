@@ -9,6 +9,14 @@
 
 <Proto>
 
+
+  <!-- 每个服务在连接其他节点或其他节点连接到己方时 必须在第一时间发送该协议进行节点认证 -->
+  <proto from="DT" to="OS" name="DirectServerAuth" desc= "服务节点认证">
+    <member name="srcNode" type="ui32"   desc="当前服务节点"/>
+    <member name="srcIndex" type="ui32"   desc="当前服务节点索引ID"/>
+  </proto>
+
+
   <!-- 一个经过center节点的标准内部协议格式  包头长度+路由协议ID+路由信息数据+原始协议ID+SessionInfo+原始信息数据 -->
   <!-- 例如: 客户端发上来的包要经过添加SessionInfo,添加路由信息发送到center, 
         center解包路由信息并根据路由数据获知目标节点服务, 然后去掉路由协议和路由信息 把'原始协议ID+SessionInfo+原始信息数据'路由至指定目标节点服务,
@@ -24,10 +32,7 @@
     <member name="dstIndex" type="ui32"   desc="optional"/>
   </proto>
 
-  <proto from="DT" to="OS" name="DirectServerInit" desc= "初始化节点连接信息">
-    <member name="srcServer" type="ui32"   desc="optional"/>
-    <member name="srcIndex" type="ui32"   desc="optional"/>
-  </proto>
+
 
 
 </Proto>

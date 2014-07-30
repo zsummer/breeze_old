@@ -45,19 +45,21 @@ public:
 	void event_OnSessionEstablished(AccepterID, SessionID);
 	void event_OnSessionDisconnect(AccepterID, SessionID);
 
-	void msg_serverInit(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
+	void msg_ConnectServerAuth(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs);
+	void msg_SessionServerAuth(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
 
 
 	void msg_DefaultReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
 	bool msg_OrgMessageReq(AccepterID aID, SessionID sID, const char * blockBegin, FrameStreamTraits::Integer blockSize);
 
-	typedef std::map<SessionID, std::pair<AccepterID, unsigned int /*index*/> > OnlineServerType;
-	OnlineServerType m_onlineAgent;
-	OnlineServerType m_onlineLogic;
+
 	tagAcceptorConfigTraits m_configListen; //保存监听配置
 	ConnectorID m_lastConnectID = 0; //自动递增的connectorID.
 	std::map<ConnectorID, tagConnctorConfigTraits> m_configDBAgent; //cID 对应的连接配置
-	std::vector<ConnectorID> m_onlineDBAgent; //在线的认证服务, 主备关系 不均衡
+
+	std::vector<ServerAuthSession> m_onlineAgent;
+	std::vector<ServerAuthSession> m_onlineLogic;
+	std::vector<ServerAuthConnect> m_onlineDBAgent;
 };
 
 

@@ -161,14 +161,17 @@
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="core\GlobalFacade.cpp" />
     <ClCompile Include="core\NetManager.cpp" />
+    <ClCompile Include="logic\AuthHandler.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\protocol\in\ProtoDefine.h" />
+    <ClInclude Include="..\common\BaseHander.h" />
     <ClInclude Include="..\common\ServerConfig.h" />
     <ClInclude Include="Application.h" />
     <ClInclude Include="core\GlobalFacade.h" />
     <ClInclude Include="core\NetManager.h" />
+    <ClInclude Include="logic\AuthHandler.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

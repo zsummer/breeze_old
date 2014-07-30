@@ -5,20 +5,20 @@
 </mongo>
 
 <listen>
-  <agent ip="0.0.0.0" port="20000" index="0" />
-  <agent ip="0.0.0.0" port="20001" index="1" />
-  <center ip="0.0.0.0" port="20002" index="0" />
-  <dbagent ip="0.0.0.0" port="20003" index="0" />
-  <logic ip="0.0.0.0" port="20004" index="0" />
-  <battle ip="0.0.0.0" port="20005" index="0" />
-  <auth ip="0.0.0.0" port="20006" index="0" />
-  <auth ip="0.0.0.0" port="20007" index="1" />
+	<dbagent ip="0.0.0.0" port="21000" index="0" />
+	<auth ip="0.0.0.0" port="21010" index="0" />
+	<auth ip="0.0.0.0" port="21011" index="1" />
+	<center ip="0.0.0.0" port="21020" index="0" />
+	<logic ip="0.0.0.0" port="21030" index="0" />
+	<agent ip="0.0.0.0" port="21040" index="0" />
+	<agent ip="0.0.0.0" port="21041" index="1" />
 </listen>
 
 <connect>
-  <agent dstNode="center" ip="127.0.0.1" port="20002"  />
-  <agent dstNode="auth" ip="127.0.0.1" port="20006"  />
-  <agent dstNode="auth" ip="127.0.0.1" port="20007"  />
-  <center dstNode="dbagent" ip="127.0.0.1" port="20003"  />
+	<center dstNode="dbagent" ip="127.0.0.1" port="21000"  />
+	<agent dstNode="center" ip="127.0.0.1" port="21020"  />
+	<agent dstNode="auth" ip="127.0.0.1" port="21010"  />
+	<agent dstNode="auth" ip="127.0.0.1" port="21011"  />
+	<logic dstNode="center" ip="127.0.0.1" port="21020"  />
 </connect>
 

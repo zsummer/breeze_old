@@ -82,6 +82,7 @@ inline bool isClientPROTO(ui16 protoID) { return protoID >= MIN_OUT_UNAUTH_PROTO
 inline bool isNeedAuthClientPROTO(ui16 protoID) { return protoID >= MIN_OUT_PROTO_ID && protoID < MAX_OUT_PROTO_ID; }
 
 
+//服务器内部传输添加这个信息
 struct SessionInfo 
 {
 	AccountID accID = InvalidAccountID;
@@ -106,6 +107,7 @@ STM & operator >> (STM & stm, SessionInfo & info)
 	return stm;
 }
 
+//agent保存session信息
 struct AgentSessionInfo
 {
 	SessionInfo sInfo;
@@ -113,9 +115,20 @@ struct AgentSessionInfo
 	time_t lastActiveTime = time(NULL);
 };
 
+struct ServerAuthSession
+{
+	AccepterID aID = InvalidAccepterID;
+	SessionID sID = InvalidSeesionID;
+	ServerNode node = InvalideServerNode;
+	NodeIndex index = InvalidNodeIndex;
+};
 
-
-
+struct ServerAuthConnect
+{
+	ConnectorID cID = InvalidConnectorID;
+	ServerNode node = InvalideServerNode;
+	NodeIndex index = InvalidNodeIndex;
+};
 
 
 

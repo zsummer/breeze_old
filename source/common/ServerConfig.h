@@ -159,7 +159,7 @@ bool ServerConfig::Parse(std::string filename, ServerNode ownNode, NodeIndex own
 			lconfig.index = iter->second.get<unsigned int>("<xmlattr>.index");
 			lconfig.node = toServerNode(strNode);
 			m_configListen.push_back(lconfig);
-			LOGI("strNode=" << strNode << ", ip=" << lconfig.ip << ", port=" << lconfig.port << ", lconfig.index=" << lconfig.index);
+			LOGD("strNode=" << strNode << ", ip=" << lconfig.ip << ", port=" << lconfig.port << ", lconfig.index=" << lconfig.index);
 		}
 
 
@@ -174,7 +174,7 @@ bool ServerConfig::Parse(std::string filename, ServerNode ownNode, NodeIndex own
 			lconfig.srcNode = toServerNode(srcStrNode);
 			lconfig.dstNode = toServerNode(dstStrNode);
 			m_configConnect.push_back(lconfig);
-			LOGI("srcStrNode=" << srcStrNode << ", remoteIP=" << lconfig.remoteIP << ", remotePort=" << lconfig.remotePort << ", dstStrNode=" << dstStrNode);
+			LOGD("srcStrNode=" << srcStrNode << ", remoteIP=" << lconfig.remoteIP << ", remotePort=" << lconfig.remotePort << ", dstStrNode=" << dstStrNode);
 		}
 
 		auto mongoParse = pt.get_child("mongo");

@@ -2,8 +2,13 @@
 
 CNetManager::CNetManager()
 {
-	CMessageDispatcher::getRef().RegisterSessionMessage(ID_DT2OS_DirectServerInit,
-		std::bind(&CNetManager::msg_serverInit, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+
+	CMessageDispatcher::getRef().RegisterSessionMessage(ID_DT2OS_DirectServerAuth,
+		std::bind(&CNetManager::msg_SessionServerAuth, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+
+	CMessageDispatcher::getRef().RegisterConnectorMessage(ID_DT2OS_DirectServerAuth,
+		std::bind(&CNetManager::msg_ConnectServerAuth, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+
 	CMessageDispatcher::getRef().RegisterSessionDefaultMessage(
 		std::bind(&CNetManager::msg_DefaultReq, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 	CMessageDispatcher::getRef().RegisterSessionOrgMessage(
@@ -61,33 +66,12 @@ bool CNetManager::Start()
 
 void CNetManager::event_OnConnect(ConnectorID cID)
 {
-	auto founder = m_configDBAgent.find(cID);
-	if (founder != m_configDBAgent.end())
-	{
-		m_onlineDBAgent.push_back(cID);
-		LOGI("event_OnConnect Auth. cID=" << cID << ", listenIP=" << founder->second.remoteIP << ", listenPort=" << founder->second.remotePort);
-
-	}
-	if (m_configDBAgent.size() != m_onlineDBAgent.size())
-	{
-		return;
-	}
-
-	//init
 	WriteStreamPack ws;
-	ProtoDirectServerInit init;
-	init.srcServer = GlobalFacade::getRef().getServerConfig().getOwnServerNode();
-	init.srcIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
-	ws << ID_DT2OS_DirectServerInit<< init;
+	ProtoDirectServerAuth auth;
+	auth.srcNode = GlobalFacade::getRef().getServerConfig().getOwnServerNode();
+	auth.srcIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
+	ws << ID_DT2OS_DirectServerAuth << auth;
 	CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
-
-	//所有connector已经建立连接 此时打开客户端监听端口
-	if (CTcpSessionManager::getRef().AddAcceptor(m_configListen) == InvalidAccepterID)
-	{
-		LOGE("AddAcceptor Failed. listenIP=" << m_configListen.listenIP << ", listenPort=" << m_configListen.listenPort);
-		return;
-	}
-	LOGI("AddAcceptor Success. listenIP=" << m_configListen.listenIP << ", listenPort=" << m_configListen.listenPort);
 }
 
 void CNetManager::event_OnDisconnect(ConnectorID cID)
@@ -95,73 +79,106 @@ void CNetManager::event_OnDisconnect(ConnectorID cID)
 	auto founder = m_configDBAgent.find(cID);
 	if (founder != m_configDBAgent.end())
 	{
-		auto searchiter = std::find_if(m_onlineDBAgent.begin(), m_onlineDBAgent.end(), [&cID](ConnectorID ccID){ return ccID == cID; });
+		LOGW("event_OnDisconnect Center. cID=" << cID << ", listenIP=" << founder->second.remoteIP << ", listenPort=" << founder->second.remotePort);
+	}
+
+	{
+		auto searchiter = std::find_if(m_onlineDBAgent.begin(), m_onlineDBAgent.end(),
+			[&cID](const ServerAuthConnect & sac){ return sac.cID == cID; });
 		if (searchiter != m_onlineDBAgent.end())
 		{
 			m_onlineDBAgent.erase(searchiter);
 		}
-		LOGW("event_OnDisconnect Center. cID=" << cID << ", listenIP=" << founder->second.remoteIP << ", listenPort=" << founder->second.remotePort);
 	}
 }
 
 
-void CNetManager::event_OnSessionEstablished(AccepterID, SessionID)
+void CNetManager::event_OnSessionEstablished(AccepterID aID, SessionID sID)
 {
-
+	WriteStreamPack ws;
+	ProtoDirectServerAuth auth;
+	auth.srcNode = GlobalFacade::getRef().getServerConfig().getOwnServerNode();
+	auth.srcIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
+	ws << ID_DT2OS_DirectServerAuth << auth;
+	CTcpSessionManager::getRef().SendOrgSessionData(aID, sID, ws.GetStream(), ws.GetStreamLen());
 }
 
 void CNetManager::event_OnSessionDisconnect(AccepterID aID, SessionID sID)
 {
-	auto founder = m_onlineAgent.find(sID);
-	if (founder != m_onlineAgent.end())
 	{
-		m_onlineAgent.erase(founder);
-		LOGW("event_OnSessionDisconnect Agent. index=" << founder->second.second);
-		return;
+		auto founder = std::find_if(m_onlineAgent.begin(), m_onlineAgent.end(),
+			[&sID](const ServerAuthSession & sac){ return sac.sID == sID; });
+		if (founder != m_onlineAgent.end())
+		{
+			m_onlineAgent.erase(founder);
+		}
 	}
-	founder = m_onlineLogic.find(sID);
-	if (founder != m_onlineLogic.end())
+
 	{
-		m_onlineLogic.erase(founder);
-		LOGW("event_OnSessionDisconnect Agent. index=" << founder->second.second);
-		return;
+		auto founder = std::find_if(m_onlineLogic.begin(), m_onlineLogic.end(),
+			[&sID](const ServerAuthSession & sac){ return sac.sID == sID; });
+		if (founder != m_onlineLogic.end())
+		{
+			m_onlineLogic.erase(founder);
+		}
 	}
 }
 
 
 
-
-
-
-
-void CNetManager::msg_serverInit(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs)
+void CNetManager::msg_ConnectServerAuth(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs)
 {
-	ServerNode node;
-	NodeIndex index = 0;
-	rs >> node >> index;
-	if (node == AgentNode)
+	ProtoDirectServerAuth auth;
+	rs >> auth;
+	if (auth.srcNode == DBAgentNode)
 	{
-		auto founder = std::find_if(m_onlineAgent.begin(), m_onlineAgent.end(), [index](OnlineServerType::value_type t){ return index == t.second.second; });
+		auto founder = std::find_if(m_onlineDBAgent.begin(), m_onlineDBAgent.end(),
+			[auth](const ServerAuthConnect &sac){return sac.index == auth.srcIndex; });
+		if (founder != m_onlineDBAgent.end())
+		{
+			m_onlineDBAgent.erase(founder);
+		}
+		ServerAuthConnect sac;
+		sac.cID = cID;
+		sac.node = auth.srcNode;
+		sac.index = auth.srcIndex;
+		m_onlineDBAgent.push_back(sac);
+	}
+}
+
+
+void CNetManager::msg_SessionServerAuth(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs)
+{
+	ProtoDirectServerAuth auth;
+	rs >> auth;
+	ServerAuthSession sas;
+	sas.aID = aID;
+	sas.sID = sID;
+	sas.node = auth.srcNode;
+	sas.index = auth.srcIndex;
+
+	if (auth.srcNode == AgentNode)
+	{
+		auto founder = std::find_if(m_onlineAgent.begin(), m_onlineAgent.end(), 
+			[auth](const ServerAuthSession & sas){ return sas.index == auth.srcIndex; });
 		if (founder != m_onlineAgent.end())
 		{
 			m_onlineAgent.erase(founder);
 		}
-		m_onlineAgent.insert(std::make_pair(sID, std::make_pair(aID, index)));
-		LOGI("agent online. sID=" << sID << ", index=" << index);
+		m_onlineAgent.push_back(sas);
 		return;
 	}
-	else if (node == LogicNode)
+	else if (auth.srcNode == LogicNode)
 	{
-		auto founder = std::find_if(m_onlineLogic.begin(), m_onlineLogic.end(), [index](OnlineServerType::value_type t){ return index == t.second.second; });
+		auto founder = std::find_if(m_onlineLogic.begin(), m_onlineLogic.end(), 
+			[auth](const ServerAuthSession & sas){ return sas.index == auth.srcIndex; });
 		if (founder != m_onlineLogic.end())
 		{
 			m_onlineLogic.erase(founder);
 		}
-		m_onlineLogic.insert(std::make_pair(sID, std::make_pair(aID, index)));
-		LOGI("logic online. sID=" << sID << ", index=" << index);
+		m_onlineLogic.push_back(sas);
 		return;
 	}
-	LOGW("unknown online. sID=" << sID << ", index=" << index);
 }
 
 
