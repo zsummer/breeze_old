@@ -2,23 +2,30 @@
 
 <mongo>
 	<auth ip="127.0.0.1" port="27017" db="auth" user="zhangyawei" pwd="123" />
+	<info ip="127.0.0.1" port="27017" db="info" user="zhangyawei" pwd="123" />
 </mongo>
 
 <listen>
 	<dbagent ip="0.0.0.0" port="21000" index="0" />
-	<auth ip="0.0.0.0" port="21010" index="0" />
-	<auth ip="0.0.0.0" port="21011" index="1" />
+	<logic ip="0.0.0.0" port="21010" index="0" />
+
 	<center ip="0.0.0.0" port="21020" index="0" />
-	<logic ip="0.0.0.0" port="21030" index="0" />
+
+	<auth ip="0.0.0.0" port="21030" index="0" />
+	<auth ip="0.0.0.0" port="21031" index="1" />
+	
 	<agent ip="0.0.0.0" port="21040" index="0" />
 	<agent ip="0.0.0.0" port="21041" index="1" />
 </listen>
 
 <connect>
-	<center dstNode="dbagent" ip="127.0.0.1" port="21000"  />
+	<logic dstNode="dbagent" ip="127.0.0.1" port="21000"  />
+	
+	<center dstNode="logic" ip="127.0.0.1" port="21010"  />
+	
 	<agent dstNode="center" ip="127.0.0.1" port="21020"  />
-	<agent dstNode="auth" ip="127.0.0.1" port="21010"  />
-	<agent dstNode="auth" ip="127.0.0.1" port="21011"  />
-	<logic dstNode="center" ip="127.0.0.1" port="21020"  />
+	<agent dstNode="auth" ip="127.0.0.1" port="21030"  />
+	<agent dstNode="auth" ip="127.0.0.1" port="21031"  />
+	
 </connect>
 

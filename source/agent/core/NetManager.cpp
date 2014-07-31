@@ -5,9 +5,12 @@
 CNetManager::CNetManager()
 {
 	CMessageDispatcher::getRef().RegisterSessionDefaultMessage(
-		std::bind(&CNetManager::msg_DefaultReq, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+		std::bind(&CNetManager::msg_DefaultSessionReq, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 	CMessageDispatcher::getRef().RegisterSessionOrgMessage(
 		std::bind(&CNetManager::msg_OrgMessageReq, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+
+	CMessageDispatcher::getRef().RegisterConnectorDefaultMessage(
+		std::bind(&CNetManager::msg_DefaultConnectReq, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	CMessageDispatcher::getRef().RegisterConnectorMessage(ID_DT2OS_DirectServerAuth,
 		std::bind(&CNetManager::msg_ConnectServerAuth, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	
@@ -243,6 +246,7 @@ void CNetManager::msg_AuthAck(ConnectorID cID, ProtocolID pID, ReadStreamPack &r
 	if (ack.retCode == EC_SUCCESS)
 	{
 		founder->second->sInfo.accID = ack.accountID;
+		m_mapAccount[ack.accountID] = founder->second;
 	}
 
 	WriteStreamPack ws;
@@ -266,8 +270,19 @@ bool CNetManager::msg_OrgMessageReq(AccepterID aID, SessionID sID, const char * 
 	}
 	return true;
 };
-
-void CNetManager::msg_DefaultReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs)
+void CNetManager::msg_DefaultConnectReq(ConnectorID cID, ProtocolID pID, ReadStreamPack & rs)
+{
+	SessionInfo info;
+	rs >> info;
+	if (info.aID != InvalidAccepterID && info.sID != InvalidSeesionID)
+	{
+		WriteStreamPack ws;
+		ws << pID;
+		ws.AppendOriginalData(rs.GetStreamUnread(), rs.GetStreamUnreadLen());
+		CTcpSessionManager::getRef().SendOrgSessionData(info.aID, info.sID, ws.GetStream(), ws.GetStreamLen());
+	}
+}
+void CNetManager::msg_DefaultSessionReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs)
 {
 	auto finditer = m_mapSession.find(sID);
 	ProtoAuthAck ack;
@@ -285,9 +300,9 @@ void CNetManager::msg_DefaultReq(AccepterID aID, SessionID sID, ProtocolID pID, 
 			inProtoID = ID_RT2OS_RouteToOtherServer;
 			ProtoRouteToOtherServer route;
 			route.srcIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
-			route.srcServer = GlobalFacade::getRef().getServerConfig().getOwnServerNode();
-			route.dstServer = LogicNode;
-			route.routerType = 3;
+			route.srcNode = GlobalFacade::getRef().getServerConfig().getOwnServerNode();
+			route.dstNode = LogicNode;
+			route.routerType = 1;
 			route.dstIndex = 0;
 			WriteStreamPack ws;
 			ws << inProtoID << route << pID << finditer->second->sInfo;

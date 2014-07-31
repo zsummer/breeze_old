@@ -10,10 +10,13 @@ CNetManager::CNetManager()
 		std::bind(&CNetManager::msg_ConnectServerAuth, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
 	CMessageDispatcher::getRef().RegisterSessionDefaultMessage(
-		std::bind(&CNetManager::msg_DefaultReq, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+		std::bind(&CNetManager::msg_DefaultSessionReq, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 	CMessageDispatcher::getRef().RegisterSessionOrgMessage(
 		std::bind(&CNetManager::msg_OrgMessageReq, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 
+
+	CMessageDispatcher::getRef().RegisterConnectorDefaultMessage(
+		std::bind(&CNetManager::msg_DefaultConnectReq, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
 	//×¢²áÊÂ¼þ
 	CMessageDispatcher::getRef().RegisterOnConnectorEstablished(std::bind(&CNetManager::event_OnConnect, this, std::placeholders::_1));
@@ -35,9 +38,9 @@ bool CNetManager::Start()
 		tag.reconnectMaxCount = 2;
 		tag.reconnectInterval = 5000;
 		tag.curReconnectCount = true;
-		if (con.dstNode == DBAgentNode)
+		if (con.dstNode == LogicNode)
 		{
-			m_configDBAgent.insert(std::make_pair(tag.cID, tag));
+			m_configConnect.insert(std::make_pair(tag.cID, tag));
 		}
 		else
 		{
@@ -73,18 +76,18 @@ void CNetManager::event_OnConnect(ConnectorID cID)
 
 void CNetManager::event_OnDisconnect(ConnectorID cID)
 {
-	auto founder = m_configDBAgent.find(cID);
-	if (founder != m_configDBAgent.end())
+	auto founder = m_configConnect.find(cID);
+	if (founder != m_configConnect.end())
 	{
 		LOGW("event_OnDisconnect Center. cID=" << cID << ", listenIP=" << founder->second.remoteIP << ", listenPort=" << founder->second.remotePort);
 	}
 
 	{
-		auto searchiter = std::find_if(m_onlineDBAgent.begin(), m_onlineDBAgent.end(),
+		auto searchiter = std::find_if(m_onlineConnect.begin(), m_onlineConnect.end(),
 			[&cID](const ServerAuthConnect & sac){ return sac.cID == cID; });
-		if (searchiter != m_onlineDBAgent.end())
+		if (searchiter != m_onlineConnect.end())
 		{
-			m_onlineDBAgent.erase(searchiter);
+			m_onlineConnect.erase(searchiter);
 		}
 	}
 }
@@ -103,22 +106,11 @@ void CNetManager::event_OnSessionEstablished(AccepterID aID, SessionID sID)
 
 void CNetManager::event_OnSessionDisconnect(AccepterID aID, SessionID sID)
 {
+	auto founder = std::find_if(m_onlineSession.begin(), m_onlineSession.end(),
+		[&sID](const ServerAuthSession & sac){ return sac.sID == sID; });
+	if (founder != m_onlineSession.end())
 	{
-		auto founder = std::find_if(m_onlineAgent.begin(), m_onlineAgent.end(),
-			[&sID](const ServerAuthSession & sac){ return sac.sID == sID; });
-		if (founder != m_onlineAgent.end())
-		{
-			m_onlineAgent.erase(founder);
-		}
-	}
-
-	{
-		auto founder = std::find_if(m_onlineLogic.begin(), m_onlineLogic.end(),
-			[&sID](const ServerAuthSession & sac){ return sac.sID == sID; });
-		if (founder != m_onlineLogic.end())
-		{
-			m_onlineLogic.erase(founder);
-		}
+		m_onlineSession.erase(founder);
 	}
 }
 
@@ -132,20 +124,20 @@ void CNetManager::msg_ConnectServerAuth(ConnectorID cID, ProtocolID pID, ReadStr
 
 	if (auth.srcNode == DBAgentNode)
 	{
-		auto founder = std::find_if(m_onlineDBAgent.begin(), m_onlineDBAgent.end(),
+		auto founder = std::find_if(m_onlineConnect.begin(), m_onlineConnect.end(),
 			[auth](const ServerAuthConnect &sac){return sac.index == auth.srcIndex; });
-		if (founder != m_onlineDBAgent.end())
+		if (founder != m_onlineConnect.end())
 		{
-			m_onlineDBAgent.erase(founder);
+			m_onlineConnect.erase(founder);
 		}
 		ServerAuthConnect sac;
 		sac.cID = cID;
 		sac.node = auth.srcNode;
 		sac.index = auth.srcIndex;
-		m_onlineDBAgent.push_back(sac);
+		m_onlineConnect.push_back(sac);
 	}
 
-	if (m_configDBAgent.size() == m_onlineDBAgent.size())
+	if (m_onlineConnect.size() == m_onlineConnect.size())
 	{
 		if (CTcpSessionManager::getRef().AddAcceptor(m_configListen) == InvalidAccepterID)
 		{
@@ -168,26 +160,13 @@ void CNetManager::msg_SessionServerAuth(AccepterID aID, SessionID sID, ProtocolI
 	sas.node = auth.srcNode;
 	sas.index = auth.srcIndex;
 
-	if (auth.srcNode == AgentNode)
+	auto founder = std::find_if(m_onlineSession.begin(), m_onlineSession.end(),
+		[auth](const ServerAuthSession & sas){ return sas.index == auth.srcIndex; });
+	if (founder != m_onlineSession.end())
 	{
-		auto founder = std::find_if(m_onlineAgent.begin(), m_onlineAgent.end(), 
-			[auth](const ServerAuthSession & sas){ return sas.index == auth.srcIndex; });
-		if (founder != m_onlineAgent.end())
-		{
-			m_onlineAgent.erase(founder);
-		}
-		m_onlineAgent.push_back(sas);
+		m_onlineSession.erase(founder);
 	}
-	else if (auth.srcNode == LogicNode)
-	{
-		auto founder = std::find_if(m_onlineLogic.begin(), m_onlineLogic.end(), 
-			[auth](const ServerAuthSession & sas){ return sas.index == auth.srcIndex; });
-		if (founder != m_onlineLogic.end())
-		{
-			m_onlineLogic.erase(founder);
-		}
-		m_onlineLogic.push_back(sas);
-	}
+	m_onlineSession.push_back(sas);
 }
 
 
@@ -196,8 +175,75 @@ bool CNetManager::msg_OrgMessageReq(AccepterID aID, SessionID sID, const char * 
 	return true;
 };
 
-void CNetManager::msg_DefaultReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs)
+void CNetManager::msg_DefaultConnectReq(ConnectorID cID, ProtocolID pID, ReadStreamPack & rs)
 {
+	msg_DefaultSessionReq(InvalidAccepterID, InvalidSeesionID, pID, rs);
+}
+
+void CNetManager::msg_DefaultSessionReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs)
+{
+	if (pID == ID_RT2OS_RouteToOtherServer)
+	{
+		ProtoRouteToOtherServer route;
+		rs >> route;
+
+		if (route.routerType == 0 || route.routerType == 1)
+		{
+			if (route.dstNode == LogicNode)
+			{
+				auto founder = std::find_if(m_onlineConnect.begin(), m_onlineConnect.end(),
+					[route](const ServerAuthConnect & sas){return sas.node == route.dstNode && (route.routerType == 3 || sas.index == route.dstIndex); });
+				if (founder != m_onlineConnect.end())
+				{
+					WriteStreamPack  ws;
+					ws.AppendOriginalData(rs.GetStreamUnread(), rs.GetStreamUnreadLen());
+					CTcpSessionManager::getRef().SendOrgConnectorData(founder->cID, ws.GetStream(), ws.GetStreamLen());
+					return;
+				}
+			}
+			else
+			{
+				auto founder = std::find_if(m_onlineSession.begin(), m_onlineSession.end(),
+					[route](const ServerAuthSession & sas){return sas.node == route.dstNode && (route.routerType == 3 || sas.index == route.dstIndex); });
+				if (founder != m_onlineSession.end())
+				{
+					WriteStreamPack  ws;
+					ws.AppendOriginalData(rs.GetStreamUnread(), rs.GetStreamUnreadLen());
+					CTcpSessionManager::getRef().SendOrgSessionData(founder->aID, founder->sID, ws.GetStream(), ws.GetStreamLen());
+					return;
+				}
+			}
+		}
+		else if (route.routerType == 2)
+		{
+			if (route.dstNode == LogicNode)
+			{
+				for (const auto & c : m_onlineConnect)
+				{
+					if (c.node == route.dstNode)
+					{
+						WriteStreamPack  ws;
+						ws.AppendOriginalData(rs.GetStreamUnread(), rs.GetStreamUnreadLen());
+						CTcpSessionManager::getRef().SendOrgConnectorData(c.cID, ws.GetStream(), ws.GetStreamLen());
+					}
+				}
+			}
+			else
+			{
+				for (const auto & s : m_onlineSession)
+				{
+					if (s.node == route.dstNode)
+					{
+						WriteStreamPack  ws;
+						ws.AppendOriginalData(rs.GetStreamUnread(), rs.GetStreamUnreadLen());
+						CTcpSessionManager::getRef().SendOrgSessionData(s.aID, s.sID, ws.GetStream(), ws.GetStreamLen());
+					}
+				}
+			}
+		}
+		
+	}
+
 
 };
 

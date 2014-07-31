@@ -25,10 +25,10 @@
 
 
   <proto from="RT" to="OS" name="RouteToOtherServer" desc= "路由给其他服务">
-    <member name="srcServer" type="ui32"   desc="optional"/>
+    <member name="srcNode" type="ui32"   desc="optional"/>
     <member name="srcIndex" type="ui32"   desc="optional"/>
-    <member name="dstServer" type="ui32"   desc=""/>
-    <member name="routerType" type="ui32"   desc="0为指定dstIndex路由, 1为广播, 2位随机, 3为主备模式"/>
+    <member name="dstNode" type="ui32"   desc=""/>
+    <member name="routerType" type="ui32"   desc="0为指定dstIndex路由, 1为任意一个, 2为广播"/>
     <member name="dstIndex" type="ui32"   desc="optional"/>
   </proto>
 

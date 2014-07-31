@@ -33,7 +33,7 @@
     <ClCompile Include="core\NetManager.cpp">
       <Filter>core</Filter>
     </ClCompile>
-    <ClCompile Include="logic\AuthHandler.cpp">
+    <ClCompile Include="logic\LoginHandler.cpp">
       <Filter>logic</Filter>
     </ClCompile>
   </ItemGroup>
@@ -53,11 +53,11 @@
     <ClInclude Include="core\NetManager.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="logic\AuthHandler.h">
-      <Filter>logic</Filter>
-    </ClInclude>
     <ClInclude Include="..\common\BaseHander.h">
       <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="logic\LoginHandler.h">
+      <Filter>logic</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

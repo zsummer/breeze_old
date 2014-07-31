@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ProtoTraits>
+  <MinNo>20100</MinNo>
+  <MaxNo>20200</MaxNo>
+  <UseLog4z>0</UseLog4z>
+</ProtoTraits>
+
+
+<Proto>
+
+  <struct name="LittleCharInfo" desc="角色信息,用于认证后拉取帐号下的所有角色">
+    <member name="charID" type="ui64"   desc="角色ID"/>
+    <member name="iconID"  type="ui32" desc="头像"/>
+    <member name="level"  type="ui32" desc="等级"/>
+    <member name="charName"  type="string" desc="昵称"/>
+  </struct>
+  <array name="LittleCharInfoVec" type="LittleCharInfo" desc="角色数组类型" />
+
+  <struct name="AccountInfo" desc="认证信息">
+    <member name="accID" type="ui64"   desc=""/>
+    <member name="diamond"  type="ui32" desc="当前剩余的充值钻石"/>
+    <member name="hisDiamond"  type="ui32" desc="历史充值钻石总额"/>
+    <member name="giftDmd"  type="ui32" desc="当前剩余的赠送钻石"/>
+    <member name="hisGiftDmd"  type="ui32" desc="历往赠送钻石总额"/>
+    <member name="charInfos"  type="LittleCharInfoVec" desc="角色信息"/>
+  </struct>
+
+
+
+  <proto from="C" to="LS" name="GetAccountInfoReq" desc= "获取帐号信息">
+    <member name="accountID" type="ui64"   desc=""/>
+  </proto>
+
+  <proto from="LS" to="C" name="GetAccountInfoAck" desc= "获取帐号信息回复" >
+  	<member name="retCode" type="ui16"   desc=""/>
+    <member name="info" type="AccountInfo"   desc=""/>
+  </proto>
+
+</Proto>
+

@@ -68,12 +68,11 @@ const ui16 MAX_OUT_UNAUTH_PROTO_ID = 20100;
 
 //认证后的通讯协议区间为[)
 const ui16 MIN_OUT_PROTO_ID = 20100;
+
+const ui16 MAX_OUT_LOGIC_PROTO_ID = 30000;
+
 const ui16 MAX_OUT_PROTO_ID = 40000;
 
-
-//CLIENT
-const ui16 MIN_C_R_RESERVE_PROTO_ID = 51000;
-const ui16 MAX_C_R_RESERVE_PROTO_ID = 65535;
 
 
 

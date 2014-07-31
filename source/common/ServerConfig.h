@@ -51,6 +51,7 @@ struct ConnectorConfig
 
 //Êý¾Ý¿â
 const std::string AuthMongoDB = "auth";
+const std::string InfoMongoDB = "info";
 
 struct MongoConfig 
 {
@@ -102,6 +103,8 @@ public:
 	NodeIndex getOwnNodeIndex(){ return m_ownNodeIndex; }
 
 	inline MongoConfig & getAuthMongoDB(){ return m_authMongo; }
+	inline MongoConfig & getInfoMongoDB(){ return m_infoMongo; }
+
 private:
 	ServerNode m_ownServerNode = InvalideServerNode;
 	NodeIndex m_ownNodeIndex = InvalidNodeIndex;
@@ -109,6 +112,7 @@ private:
 	std::vector<ConnectorConfig> m_configConnect;
 
 	MongoConfig m_authMongo;
+	MongoConfig m_infoMongo;
 };
 
 
@@ -189,6 +193,10 @@ bool ServerConfig::Parse(std::string filename, ServerNode ownNode, NodeIndex own
 			if (iter->first == AuthMongoDB)
 			{
 				m_authMongo = lconfig;
+			}
+			else if (iter->first == InfoMongoDB)
+			{
+				m_infoMongo = lconfig;
 			}
 		}
 

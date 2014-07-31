@@ -42,13 +42,20 @@ public:
 	void event_OnConnect(ConnectorID cID);
 	void event_OnDisconnect(ConnectorID cID);
 
+	void event_OnSessionEstablished(AccepterID aID, SessionID sID);
+	void event_OnSessionDisconnect(AccepterID aID, SessionID sID);
+
 	void msg_ConnectServerAuth(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs);
+	void msg_SessionServerAuth(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
 
 
+private:
+	tagAcceptorConfigTraits m_configListen; //保存监听配置
 	ConnectorID m_lastConnectID = 0; //自动递增的connectorID.
-	std::map<ConnectorID, tagConnctorConfigTraits> m_configDBAgent; //cID 对应的连接配置
+	std::map<ConnectorID, tagConnctorConfigTraits> m_configConnect; //cID 对应的连接配置
 
-	std::vector<ServerAuthConnect> m_onlineCenter;
+	std::vector<ServerAuthSession> m_onlineSession;
+	std::vector<ServerAuthConnect> m_onlineConnect;
 };
 
 

@@ -49,17 +49,17 @@ public:
 	void msg_SessionServerAuth(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
 
 
-	void msg_DefaultReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
+	void msg_DefaultConnectReq(ConnectorID cID, ProtocolID pID, ReadStreamPack & rs);
+	void msg_DefaultSessionReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
 	bool msg_OrgMessageReq(AccepterID aID, SessionID sID, const char * blockBegin, FrameStreamTraits::Integer blockSize);
 
 
 	tagAcceptorConfigTraits m_configListen; //保存监听配置
 	ConnectorID m_lastConnectID = 0; //自动递增的connectorID.
-	std::map<ConnectorID, tagConnctorConfigTraits> m_configDBAgent; //cID 对应的连接配置
+	std::map<ConnectorID, tagConnctorConfigTraits> m_configConnect; //cID 对应的连接配置
 
-	std::vector<ServerAuthSession> m_onlineAgent;
-	std::vector<ServerAuthSession> m_onlineLogic;
-	std::vector<ServerAuthConnect> m_onlineDBAgent;
+	std::vector<ServerAuthSession> m_onlineSession;
+	std::vector<ServerAuthConnect> m_onlineConnect;
 };
 
 

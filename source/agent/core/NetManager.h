@@ -50,9 +50,16 @@ public:
 	void msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
 	void msg_AuthAck(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs);
 
-	void msg_DefaultReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
+	void msg_DefaultConnectReq(ConnectorID cID, ProtocolID pID, ReadStreamPack & rs);
+	void msg_DefaultSessionReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
 	bool msg_OrgMessageReq(AccepterID aID, SessionID sID, const char * blockBegin, FrameStreamTraits::Integer blockSize);
+
+
+private:
 	std::map<SessionID, std::shared_ptr<AgentSessionInfo>> m_mapSession;
+	std::map<AccepterID, std::shared_ptr<AgentSessionInfo>> m_mapAccount;
+	std::map<CharacterID, std::shared_ptr<AgentSessionInfo>> m_mapChar;
+
 	tagAcceptorConfigTraits m_configListen; //保存监听配置
 
 	ConnectorID m_lastConnectID = 0; //自动递增的connectorID.

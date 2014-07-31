@@ -5,7 +5,7 @@
 #include "core/GlobalFacade.h"
 #include <ServerConfig.h>
 #include "core/NetManager.h"
-#include "logic/AuthHandler.h"
+#include "logic/LoginHandler.h"
 using namespace zsummer::log4z;
 
 Appliction::Appliction()
@@ -49,7 +49,7 @@ bool Appliction::Init(std::string filename, unsigned int index)
 	}
 
 	std::vector<CBaseHandler*> handlers;
-	handlers.push_back(new CAuthHandler());
+	handlers.push_back(new CLoginHandler());
 	for (auto ptr:handlers)
 	{
 		if (!ptr->Init())

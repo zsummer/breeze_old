@@ -16,30 +16,25 @@
 * limitations under the License.
 */
 
-#ifndef _AUTH_HANDLER_H_
-#define _AUTH_HANDLER_H_
+#ifndef _LOGIN_HANDLER_H_
+#define _LOGIN_HANDLER_H_
 
 
 #include <BaseHander.h>
 #include "../core/GlobalFacade.h"
-#include <ProtoAuth.h>
+#include <ProtoLogin.h>
 
 
-namespace mongo
-{
-	class DBClientConnection;
-};
-
-class CAuthHandler : public CBaseHandler
+class CLoginHandler : public CBaseHandler
 {
 public:
-	CAuthHandler(){}
-	~CAuthHandler(){}
+	CLoginHandler(){}
+	~CLoginHandler(){}
 	virtual bool Init() override final;
-	void msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
+	void msg_GetAccountReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
+	void msg_GetAccountAck(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs);
+
 private:
-	//!auth mongo
-	std::shared_ptr<mongo::DBClientConnection> m_authMongo;
 };
 
 
