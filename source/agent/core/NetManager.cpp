@@ -170,7 +170,6 @@ void CNetManager::msg_ConnectServerAuth(ConnectorID cID, ProtocolID pID, ReadStr
 		sac.index = auth.srcIndex;
 		sac.cID = cID;
 		m_onlineCenter.push_back(sac);
-		return;
 	}
 
 	if (m_configAuth.size() + m_configCenter.size() != m_onlineAuth.size() + m_onlineCenter.size())

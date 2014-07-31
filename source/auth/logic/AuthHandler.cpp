@@ -64,12 +64,14 @@ void CAuthHandler::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Re
 // 			//end debug
 			mongo::BSONObjBuilder builder;
 			builder.append("_id", req.info.user);
-			auto cursor = m_authMongo->query("auth.users", builder.obj());
+			std::string db = GlobalFacade::getRef().getServerConfig().getAuthMongoDB().db;
+			db += ".cl_auth";
+			auto cursor = m_authMongo->query(db, builder.obj());
 			if (cursor->more())
 			{
 				auto obj = cursor->next();
 				std::string pwd = obj.getField("pwd").str();
-				AccountID accID = obj.getField("accountID").numberLong();
+				AccountID accID = obj.getField("accID").numberLong();
 				if (pwd == req.info.pwd)
 				{
 					ack.accountID = accID;

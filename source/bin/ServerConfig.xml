@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <mongo>
-	<auth ip="127.0.0.1" port="27017" db="auth" user="zhangyawei" pwd="123" />
-	<info ip="127.0.0.1" port="27017" db="info" user="zhangyawei" pwd="123" />
+	<auth ip="127.0.0.1" port="27017" db="db_auth" user="zhangyawei" pwd="123" />
+	<info ip="127.0.0.1" port="27017" db="db_info" user="zhangyawei" pwd="123" />
 </mongo>
 
 <listen>
