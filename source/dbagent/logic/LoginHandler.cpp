@@ -52,7 +52,7 @@ void CLoginHandler::msg_GetAccountInfoReq(AccepterID aID, SessionID sID, Protoco
 
 
 	ProtoGetAccountInfoAck ack;
-	ack.retCode = EC_SUCCESS;
+	ack.retCode = EC_KEY_NOTFOUND;
 	ack.info.accID = req.accountID;
 
 	do
@@ -65,22 +65,25 @@ void CLoginHandler::msg_GetAccountInfoReq(AccepterID aID, SessionID sID, Protoco
 // 			//end debug
 			mongo::BSONObjBuilder builder;
 			builder.append("_id", (long long)req.accountID);
-			auto cursor = m_infoMongo->query("auth.users", builder.obj());
+			std::string cl = GlobalFacade::getRef().getServerConfig().getInfoMongoDB().db;
+			cl += ".cl_account";
+			auto cursor = m_infoMongo->query(cl, builder.obj());
 			if (cursor->more())
 			{
 				auto obj = cursor->next();
-				AccountID accID = obj.getField("accountID").numberLong();
-				if (accID == req.accountID)
-				{
-
-				}
-				else
-				{
-				}
+				ack.info.diamond = obj.getField("diamond").numberInt();
+				ack.info.hisDiamond = obj.getField("hisDiamond").numberInt();
+				ack.info.giftDmd = obj.getField("giftDmd").numberInt();
+				ack.info.hisGiftDmd = obj.getField("hisGiftDmd").numberInt();
+				ack.retCode = EC_SUCCESS;
 			}
 			else
 			{
-				
+				ack.info.diamond = 0;
+				ack.info.hisDiamond = 0;
+				ack.info.giftDmd = 0;
+				ack.info.hisGiftDmd = 0;
+				ack.retCode = EC_SUCCESS;
 			}
 		}
 		catch (const mongo::DBException &e)

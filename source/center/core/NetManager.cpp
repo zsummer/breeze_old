@@ -122,7 +122,7 @@ void CNetManager::msg_ConnectServerAuth(ConnectorID cID, ProtocolID pID, ReadStr
 	rs >> auth;
 	LOGI("msg_ConnectServerAuth. cID=" << cID << ", Node=" << auth.srcNode << ", index=" << auth.srcIndex);
 
-	if (auth.srcNode == DBAgentNode)
+	if (auth.srcNode == LogicNode)
 	{
 		auto founder = std::find_if(m_onlineConnect.begin(), m_onlineConnect.end(),
 			[auth](const ServerAuthConnect &sac){return sac.index == auth.srcIndex; });

@@ -48,7 +48,27 @@ public:
 	void msg_ConnectServerAuth(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs);
 	void msg_SessionServerAuth(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
 
-
+public:
+	inline void SendOrgDataToCenter(const char * orgData, unsigned int orgDataLen)
+	{
+		if (m_onlineSession.empty())
+		{
+			LOGW("not found any center. protocol send lost");
+			return;
+		}
+		const ServerAuthSession & sas = m_onlineSession.at(0);
+		CTcpSessionManager::getRef().SendOrgSessionData(sas.aID, sas.sID, orgData, orgDataLen);
+	}
+	inline void SendOrgDataToDBAgent(const char * orgData, unsigned int orgDataLen)
+	{
+		if (m_onlineConnect.empty())
+		{
+			LOGW("not found any dbAgent. protocol send lost");
+			return;
+		}
+		const ServerAuthConnect & sac = m_onlineConnect.at(0);
+		CTcpSessionManager::getRef().SendOrgConnectorData(sac.cID,orgData, orgDataLen);
+	}
 private:
 	tagAcceptorConfigTraits m_configListen; //保存监听配置
 	ConnectorID m_lastConnectID = 0; //自动递增的connectorID.

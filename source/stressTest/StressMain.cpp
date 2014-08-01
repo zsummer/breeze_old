@@ -27,6 +27,7 @@
 #include <ProtoDefine.h>
 #include <ProtoCommon.h>
 #include <ProtoAuth.h>
+#include <ProtoLogin.h>
 #include <ServerConfig.h>
 using namespace zsummer::log4z;
 
@@ -103,12 +104,15 @@ public:
 		CMessageDispatcher::getRef().RegisterOnConnectorEstablished(std::bind(&CStressClientHandler::OnConnected, this, std::placeholders::_1));
 		CMessageDispatcher::getRef().RegisterConnectorMessage(ID_AS2C_AuthAck,
 			std::bind(&CStressClientHandler::msg_AuthAck_fun, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+		CMessageDispatcher::getRef().RegisterConnectorMessage(ID_LS2C_GetAccountInfoAck,
+			std::bind(&CStressClientHandler::msg_LoginAck_fun, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+
 		CMessageDispatcher::getRef().RegisterOnConnectorDisconnect(std::bind(&CStressClientHandler::OnConnectDisconnect, this, std::placeholders::_1));
 	}
 
-	void OnConnected (ConnectorID cID)
+	void OnConnected(ConnectorID cID)
 	{
-		LOGI("OnConnected. ConnectorID=" << cID );
+		LOGI("OnConnected. ConnectorID=" << cID);
 		WriteStreamPack ws;
 		ProtoAuthReq req;
 		req.info.user = "zhangyawei";
@@ -123,9 +127,9 @@ public:
 		m_sessionStatus[cID] = false;
 	}
 
-	void msg_AuthAck_fun(ConnectorID cID, ProtocolID pID, ReadStreamPack & rs)
+	inline void msg_AuthAck_fun(ConnectorID cID, ProtocolID pID, ReadStreamPack & rs)
 	{
-		
+
 		ProtoAuthAck ack;
 		rs >> ack;
 		if (ack.retCode == EC_SUCCESS)
@@ -137,38 +141,38 @@ public:
 			LOGE("Auth Failed. cID=" << cID);
 			return;
 		}
-		
+
 
 		g_totalRecvCount++;
 		g_totalEchoCount++;
 
 
-		//debug
-		{
-			WriteStreamPack ws;
-			ProtoAuthReq req;
-			req.info.user = "zhangyawei";
-			req.info.pwd = "123";
-			ws << ID_C2AS_AuthReq << req;
-			CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
-			LOGD("OnConnected. Send AuthReq. cID=" << cID << ", user=" << req.info.user << ", pwd=" << req.info.pwd);
-			g_totalSendCount++;
-		}
 
-
-// 		{
-// 			WriteStreamPack ws;
-// 			ProtoAuthReq req;
-// 			req.info.user = "zhangyawei";
-// 			req.info.pwd = "123";
-// 			ws << MIN_C_R_AS_PROTO_ID << req;
-// 			CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
-// 			LOGD("OnConnected. Send AuthReq. cID=" << cID << ", user=" << req.info.user << ", pwd=" << req.info.pwd);
-// 			g_totalSendCount++;
-// 		}
-		//!end
+		WriteStreamPack ws;
+		ProtoGetAccountInfoReq req;
+		req.accountID = ack.accountID;
+		ws << ID_C2LS_GetAccountInfoReq << req;
+		CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
+		LOGD("msg_AuthAck. Send LoginReq. cID=" << cID << ", user=" << req.accountID);
+		g_totalSendCount++;
+		
 
 	};
+	inline void msg_LoginAck_fun(ConnectorID cID, ProtocolID pID, ReadStreamPack & rs)
+	{
+		ProtoGetAccountInfoAck ack;
+		rs >> ack;
+		if (ack.retCode == EC_SUCCESS)
+		{
+			LOGD("getaccount Success. cID=" << cID << ", accID=" << ack.info.accID << ", diamond=" << ack.info.diamond);
+
+		}
+		else
+		{
+			LOGE("getaccount Failed. cID=" << cID);
+			return;
+		}
+	}
 private:
 	std::unordered_map<ConnectorID, bool> m_sessionStatus;
 };

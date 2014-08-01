@@ -17,6 +17,7 @@
     <const name="EC_AUTH_ERROR"  value="4" type="ui16" desc="认证失败"/>
     <const name="EC_AUTH_ING"  value="5" type="ui16" desc="正在认证中..."/>
     <const name="EC_AUTH_DOUBLE"  value="6" type="ui16" desc="重复认证"/>
+    <const name="EC_KEY_NOTFOUND"  value="7" type="ui16" desc="KEY找不到"/>
 
 
 

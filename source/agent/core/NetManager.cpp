@@ -289,12 +289,12 @@ void CNetManager::msg_DefaultSessionReq(AccepterID aID, SessionID sID, ProtocolI
 	ack.accountID = InvalidAccountID;
 	if (finditer == m_mapSession.end() || finditer->second->sInfo.accID == InvalidAccountID)
 	{
-		ack.retCode = EC_AUTH_ERROR;
+		ack.retCode = EC_AUTH_NOT_FOUND;
 	}
 	else
 	{
 		ProtocolID inProtoID = InvalidProtocolID;
-		if (isNeedAuthClientPROTO(pID))
+		if (isNeedAuthClientPROTO(pID) && !m_onlineCenter.empty())
 		{
 			inProtoID = ID_RT2OS_RouteToOtherServer;
 			ProtoRouteToOtherServer route;
@@ -303,10 +303,11 @@ void CNetManager::msg_DefaultSessionReq(AccepterID aID, SessionID sID, ProtocolI
 			route.dstNode = LogicNode;
 			route.routerType = 1;
 			route.dstIndex = 0;
+			
 			WriteStreamPack ws;
 			ws << inProtoID << route << pID << finditer->second->sInfo;
 			ws.AppendOriginalData(rs.GetStreamUnread(), rs.GetStreamUnreadLen());
-			CTcpSessionManager::getRef().SendOrgSessionData(aID, sID, ws.GetStream(), ws.GetStreamLen());
+			CTcpSessionManager::getRef().SendOrgConnectorData(m_onlineCenter.at(0).cID,  ws.GetStream(), ws.GetStreamLen());
 			return;
 		}
 	}
