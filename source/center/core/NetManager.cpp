@@ -37,7 +37,6 @@ bool CNetManager::Start()
 		tag.remotePort = con.remotePort;
 		tag.reconnectMaxCount = 2;
 		tag.reconnectInterval = 5000;
-		tag.curReconnectCount = true;
 		if (con.dstNode == LogicNode)
 		{
 			m_configConnect.insert(std::make_pair(tag.cID, tag));
@@ -177,10 +176,16 @@ bool CNetManager::msg_OrgMessageReq(AccepterID aID, SessionID sID, const char * 
 
 void CNetManager::msg_DefaultConnectReq(ConnectorID cID, ProtocolID pID, ReadStreamPack & rs)
 {
-	msg_DefaultSessionReq(InvalidAccepterID, InvalidSeesionID, pID, rs);
+	msg_TranslateToOtherServer(pID, rs);
 }
 
 void CNetManager::msg_DefaultSessionReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs)
+{
+	msg_TranslateToOtherServer(pID, rs);
+};
+
+
+void CNetManager::msg_TranslateToOtherServer(ProtocolID pID, ReadStreamPack & rs)
 {
 	if (pID == ID_RT2OS_RouteToOtherServer)
 	{
@@ -241,10 +246,10 @@ void CNetManager::msg_DefaultSessionReq(AccepterID aID, SessionID sID, ProtocolI
 				}
 			}
 		}
-		
+
 	}
 
 
-};
+}
 
 

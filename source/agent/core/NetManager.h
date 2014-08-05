@@ -52,19 +52,20 @@ public:
 
 	void msg_DefaultConnectReq(ConnectorID cID, ProtocolID pID, ReadStreamPack & rs);
 	void msg_DefaultSessionReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
+
 	bool msg_OrgMessageReq(AccepterID aID, SessionID sID, const char * blockBegin, FrameStreamTraits::Integer blockSize);
 
 
 private:
-	std::map<SessionID, std::shared_ptr<AgentSessionInfo>> m_mapSession;
-	std::map<AccepterID, std::shared_ptr<AgentSessionInfo>> m_mapAccount;
-	std::map<CharacterID, std::shared_ptr<AgentSessionInfo>> m_mapChar;
+	std::unordered_map<SessionID, std::shared_ptr<AgentSessionInfo>> m_mapSession;
+	std::unordered_map<AccepterID, std::shared_ptr<AgentSessionInfo>> m_mapAccount;
+	std::unordered_map<CharacterID, std::shared_ptr<AgentSessionInfo>> m_mapChar;
 
 	tagAcceptorConfigTraits m_configListen; //保存监听配置
 
 	ConnectorID m_lastConnectID = 0; //自动递增的connectorID.
-	std::map<ConnectorID, tagConnctorConfigTraits> m_configAuth; //cID 对应的连接配置
-	std::map<ConnectorID, tagConnctorConfigTraits> m_configCenter;  //cID 对应的连接配置
+	std::unordered_map<ConnectorID, tagConnctorConfigTraits> m_configAuth; //cID 对应的连接配置
+	std::unordered_map<ConnectorID, tagConnctorConfigTraits> m_configCenter;  //cID 对应的连接配置
 
 	std::vector<ServerAuthConnect> m_onlineAuth; //在线的认证服务
 	std::vector<ServerAuthConnect> m_onlineCenter; //在线的中心服务, 主备关系 不均衡

@@ -30,7 +30,6 @@ bool CNetManager::Start()
 		tag.remotePort = con.remotePort;
 		tag.reconnectMaxCount = 2;
 		tag.reconnectInterval = 5000;
-		tag.curReconnectCount = true;
 		if (con.dstNode == DBAgentNode)
 		{
 			m_configConnect.insert(std::make_pair(tag.cID, tag));

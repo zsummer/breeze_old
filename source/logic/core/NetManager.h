@@ -72,7 +72,7 @@ public:
 private:
 	tagAcceptorConfigTraits m_configListen; //保存监听配置
 	ConnectorID m_lastConnectID = 0; //自动递增的connectorID.
-	std::map<ConnectorID, tagConnctorConfigTraits> m_configConnect; //cID 对应的连接配置
+	std::unordered_map<ConnectorID, tagConnctorConfigTraits> m_configConnect; //cID 对应的连接配置
 
 	std::vector<ServerAuthSession> m_onlineSession;
 	std::vector<ServerAuthConnect> m_onlineConnect;

@@ -39,7 +39,6 @@ bool CNetManager::Start()
 		tag.remotePort = con.remotePort;
 		tag.reconnectMaxCount = 2;
 		tag.reconnectInterval = 5000;
-		tag.curReconnectCount = true;
 		if (con.dstNode == CenterNode)
 		{
 			m_configCenter.insert(std::make_pair(tag.cID, tag));
@@ -252,18 +251,6 @@ void CNetManager::msg_AuthAck(ConnectorID cID, ProtocolID pID, ReadStreamPack &r
 
 bool CNetManager::msg_OrgMessageReq(AccepterID aID, SessionID sID, const char * blockBegin,  FrameStreamTraits::Integer blockSize)
 {
-	ReadStreamPack pack(blockBegin, blockSize);
-	ProtocolID protoID = InvalidProtocolID;
-	pack >> protoID;
-	if (isClientPROTO(protoID) && isNeedAuthClientPROTO(protoID))
-	{
-		auto finditer = m_mapSession.find(sID);
-		if (finditer == m_mapSession.end() || finditer->second->sInfo.accID == InvalidAccountID)
-		{
-			LOGW("msg_OrgMessageReq check false. sID=" << sID);
-			return false;
-		}
-	}
 	return true;
 };
 void CNetManager::msg_DefaultConnectReq(ConnectorID cID, ProtocolID pID, ReadStreamPack & rs)
