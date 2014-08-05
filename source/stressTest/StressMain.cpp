@@ -105,7 +105,7 @@ public:
 		CMessageDispatcher::getRef().RegisterConnectorMessage(ID_AS2C_AuthAck,
 			std::bind(&CStressClientHandler::msg_AuthAck_fun, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 		CMessageDispatcher::getRef().RegisterConnectorMessage(ID_LS2C_GetAccountInfoAck,
-			std::bind(&CStressClientHandler::msg_LoginAck_fun, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+			std::bind(&CStressClientHandler::msg_GetAccountInfoAck_fun, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
 		CMessageDispatcher::getRef().RegisterOnConnectorDisconnect(std::bind(&CStressClientHandler::OnConnectDisconnect, this, std::placeholders::_1));
 	}
@@ -148,17 +148,17 @@ public:
 
 
 
-		{
-			WriteStreamPack ws;
-			ProtoAuthReq req;
-			req.info.user = "zhangyawei";
-			req.info.pwd = "123";
-			ws << ID_C2AS_AuthReq << req;
-			CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
-			LOGD("OnConnected. Send AuthReq. cID=" << cID << ", user=" << req.info.user << ", pwd=" << req.info.pwd);
-			g_totalSendCount++;
-			return;
-		}
+// 		{
+// 			WriteStreamPack ws;
+// 			ProtoAuthReq req;
+// 			req.info.user = "zhangyawei";
+// 			req.info.pwd = "123";
+// 			ws << ID_C2AS_AuthReq << req;
+// 			CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
+// 			LOGD("msg_AuthAck. Send AuthReq. cID=" << cID << ", user=" << req.info.user << ", pwd=" << req.info.pwd);
+// 			g_totalSendCount++;
+// 			return;
+// 		}
 
 		WriteStreamPack ws;
 		ProtoGetAccountInfoReq req;
@@ -170,14 +170,24 @@ public:
 		
 
 	};
-	inline void msg_LoginAck_fun(ConnectorID cID, ProtocolID pID, ReadStreamPack & rs)
+	inline void msg_GetAccountInfoAck_fun(ConnectorID cID, ProtocolID pID, ReadStreamPack & rs)
 	{
 		ProtoGetAccountInfoAck ack;
 		rs >> ack;
 		if (ack.retCode == EC_SUCCESS)
 		{
 			LOGD("getaccount Success. cID=" << cID << ", accID=" << ack.info.accID << ", diamond=" << ack.info.diamond);
-
+			{
+				WriteStreamPack ws;
+				ProtoAuthReq req;
+				req.info.user = "zhangyawei";
+				req.info.pwd = "123";
+				ws << ID_C2AS_AuthReq << req;
+				CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
+				LOGD("msg_GetAccountInfoAck_fun. Send AuthReq. cID=" << cID << ", user=" << req.info.user << ", pwd=" << req.info.pwd);
+				g_totalSendCount++;
+				return;
+			}
 		}
 		else
 		{
@@ -235,7 +245,6 @@ int main(int argc, char* argv[])
 
 
 
-	ILog4zManager::GetInstance()->SetLoggerLevel(LOG4Z_MAIN_LOGGER_ID, LOG_LEVEL_INFO);
 	ServerConfig serverConfig;
 	if (!serverConfig.Parse("../ServerConfig.xml", AgentNode, g_agentIndex))
 	{

@@ -27,7 +27,7 @@
 #include <ServerConfig.h>
 #include <zsummerX/FrameMessageDispatch.h>
 #include <zsummerX/FrameTcpSessionManager.h>
-
+#include <unordered_map>
 /*
 * NetManager
 */

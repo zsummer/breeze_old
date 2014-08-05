@@ -193,19 +193,16 @@ void CNetManager::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Rea
 	ProtoAuthReq req;
 	rs >> req;
 	LOGD("ID_C2AS_AuthReq user=" << req.info.user << ", pwd=" << req.info.pwd);
-// 	//debug 可以重复认证 做认证压测
-	m_mapSession.erase(sID);
-// 	//end
-	auto finditer = m_mapSession.find(sID);
-	if (finditer != m_mapSession.end())
-	{
-		WriteStreamPack ws;
-		ProtoAuthAck ack;
-		ack.retCode = EC_AUTH_ING;
-		ws << ID_AS2C_AuthAck << ack;
-		CTcpSessionManager::getRef().SendOrgSessionData(aID, sID, ws.GetStream(), ws.GetStreamLen());
-		return;
-	}
+//	auto finditer = m_mapSession.find(sID);
+// 	if (finditer != m_mapSession.end())
+// 	{
+// 		WriteStreamPack ws;
+// 		ProtoAuthAck ack;
+// 		ack.retCode = EC_AUTH_ING;
+// 		ws << ID_AS2C_AuthAck << ack;
+// 		CTcpSessionManager::getRef().SendOrgSessionData(aID, sID, ws.GetStream(), ws.GetStreamLen());
+// 		return;
+// 	}
 	std::shared_ptr<AgentSessionInfo> sinfo(new AgentSessionInfo);
 	sinfo->sInfo.agentIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
 	sinfo->sInfo.aID = aID;
