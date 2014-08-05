@@ -62,11 +62,37 @@ void CAuthHandler::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Re
 // 			ack.retCode = EC_SUCCESS;
 // 			break;
 // 			//end debug
-			mongo::BSONObjBuilder builder;
-			builder.append("_id", req.info.user);
+
 			std::string db = GlobalFacade::getRef().getServerConfig().getAuthMongoDB().db;
 			db += ".cl_auth";
-			auto cursor = m_authMongo->query(db, builder.obj());
+
+
+
+// 			//debug
+// 			static long long seq = 0;
+// 			seq++;
+// 			{
+// 				m_authMongo->update(db, BSON("_id" << req.info.user + boost::lexical_cast<std::string>(seq)),
+// 					 BSON("pwd" << "123" << "accID" << seq), true);
+// 				std::string errStr = m_authMongo->getLastError();
+// 				if (!errStr.empty())
+// 				{
+// 					LOGW("error: " << errStr);
+// 				}
+// 				
+// 				else
+// 				{
+// 					ack.accountID = seq;
+// 					ack.retCode = EC_SUCCESS;
+// 					LOGD("auth success req user=" << req.info.user << ", req pwd=" << req.info.pwd << ", result pwd=" << "123" << ", result accID=" << seq);
+// 					break;
+// 				}
+// 			}
+// 			//!end debug
+
+
+
+			auto cursor = m_authMongo->query(db, BSON("_id" << req.info.user));
 			if (cursor->more())
 			{
 				auto obj = cursor->next();
@@ -77,6 +103,7 @@ void CAuthHandler::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Re
 					ack.accountID = accID;
 					ack.retCode = EC_SUCCESS;
 					LOGD("auth success req user=" << req.info.user << ", req pwd=" << req.info.pwd << ", result pwd=" << pwd << ", result accID=" << accID);
+					break;
 				}
 				else
 				{

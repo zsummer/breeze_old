@@ -148,6 +148,18 @@ public:
 
 
 
+// 		{
+// 			WriteStreamPack ws;
+// 			ProtoAuthReq req;
+// 			req.info.user = "zhangyawei";
+// 			req.info.pwd = "123";
+// 			ws << ID_C2AS_AuthReq << req;
+// 			CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
+// 			LOGD("OnConnected. Send AuthReq. cID=" << cID << ", user=" << req.info.user << ", pwd=" << req.info.pwd);
+// 			g_totalSendCount++;
+// 			return;
+// 		}
+
 		WriteStreamPack ws;
 		ProtoGetAccountInfoReq req;
 		req.accountID = ack.accountID;
@@ -223,7 +235,7 @@ int main(int argc, char* argv[])
 
 
 
-//	ILog4zManager::GetInstance()->SetLoggerLevel(LOG4Z_MAIN_LOGGER_ID, LOG_LEVEL_INFO);
+	ILog4zManager::GetInstance()->SetLoggerLevel(LOG4Z_MAIN_LOGGER_ID, LOG_LEVEL_INFO);
 	ServerConfig serverConfig;
 	if (!serverConfig.Parse("../ServerConfig.xml", AgentNode, g_agentIndex))
 	{
