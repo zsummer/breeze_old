@@ -1,6 +1,6 @@
 #include "LoginHandler.h"
-#include <mongo/client/dbclient.h>
 #include <ProtoLogin.h>
+#include <MongoManager.h>
 
 
 
@@ -8,37 +8,6 @@ bool CLoginHandler::Init()
 {
 	CMessageDispatcher::getRef().RegisterSessionMessage(ID_C2LS_GetAccountInfoReq,
 		std::bind(&CLoginHandler::msg_GetAccountInfoReq, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-
-	if (m_infoMongo)
-	{
-		return false;
-	}
-	m_infoMongo = std::make_shared<mongo::DBClientConnection>(new mongo::DBClientConnection);
-	try
-	{
-		std::string errorMsg;
-		std::string dbhost = GlobalFacade::getRef().getServerConfig().getInfoMongoDB().ip;
-		dbhost += ":" + boost::lexical_cast<std::string>(GlobalFacade::getRef().getServerConfig().getInfoMongoDB().port);
-		std::string db = GlobalFacade::getRef().getServerConfig().getInfoMongoDB().db;
-		std::string user = GlobalFacade::getRef().getServerConfig().getInfoMongoDB().user;
-		std::string pwd = GlobalFacade::getRef().getServerConfig().getInfoMongoDB().pwd;
-		m_infoMongo->connect(dbhost);
-		if (!m_infoMongo->auth(db, user, pwd, errorMsg))
-		{
-			LOGI("auth failed. db=" << db << ", user=" << user << ", pwd=" << pwd << ", errMSG=" << errorMsg);
-		//	return false;
-		}
-	}
-	catch (const mongo::DBException &e)
-	{
-		LOGE("connect caught:" << e.what());
-		return false;
-	}
-	catch (...)
-	{
-		LOGE("connect mongo auth UNKNOWN ERROR");
-		return false;
-	}
 	return true;
 }
 
@@ -54,7 +23,7 @@ void CLoginHandler::msg_GetAccountInfoReq(AccepterID aID, SessionID sID, Protoco
 	ProtoGetAccountInfoAck ack;
 	ack.retCode = EC_KEY_NOTFOUND;
 	ack.info.accID = req.accountID;
-
+	auto infoMongo = GlobalFacade::getRef().getMongoManger().getInfoMongo();
 	do
 	{
 		try 
@@ -67,7 +36,7 @@ void CLoginHandler::msg_GetAccountInfoReq(AccepterID aID, SessionID sID, Protoco
 			builder.append("_id", (long long)req.accountID);
 			std::string cl = GlobalFacade::getRef().getServerConfig().getInfoMongoDB().db;
 			cl += ".cl_account";
-			auto cursor = m_infoMongo->query(cl, builder.obj());
+			auto cursor = infoMongo->query(cl, builder.obj());
 			if (cursor->more())
 			{
 				auto obj = cursor->next();

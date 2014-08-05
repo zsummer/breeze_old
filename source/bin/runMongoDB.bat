@@ -1,2 +1,2 @@
 cd mongodb/bin
-mongod.exe  --dbpath=E:\github\breeze\trunk\source\bin\mongodb\bin\data
+mongod.exe  --dbpath=D:\github\breeze\trunk\source\bin\mongodb\data

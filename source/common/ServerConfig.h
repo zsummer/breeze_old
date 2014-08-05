@@ -58,6 +58,7 @@ struct MongoConfig
 	std::string ip;
 	unsigned short port = 28017;
 	std::string db;
+	bool needAuth = true;
 	std::string user;
 	std::string pwd;
 };
@@ -190,6 +191,7 @@ bool ServerConfig::Parse(std::string filename, ServerNode ownNode, NodeIndex own
 			lconfig.db = iter->second.get<std::string>("<xmlattr>.db");
 			lconfig.user = iter->second.get<std::string>("<xmlattr>.user");
 			lconfig.pwd = iter->second.get<std::string>("<xmlattr>.pwd");
+			lconfig.needAuth = iter->second.get<bool>("<xmlattr>.needAuth");
 			if (iter->first == AuthMongoDB)
 			{
 				m_authMongo = lconfig;

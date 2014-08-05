@@ -25,10 +25,6 @@
 #include <ProtoAuth.h>
 
 
-namespace mongo
-{
-	class DBClientConnection;
-};
 
 class CAuthHandler : public CBaseHandler
 {
@@ -38,8 +34,6 @@ public:
 	virtual bool Init() override final;
 	void msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
 private:
-	//!auth mongo
-	std::shared_ptr<mongo::DBClientConnection> m_authMongo;
 };
 
 

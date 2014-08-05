@@ -25,10 +25,7 @@
 #include <ProtoAuth.h>
 
 
-namespace mongo
-{
-	class DBClientConnection;
-};
+
 
 class CLoginHandler : public CBaseHandler
 {
@@ -37,9 +34,7 @@ public:
 	~CLoginHandler(){}
 	virtual bool Init() override final;
 	void msg_GetAccountInfoReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
-private:
-	//!game mongo
-	std::shared_ptr<mongo::DBClientConnection> m_infoMongo;
+
 };
 
 

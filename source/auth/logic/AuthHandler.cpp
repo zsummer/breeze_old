@@ -1,5 +1,6 @@
 #include "AuthHandler.h"
-#include <mongo/client/dbclient.h>
+#include "../core/GlobalFacade.h"
+#include <MongoManager.h>
 
 
 
@@ -7,37 +8,6 @@ bool CAuthHandler::Init()
 {
 	CMessageDispatcher::getRef().RegisterSessionMessage(ID_C2AS_AuthReq,
 		std::bind(&CAuthHandler::msg_AuthReq, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-
-	if (m_authMongo)
-	{
-		return false;
-	}
-	m_authMongo = std::make_shared<mongo::DBClientConnection>(new mongo::DBClientConnection);
-	try
-	{
-		std::string errorMsg;
-		std::string dbhost = GlobalFacade::getRef().getServerConfig().getAuthMongoDB().ip;
-		dbhost += ":" + boost::lexical_cast<std::string>(GlobalFacade::getRef().getServerConfig().getAuthMongoDB().port);
-		std::string db = GlobalFacade::getRef().getServerConfig().getAuthMongoDB().db;
-		std::string user = GlobalFacade::getRef().getServerConfig().getAuthMongoDB().user;
-		std::string pwd = GlobalFacade::getRef().getServerConfig().getAuthMongoDB().pwd;
-		m_authMongo->connect(dbhost);
-		if (!m_authMongo->auth(db, user, pwd, errorMsg))
-		{
-			LOGI("auth failed. db=" << db << ", user=" << user << ", pwd=" << pwd << ", errMSG=" << errorMsg);
-			return false;
-		}
-	}
-	catch (const mongo::DBException &e)
-	{
-		LOGE("connect caught:" << e.what());
-		return false;
-	}
-	catch (...)
-	{
-		LOGE("connect mongo auth UNKNOWN ERROR");
-		return false;
-	}
 	return true;
 }
 
@@ -67,14 +37,14 @@ void CAuthHandler::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Re
 			db += ".cl_auth";
 
 
-
+			auto authMongo = GlobalFacade::getRef().getMongoManger().getAuthMongo();
 // 			//debug
 // 			static long long seq = 0;
 // 			seq++;
 // 			{
-// 				m_authMongo->update(db, BSON("_id" << req.info.user + boost::lexical_cast<std::string>(seq)),
+// 				authMongo->update(db, BSON("_id" << req.info.user + boost::lexical_cast<std::string>(seq)),
 // 					 BSON("pwd" << "123" << "accID" << seq), true);
-// 				std::string errStr = m_authMongo->getLastError();
+// 				std::string errStr = authMongo->getLastError();
 // 				if (!errStr.empty())
 // 				{
 // 					LOGW("error: " << errStr);
@@ -92,7 +62,7 @@ void CAuthHandler::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Re
 
 
 
-			auto cursor = m_authMongo->query(db, BSON("_id" << req.info.user));
+			auto cursor = authMongo->query(db, BSON("_id" << req.info.user));
 			if (cursor->more())
 			{
 				auto obj = cursor->next();

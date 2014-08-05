@@ -4,6 +4,7 @@
 #include <zsummerX/FrameMessageDispatch.h>
 #include "core/GlobalFacade.h"
 #include <ServerConfig.h>
+#include <MongoManager.h>
 #include "core/NetManager.h"
 #include "logic/LoginHandler.h"
 using namespace zsummer::log4z;
@@ -33,6 +34,12 @@ bool Appliction::Init(std::string filename, unsigned int index)
 	if (!ret)
 	{
 		LOGE("getServerConfig failed." );
+		return ret;
+	}
+	ret = GlobalFacade::getRef().getMongoManger().ConnectInfo(GlobalFacade::getRef().getServerConfig().getInfoMongoDB());
+	if (!ret)
+	{
+		LOGE("ConnectInfo mongo failed.");
 		return ret;
 	}
 	ret = CTcpSessionManager::getRef().Start();
