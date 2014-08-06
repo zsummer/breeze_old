@@ -100,11 +100,11 @@ public:
 	
 		return ret;
 	}
-	ServerNode getOwnServerNode(){ return m_ownServerNode; }
-	NodeIndex getOwnNodeIndex(){ return m_ownNodeIndex; }
+	const ServerNode & getOwnServerNode(){ return m_ownServerNode; }
+	const NodeIndex & getOwnNodeIndex(){ return m_ownNodeIndex; }
 
-	inline MongoConfig & getAuthMongoDB(){ return m_authMongo; }
-	inline MongoConfig & getInfoMongoDB(){ return m_infoMongo; }
+	inline const MongoConfig & getAuthMongoDB(){ return m_authMongo; }
+	inline const MongoConfig & getInfoMongoDB(){ return m_infoMongo; }
 
 private:
 	ServerNode m_ownServerNode = InvalideServerNode;

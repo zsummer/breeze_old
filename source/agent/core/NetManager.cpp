@@ -259,7 +259,7 @@ void CNetManager::msg_DefaultConnectReq(ConnectorID cID, ProtocolID pID, ReadStr
 	rs >> info;
 	if (info.aID != InvalidAccepterID && info.sID != InvalidSeesionID)
 	{
-		WriteStreamPack ws;
+		WriteStreamPack ws(m_chunkWriteStream, SEND_RECV_CHUNK_SIZE);
 		ws << pID;
 		ws.AppendOriginalData(rs.GetStreamUnread(), rs.GetStreamUnreadLen());
 		CTcpSessionManager::getRef().SendOrgSessionData(info.aID, info.sID, ws.GetStream(), ws.GetStreamLen());
@@ -268,12 +268,18 @@ void CNetManager::msg_DefaultConnectReq(ConnectorID cID, ProtocolID pID, ReadStr
 void CNetManager::msg_DefaultSessionReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs)
 {
 	auto finditer = m_mapSession.find(sID);
-	ProtoAuthAck ack;
-	ack.retCode = EC_SUCCESS;
-	ack.accountID = InvalidAccountID;
+
 	if (finditer == m_mapSession.end() || finditer->second->sInfo.accID == InvalidAccountID)
 	{
+		ProtoAuthAck ack;
 		ack.retCode = EC_AUTH_NOT_FOUND;
+		ack.accountID = InvalidAccountID;
+		if (ack.retCode != EC_SUCCESS)
+		{
+			WriteStreamPack ws(m_chunkWriteStream, SEND_RECV_CHUNK_SIZE);
+			ws << ID_AS2C_AuthAck << ack;
+			CTcpSessionManager::getRef().SendOrgSessionData(aID, sID, ws.GetStream(), ws.GetStreamLen());
+		}
 	}
 	else
 	{
@@ -288,7 +294,7 @@ void CNetManager::msg_DefaultSessionReq(AccepterID aID, SessionID sID, ProtocolI
 			route.routerType = 1;
 			route.dstIndex = 0;
 			
-			WriteStreamPack ws;
+			WriteStreamPack ws(m_chunkWriteStream, SEND_RECV_CHUNK_SIZE);
 			ws << inProtoID << route << pID << finditer->second->sInfo;
 			ws.AppendOriginalData(rs.GetStreamUnread(), rs.GetStreamUnreadLen());
 			CTcpSessionManager::getRef().SendOrgConnectorData(m_onlineCenter.at(0).cID,  ws.GetStream(), ws.GetStreamLen());
@@ -296,12 +302,7 @@ void CNetManager::msg_DefaultSessionReq(AccepterID aID, SessionID sID, ProtocolI
 		}
 	}
 
-	if (ack.retCode != EC_SUCCESS)
-	{
-		WriteStreamPack ws;
-		ws << ID_AS2C_AuthAck << ack;
-		CTcpSessionManager::getRef().SendOrgSessionData(aID, sID, ws.GetStream(), ws.GetStreamLen());
-	}
+
 
 };
 

@@ -29,7 +29,7 @@ void CLoginHandler::msg_GetAccountReq(AccepterID aID, SessionID sID, ProtocolID 
 	ack.info.hisGiftDmd = 0;
 
 
-	WriteStreamPack ws;
+	WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);
 	ws << ID_C2LS_GetAccountInfoReq << info << req;
 	GlobalFacade::getRef().getNetManger().SendOrgDataToDBAgent(ws.GetStream(), ws.GetStreamLen());
 }
@@ -43,7 +43,7 @@ void CLoginHandler::msg_GetAccountAck(ConnectorID cID, ProtocolID pID, ReadStrea
 	LOGD("ID_LS2C_GetAccountInfoAck accID=" << ack.info.accID << ", retCode=" << ack.retCode);
 
 	
-	WriteStreamPack ws;
+	WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);;
 	ProtoRouteToOtherServer route;
 	route.dstIndex = info.agentIndex;
 	route.dstNode = AgentNode;

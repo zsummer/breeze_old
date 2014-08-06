@@ -18,13 +18,13 @@
 
 #ifndef _MONGO_MANAGER_H_
 #define _MONGO_MANAGER_H_
-
 #include <ProtoDefine.h>
 #include <ProtoCommon.h>
 #include <InProtoCommon.h>
 #include <ProtoAuth.h>
 #include <ServerConfig.h>
 #include <mongo/client/dbclient.h>
+
 
 
 //! 服务节点配置必须已经解析好才可以调用这个类的初始化
@@ -39,8 +39,8 @@ public:
 public:
 	typedef std::shared_ptr<mongo::DBClientConnection> MongoPtr;
 
-	inline MongoPtr getAuthMongo(){ return m_authMongo; }
-	inline MongoPtr getInfoMongo(){ return m_infoMongo; }
+	inline MongoPtr & getAuthMongo(){ return m_authMongo; }
+	inline MongoPtr & getInfoMongo(){ return m_infoMongo; }
 private:
 	std::shared_ptr<mongo::DBClientConnection> m_authMongo;
 	std::shared_ptr<mongo::DBClientConnection> m_infoMongo;
@@ -53,7 +53,7 @@ bool CMongoManager::ConnectAuth(const MongoConfig & mc)
 	{
 		return false;
 	}
-	m_authMongo = std::make_shared<mongo::DBClientConnection>(new mongo::DBClientConnection(true));
+	m_authMongo = std::shared_ptr<mongo::DBClientConnection>(new mongo::DBClientConnection(true));
 	try
 	{
 		std::string dbhost = mc.ip + ":" + boost::lexical_cast<std::string>(mc.port);

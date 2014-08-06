@@ -200,7 +200,7 @@ void CNetManager::msg_TranslateToOtherServer(ProtocolID pID, ReadStreamPack & rs
 					[route](const ServerAuthConnect & sas){return sas.node == route.dstNode && (route.routerType == 3 || sas.index == route.dstIndex); });
 				if (founder != m_onlineConnect.end())
 				{
-					WriteStreamPack  ws;
+					WriteStreamPack  ws(m_chunkWriteStream, SEND_RECV_CHUNK_SIZE);
 					ws.AppendOriginalData(rs.GetStreamUnread(), rs.GetStreamUnreadLen());
 					CTcpSessionManager::getRef().SendOrgConnectorData(founder->cID, ws.GetStream(), ws.GetStreamLen());
 					return;
@@ -212,7 +212,7 @@ void CNetManager::msg_TranslateToOtherServer(ProtocolID pID, ReadStreamPack & rs
 					[route](const ServerAuthSession & sas){return sas.node == route.dstNode && (route.routerType == 3 || sas.index == route.dstIndex); });
 				if (founder != m_onlineSession.end())
 				{
-					WriteStreamPack  ws;
+					WriteStreamPack  ws(m_chunkWriteStream, SEND_RECV_CHUNK_SIZE);
 					ws.AppendOriginalData(rs.GetStreamUnread(), rs.GetStreamUnreadLen());
 					CTcpSessionManager::getRef().SendOrgSessionData(founder->aID, founder->sID, ws.GetStream(), ws.GetStreamLen());
 					return;
@@ -227,7 +227,7 @@ void CNetManager::msg_TranslateToOtherServer(ProtocolID pID, ReadStreamPack & rs
 				{
 					if (c.node == route.dstNode)
 					{
-						WriteStreamPack  ws;
+						WriteStreamPack  ws(m_chunkWriteStream, SEND_RECV_CHUNK_SIZE);
 						ws.AppendOriginalData(rs.GetStreamUnread(), rs.GetStreamUnreadLen());
 						CTcpSessionManager::getRef().SendOrgConnectorData(c.cID, ws.GetStream(), ws.GetStreamLen());
 					}
@@ -239,7 +239,7 @@ void CNetManager::msg_TranslateToOtherServer(ProtocolID pID, ReadStreamPack & rs
 				{
 					if (s.node == route.dstNode)
 					{
-						WriteStreamPack  ws;
+						WriteStreamPack  ws(m_chunkWriteStream, SEND_RECV_CHUNK_SIZE);
 						ws.AppendOriginalData(rs.GetStreamUnread(), rs.GetStreamUnreadLen());
 						CTcpSessionManager::getRef().SendOrgSessionData(s.aID, s.sID, ws.GetStream(), ws.GetStreamLen());
 					}

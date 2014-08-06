@@ -174,19 +174,33 @@ public:
 	{
 		ProtoGetAccountInfoAck ack;
 		rs >> ack;
+
+		g_totalRecvCount++;
+		g_totalEchoCount++;
+
 		if (ack.retCode == EC_SUCCESS)
 		{
 			LOGD("getaccount Success. cID=" << cID << ", accID=" << ack.info.accID << ", diamond=" << ack.info.diamond);
+// 			{
+// 				WriteStreamPack ws;
+// 				ProtoAuthReq req;
+// 				req.info.user = "zhangyawei";
+// 				req.info.pwd = "123";
+// 				ws << ID_C2AS_AuthReq << req;
+// 				CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
+// 				LOGD("msg_GetAccountInfoAck_fun. Send AuthReq. cID=" << cID << ", user=" << req.info.user << ", pwd=" << req.info.pwd);
+// 				g_totalSendCount++;
+// 				return;
+// 			}
+
 			{
 				WriteStreamPack ws;
-				ProtoAuthReq req;
-				req.info.user = "zhangyawei";
-				req.info.pwd = "123";
-				ws << ID_C2AS_AuthReq << req;
+				ProtoGetAccountInfoReq req;
+				req.accountID = ack.info.accID;
+				ws << ID_C2LS_GetAccountInfoReq << req;
 				CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
-				LOGD("msg_GetAccountInfoAck_fun. Send AuthReq. cID=" << cID << ", user=" << req.info.user << ", pwd=" << req.info.pwd);
+				LOGD("msg_AuthAck. Send LoginReq. cID=" << cID << ", user=" << req.accountID);
 				g_totalSendCount++;
-				return;
 			}
 		}
 		else

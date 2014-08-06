@@ -23,7 +23,7 @@ void CLoginHandler::msg_GetAccountInfoReq(AccepterID aID, SessionID sID, Protoco
 	ProtoGetAccountInfoAck ack;
 	ack.retCode = EC_KEY_NOTFOUND;
 	ack.info.accID = req.accountID;
-	auto infoMongo = GlobalFacade::getRef().getMongoManger().getInfoMongo();
+	auto & infoMongo = GlobalFacade::getRef().getMongoManger().getInfoMongo();
 	do
 	{
 		try 
@@ -69,7 +69,7 @@ void CLoginHandler::msg_GetAccountInfoReq(AccepterID aID, SessionID sID, Protoco
 
 
 
-	WriteStreamPack ws;
+	WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);
 	ws << ID_LS2C_GetAccountInfoAck << info << ack;
 	CTcpSessionManager::getRef().SendOrgSessionData(aID, sID, ws.GetStream(), ws.GetStreamLen());
 }

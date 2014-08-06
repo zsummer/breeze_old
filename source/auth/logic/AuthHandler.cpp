@@ -30,6 +30,7 @@ void CAuthHandler::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Re
 		{
 // 			//debug 截断认证流程检测协议QPS速度
 // 			ack.retCode = EC_SUCCESS;
+// 			ack.accountID = 101;
 // 			break;
 // 			//end debug
 
@@ -37,7 +38,7 @@ void CAuthHandler::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Re
 			db += ".cl_auth";
 
 
-			auto authMongo = GlobalFacade::getRef().getMongoManger().getAuthMongo();
+			auto & authMongo = GlobalFacade::getRef().getMongoManger().getAuthMongo();
 // 			//debug
 // 			static long long seq = 0;
 // 			seq++;

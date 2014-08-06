@@ -58,7 +58,7 @@ public:
 
 private:
 	std::unordered_map<SessionID, std::shared_ptr<AgentSessionInfo>> m_mapSession;
-	std::unordered_map<AccepterID, std::shared_ptr<AgentSessionInfo>> m_mapAccount;
+	std::unordered_map<AccountID, std::shared_ptr<AgentSessionInfo>> m_mapAccount;
 	std::unordered_map<CharacterID, std::shared_ptr<AgentSessionInfo>> m_mapChar;
 
 	tagAcceptorConfigTraits m_configListen; //保存监听配置
@@ -69,6 +69,8 @@ private:
 
 	std::vector<ServerAuthConnect> m_onlineAuth; //在线的认证服务
 	std::vector<ServerAuthConnect> m_onlineCenter; //在线的中心服务, 主备关系 不均衡
+
+	char m_chunkWriteStream[SEND_RECV_CHUNK_SIZE];
 };
 
 

@@ -27,7 +27,7 @@
 #include <ServerConfig.h>
 #include <zsummerX/FrameMessageDispatch.h>
 #include <zsummerX/FrameTcpSessionManager.h>
-
+#include <unordered_map>
 /*
 * NetManager
 */
@@ -64,6 +64,8 @@ private:
 
 	std::vector<ServerAuthSession> m_onlineSession;
 	std::vector<ServerAuthConnect> m_onlineConnect;
+
+	char m_chunkWriteStream[SEND_RECV_CHUNK_SIZE]; // proto4z  write optimize
 };
 
 
