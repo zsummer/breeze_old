@@ -64,10 +64,8 @@ private:
 	tagAcceptorConfigTraits m_configListen; //保存监听配置
 
 	ConnectorID m_lastConnectID = 0; //自动递增的connectorID.
-	std::unordered_map<ConnectorID, tagConnctorConfigTraits> m_configAuth; //cID 对应的连接配置
 	std::unordered_map<ConnectorID, tagConnctorConfigTraits> m_configCenter;  //cID 对应的连接配置
 
-	std::vector<ServerAuthConnect> m_onlineAuth; //在线的认证服务
 	std::vector<ServerAuthConnect> m_onlineCenter; //在线的中心服务, 主备关系 不均衡
 
 	char m_chunkWriteStream[SEND_RECV_CHUNK_SIZE];

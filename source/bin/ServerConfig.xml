@@ -9,10 +9,12 @@
 	<dbagent ip="0.0.0.0" port="21000" index="0" />
 	<logic ip="0.0.0.0" port="21010" index="0" />
 
-	<center ip="0.0.0.0" port="21020" index="0" />
-
 	<auth ip="0.0.0.0" port="21030" index="0" />
 	<auth ip="0.0.0.0" port="21031" index="1" />
+	
+	<center ip="0.0.0.0" port="21020" index="0" />
+
+
 	
 	<agent ip="0.0.0.0" port="21040" index="0" />
 	<agent ip="0.0.0.0" port="21041" index="1" />
@@ -20,12 +22,9 @@
 
 <connect>
 	<logic dstNode="dbagent" ip="127.0.0.1" port="21000"  />
-	
 	<center dstNode="logic" ip="127.0.0.1" port="21010"  />
-	
+	<center dstNode="auth" ip="127.0.0.1" port="21030"  />
+	<center dstNode="auth" ip="127.0.0.1" port="21031"  />
 	<agent dstNode="center" ip="127.0.0.1" port="21020"  />
-	<agent dstNode="auth" ip="127.0.0.1" port="21030"  />
-	<agent dstNode="auth" ip="127.0.0.1" port="21031"  />
-	
 </connect>
 

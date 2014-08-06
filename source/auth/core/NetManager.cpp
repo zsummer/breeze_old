@@ -40,14 +40,14 @@ void CNetManager::event_OnSessionEstablished(AccepterID aID, SessionID sID)
 void CNetManager::event_OnSessionDisconnect(AccepterID aID, SessionID sID)
 {
 	LOGW("event_OnSessionDisconnect sID=" << sID);
-	auto founder = std::find_if(m_onlineAgent.begin(), m_onlineAgent.end(),
+	auto founder = std::find_if(m_onlineCenter.begin(), m_onlineCenter.end(),
 		[sID](const ServerAuthSession & sac){ return sac.sID == sID; });
-	if (founder == m_onlineAgent.end())
+	if (founder == m_onlineCenter.end())
 	{
 		LOGW("event_OnSessionDisconnect not found the sID=" << sID);
 		return;
 	}
-	m_onlineAgent.erase(founder);
+	m_onlineCenter.erase(founder);
 }
 
 
@@ -64,15 +64,15 @@ void CNetManager::msg_SessionServerAuth(AccepterID aID, SessionID sID, ProtocolI
 	sac.node = auth.srcNode;
 	sac.index = auth.srcIndex;
 
-	auto founder = std::find_if(m_onlineAgent.begin(), m_onlineAgent.end(),
+	auto founder = std::find_if(m_onlineCenter.begin(), m_onlineCenter.end(),
 		[auth](const ServerAuthSession & cas){return cas.index == auth.srcIndex; });
 
-	if (founder != m_onlineAgent.end())
+	if (founder != m_onlineCenter.end())
 	{
 		CTcpSessionManager::getRef().KickSession(founder->aID, founder->sID);
-		m_onlineAgent.erase(founder);
+		m_onlineCenter.erase(founder);
 	}
-	m_onlineAgent.push_back(sac);
+	m_onlineCenter.push_back(sac);
 }
 
 

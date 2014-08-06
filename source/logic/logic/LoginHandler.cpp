@@ -48,6 +48,8 @@ void CLoginHandler::msg_GetAccountAck(ConnectorID cID, ProtocolID pID, ReadStrea
 	route.dstIndex = info.agentIndex;
 	route.dstNode = AgentNode;
 	route.routerType = 0;
+	info.srcNode = LogicNode;
+	info.srcIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
 	ws << ID_RT2OS_RouteToOtherServer << route << ID_LS2C_GetAccountInfoAck << info << ack;
 	GlobalFacade::getRef().getNetManger().SendOrgDataToCenter(ws.GetStream(), ws.GetStreamLen());
 }

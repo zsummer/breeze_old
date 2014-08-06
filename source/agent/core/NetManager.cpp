@@ -43,10 +43,6 @@ bool CNetManager::Start()
 		{
 			m_configCenter.insert(std::make_pair(tag.cID, tag));
 		}
-		else if (con.dstNode == AuthNode)
-		{
-			m_configAuth.insert(std::make_pair(tag.cID, tag));
-		}
 		else
 		{
 			continue;
@@ -83,26 +79,13 @@ void CNetManager::event_OnConnect(ConnectorID cID)
 
 void CNetManager::event_OnDisconnect(ConnectorID cID)
 {
-	auto founder = m_configAuth.find(cID);
-	if (founder != m_configAuth.end())
-	{
-		LOGW("event_OnDisconnect Auth Server. cID=" << cID << ", listenIP=" << founder->second.remoteIP << ", listenPort=" << founder->second.remotePort);
-	}
-	founder = m_configCenter.find(cID);
+	
+	auto founder = m_configCenter.find(cID);
 	if (founder != m_configCenter.end())
 	{
 		LOGW("event_OnDisconnect Center Server. cID=" << cID << ", listenIP=" << founder->second.remoteIP << ", listenPort=" << founder->second.remotePort);
 	}
 
-	{
-		auto finder = std::find_if(m_onlineAuth.begin(), m_onlineAuth.end(),
-			[cID](const ServerAuthConnect & sac){ return sac.cID == cID; });
-		if (finder != m_onlineAuth.end())
-		{
-			m_onlineAuth.erase(finder);
-			LOGW("event_OnDisconnect Auth Server erase. cID=" << cID << ", current online Auth count=" << m_onlineAuth.size());
-		}
-	}
 
 	{
 		auto finder = std::find_if(m_onlineCenter.begin(), m_onlineCenter.end(),
@@ -139,39 +122,21 @@ void CNetManager::msg_ConnectServerAuth(ConnectorID cID, ProtocolID pID, ReadStr
 	rs >> auth;
 	LOGI("msg_ConnectServerAuth. cID=" << cID << ", Node=" << auth.srcNode << ", index=" << auth.srcIndex);
 
-
-	if (auth.srcNode == AuthNode)
+	auto founder = std::find_if(m_onlineCenter.begin(), m_onlineCenter.end(),
+		[auth](const ServerAuthConnect & sac){ return sac.index == auth.srcIndex; });
+	if (founder != m_onlineCenter.end())
 	{
-		auto founder = std::find_if(m_onlineAuth.begin(), m_onlineAuth.end(),
-			[auth](const ServerAuthConnect & sac){ return sac.index == auth.srcIndex; });
-		if (founder != m_onlineAuth.end())
-		{
-			CTcpSessionManager::getRef().BreakConnector(founder->cID);
-			m_onlineAuth.erase(founder);
-		}
-		ServerAuthConnect sac;
-		sac.node = auth.srcNode;
-		sac.index = auth.srcIndex;
-		sac.cID = cID;
-		m_onlineAuth.push_back(sac);
+		CTcpSessionManager::getRef().BreakConnector(founder->cID);
+		m_onlineCenter.erase(founder);
 	}
-	else if (auth.srcNode == CenterNode)
-	{
-		auto founder = std::find_if(m_onlineCenter.begin(), m_onlineCenter.end(),
-			[auth](const ServerAuthConnect & sac){ return sac.index == auth.srcIndex; });
-		if (founder != m_onlineCenter.end())
-		{
-			CTcpSessionManager::getRef().BreakConnector(founder->cID);
-			m_onlineCenter.erase(founder);
-		}
-		ServerAuthConnect sac;
-		sac.node = auth.srcNode;
-		sac.index = auth.srcIndex;
-		sac.cID = cID;
-		m_onlineCenter.push_back(sac);
-	}
+	ServerAuthConnect sac;
+	sac.node = auth.srcNode;
+	sac.index = auth.srcIndex;
+	sac.cID = cID;
+	m_onlineCenter.push_back(sac);
 
-	if (m_configAuth.size() + m_configCenter.size() != m_onlineAuth.size() + m_onlineCenter.size())
+
+	if (m_configCenter.size() !=  m_onlineCenter.size())
 	{
 		return;
 	}
@@ -192,23 +157,7 @@ void CNetManager::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Rea
 	ProtoAuthReq req;
 	rs >> req;
 	LOGD("ID_C2AS_AuthReq user=" << req.info.user << ", pwd=" << req.info.pwd);
-//	auto finditer = m_mapSession.find(sID);
-// 	if (finditer != m_mapSession.end())
-// 	{
-// 		WriteStreamPack ws;
-// 		ProtoAuthAck ack;
-// 		ack.retCode = EC_AUTH_ING;
-// 		ws << ID_AS2C_AuthAck << ack;
-// 		CTcpSessionManager::getRef().SendOrgSessionData(aID, sID, ws.GetStream(), ws.GetStreamLen());
-// 		return;
-// 	}
-	std::shared_ptr<AgentSessionInfo> sinfo(new AgentSessionInfo);
-	sinfo->sInfo.agentIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
-	sinfo->sInfo.aID = aID;
-	sinfo->sInfo.sID = sID;
-	m_mapSession.insert(std::make_pair(sID, sinfo));
-
-	if (m_onlineAuth.empty())
+	if (m_onlineCenter.empty())
 	{
 		WriteStreamPack ws;
 		ProtoAuthAck ack;
@@ -218,10 +167,37 @@ void CNetManager::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Rea
 		return;
 	}
 
-	WriteStreamPack ws;
-	ws << ID_C2AS_AuthReq << sinfo->sInfo << req ;
-	auto authServer = m_onlineAuth.at(rand() % m_onlineAuth.size());
-	CTcpSessionManager::getRef().SendOrgConnectorData(authServer.cID, ws.GetStream(), ws.GetStreamLen());
+	auto finditer = m_mapSession.find(sID);
+	if (finditer != m_mapSession.end())
+	{
+		WriteStreamPack ws;
+		ProtoAuthAck ack;
+		ack.retCode = EC_AUTH_ING;
+		ws << ID_AS2C_AuthAck << ack;
+		CTcpSessionManager::getRef().SendOrgSessionData(aID, sID, ws.GetStream(), ws.GetStreamLen());
+		return;
+	}
+
+	std::shared_ptr<AgentSessionInfo> sinfo(new AgentSessionInfo);
+	sinfo->sInfo.agentIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
+	sinfo->sInfo.srcNode = AgentNode;
+	sinfo->sInfo.srcIndex = sinfo->sInfo.agentIndex;
+	sinfo->sInfo.aID = aID;
+	sinfo->sInfo.sID = sID;
+	m_mapSession.insert(std::make_pair(sID, sinfo));
+
+
+
+	
+	//route
+	ProtocolID inProtoID = ID_RT2OS_RouteToOtherServer;
+	ProtoRouteToOtherServer route;
+	route.dstNode = AuthNode;
+	route.routerType = 1;
+	route.dstIndex = 0;
+	WriteStreamPack ws(m_chunkWriteStream, SEND_RECV_CHUNK_SIZE);
+	ws << inProtoID << route << ID_C2AS_AuthReq << sinfo->sInfo << req;
+	CTcpSessionManager::getRef().SendOrgConnectorData(m_onlineCenter.at(0).cID, ws.GetStream(), ws.GetStreamLen());
 }
 
 void CNetManager::msg_AuthAck(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs)
@@ -231,22 +207,23 @@ void CNetManager::msg_AuthAck(ConnectorID cID, ProtocolID pID, ReadStreamPack &r
 	rs >> info;
 	rs >> ack;
 
-	auto founder = m_mapSession.find(info.sID);
-	if (founder == m_mapSession.end())
-	{
-		LOGE("msg_AuthAck can not found session ID.  sID=" << info.sID);
-		return;
-	}
+
 
 	if (ack.retCode == EC_SUCCESS)
 	{
+		auto founder = m_mapSession.find(info.sID);
+		if (founder == m_mapSession.end())
+		{
+			LOGE("msg_AuthAck can not found session ID.  sID=" << info.sID);
+			return;
+		}
 		founder->second->sInfo.accID = ack.accountID;
 		m_mapAccount[ack.accountID] = founder->second;
 	}
 
 	WriteStreamPack ws;
 	ws << ID_AS2C_AuthAck << ack;
-	CTcpSessionManager::getRef().SendOrgSessionData(founder->second->sInfo.aID, founder->second->sInfo.sID, ws.GetStream(), ws.GetStreamLen());
+	CTcpSessionManager::getRef().SendOrgSessionData(info.aID, info.sID, ws.GetStream(), ws.GetStreamLen());
 }
 
 bool CNetManager::msg_OrgMessageReq(AccepterID aID, SessionID sID, const char * blockBegin,  FrameStreamTraits::Integer blockSize)
@@ -288,8 +265,6 @@ void CNetManager::msg_DefaultSessionReq(AccepterID aID, SessionID sID, ProtocolI
 		{
 			inProtoID = ID_RT2OS_RouteToOtherServer;
 			ProtoRouteToOtherServer route;
-			route.srcIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
-			route.srcNode = GlobalFacade::getRef().getServerConfig().getOwnServerNode();
 			route.dstNode = LogicNode;
 			route.routerType = 1;
 			route.dstIndex = 0;

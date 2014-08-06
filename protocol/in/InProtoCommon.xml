@@ -17,16 +17,14 @@
   </proto>
 
 
-  <!-- 一个经过center节点的标准内部协议格式  包头长度+路由协议ID+路由信息数据+原始协议ID+SessionInfo+原始信息数据 -->
-  <!-- 例如: 客户端发上来的包要经过添加SessionInfo,添加路由信息发送到center, 
-        center解包路由信息并根据路由数据获知目标节点服务, 然后去掉路由协议和路由信息 把'原始协议ID+SessionInfo+原始信息数据'路由至指定目标节点服务,
-        目标服务处理协议首先从流中流出SesssionInfo 其次才是原始信息数据,  返回协议参照请求协议流程 -->
-  <!-- 备注: 如果协议为广播, 或者玩家与玩家通讯 在推送/返回协议时 应忽略或者重新设置SessionInfo的信息内容 -->
+  <!-- 一个经过center节点的标准内部协议格式  包头长度+路由协议ID+路由信息数据+原始协议ID+SessionDEBUG+原始信息数据 -->
+  <!-- 例如: 客户端发上来的包要经过添加SessionDEBUG,添加路由信息发送到center, 
+        center解包路由信息并根据路由数据获知目标节点服务, 然后去掉路由协议和路由信息 把'原始协议ID+SessionDEBUG+原始信息数据'路由至指定目标节点服务,
+        目标服务处理协议首先从流中流出SesssionDEBUG 其次才是原始信息数据,  返回协议参照请求协议流程 -->
+  <!-- 备注: 如果协议为广播, 或者玩家与玩家通讯 在推送/返回协议时 应忽略或者重新设置SessionDEBUG的信息内容 -->
 
 
   <proto from="RT" to="OS" name="RouteToOtherServer" desc= "路由给其他服务">
-    <member name="srcNode" type="ui32"   desc="optional"/>
-    <member name="srcIndex" type="ui32"   desc="optional"/>
     <member name="dstNode" type="ui32"   desc=""/>
     <member name="routerType" type="ui32"   desc="0为指定dstIndex路由, 1为任意一个, 2为广播"/>
     <member name="dstIndex" type="ui32"   desc="optional"/>

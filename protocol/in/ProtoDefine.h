@@ -84,25 +84,31 @@ inline bool isNeedAuthClientPROTO(ui16 protoID) { return protoID >= MIN_OUT_PROT
 //服务器内部传输添加这个信息
 struct SessionInfo 
 {
+	//client
 	AccountID accID = InvalidAccountID;
 	CharacterID charID = InvalidCharacterID;
 	NodeIndex agentIndex = InvalideNodeIndex;
 	AccepterID aID = InvalidAccepterID;
 	SessionID sID = InvalidSeesionID;
+	//internal
+	ServerNode srcNode = InvalideServerNode;
+	NodeIndex srcIndex = InvalideNodeIndex;
 };
 
 template <class STM>
 STM & operator << (STM & stm, const SessionInfo & info)
 {
 	stm << info.accID << info.charID
-		<< info.agentIndex << info.aID << info.sID;
+		<< info.agentIndex << info.aID << info.sID
+		<< info.srcNode << info.srcIndex;
 	return stm;
 }
 template <class STM>
 STM & operator >> (STM & stm, SessionInfo & info)
 {
 	stm >> info.accID >> info.charID
-		>> info.agentIndex >> info.aID >> info.sID;
+		>> info.agentIndex >> info.aID >> info.sID
+		>> info.srcNode >> info.srcIndex;;
 	return stm;
 }
 

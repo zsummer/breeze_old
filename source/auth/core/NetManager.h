@@ -44,7 +44,20 @@ public:
 	//连接所有认证服务和中央服务
 	bool Start();
 
+	//
+	inline void SendOrgDataToCenter(const char * orgData, unsigned int orgDataLen)
+	{
+		if (m_onlineCenter.empty())
+		{
+			LOGW("not found any center. protocol send lost");
+			return;
+		}
+		const ServerAuthSession & sas = m_onlineCenter.at(0);
+		CTcpSessionManager::getRef().SendOrgSessionData(sas.aID, sas.sID, orgData, orgDataLen);
+	}
 
+
+	//register 
 	void event_OnSessionEstablished(AccepterID, SessionID);
 	void event_OnSessionDisconnect(AccepterID, SessionID);
 	void msg_SessionServerAuth(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
@@ -52,7 +65,7 @@ public:
 private:
 	tagAcceptorConfigTraits m_configListen; //保存监听配置
 
-	std::vector<ServerAuthSession> m_onlineAgent;
+	std::vector<ServerAuthSession> m_onlineCenter;
 
 
 };

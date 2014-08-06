@@ -98,8 +98,15 @@ void CAuthHandler::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Re
 		}
 	} while (0);
 
-	WriteStreamPack ws;
-	ws << ID_AS2C_AuthAck << info << ack;
+
+	WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);
+	ProtoRouteToOtherServer route;
+	route.dstNode = info.srcNode;
+	route.dstIndex = info.srcIndex;
+	route.routerType = 0;
+	info.srcNode = AgentNode;
+	info.srcIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
+	ws << ID_RT2OS_RouteToOtherServer << route << ID_AS2C_AuthAck << info << ack;
 	CTcpSessionManager::getRef().SendOrgSessionData(aID, sID, ws.GetStream(), ws.GetStreamLen());
 }
 
