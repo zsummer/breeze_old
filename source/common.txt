@@ -1,0 +1,19 @@
+
+
+
+aux_source_directory(./ source)    
+set(BINNAME ${PROJECT_NAME}${LIB_SUFFIX})
+
+
+set(EXECUTABLE_OUTPUT_PATH ${breeze_SOURCE_DIR}/bin/${PROJECT_NAME}/)
+
+add_executable(${BINNAME} ${source})
+
+if(WIN32)
+  target_link_libraries(${BINNAME} mongoclient zsummerX${LIB_SUFFIX} log4z${LIB_SUFFIX})
+else()
+  target_link_libraries(${BINNAME} mongoclient boost_thread boost_filesystem boost_program_options zsummerX${LIB_SUFFIX} log4z${LIB_SUFFIX} pthread rt)
+endif()
+
+
+
