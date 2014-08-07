@@ -1,4 +1,4 @@
-
+﻿
 /*
 * breeze License
 * Copyright (C) 2014 YaweiZhang <yawei_zhang@foxmail.com>.
@@ -18,11 +18,10 @@
 
 #ifndef _BASE_HANDLER_H_
 #define _BASE_HANDLER_H_
-
+#include <ServerConfig.h>
 #include <ProtoDefine.h>
 #include <ProtoCommon.h>
 #include <InProtoCommon.h>
-#include <ServerConfig.h>
 #include <zsummerX/FrameMessageDispatch.h>
 #include <zsummerX/FrameTcpSessionManager.h>
 

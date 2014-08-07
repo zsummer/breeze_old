@@ -18,13 +18,12 @@
 
 #ifndef _NET_MANAGER_H_
 #define _NET_MANAGER_H_
-
+#include <ServerConfig.h>
 #include <ProtoDefine.h>
 #include <ProtoCommon.h>
 #include <InProtoCommon.h>
 #include <ProtoAuth.h>
 #include "../core/GlobalFacade.h"
-#include <ServerConfig.h>
 #include <zsummerX/FrameMessageDispatch.h>
 #include <zsummerX/FrameTcpSessionManager.h>
 #include <unordered_map>

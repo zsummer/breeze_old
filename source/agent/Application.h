@@ -1,4 +1,4 @@
-#ifndef _APPLICATION_H_
+﻿#ifndef _APPLICATION_H_
 #define _APPLICATION_H_
 #include <string>
 

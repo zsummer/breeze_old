@@ -1,4 +1,4 @@
-
+ï»¿
 /*
 * breeze License
 * Copyright (C) 2014 YaweiZhang <yawei_zhang@foxmail.com>.
@@ -18,13 +18,13 @@
 
 #ifndef _NET_MANAGER_H_
 #define _NET_MANAGER_H_
-
+#include <ServerConfig.h>
 #include <ProtoDefine.h>
 #include <ProtoCommon.h>
 #include <InProtoCommon.h>
 #include <ProtoAuth.h>
 #include "GlobalFacade.h"
-#include <ServerConfig.h>
+
 #include <zsummerX/FrameMessageDispatch.h>
 #include <zsummerX/FrameTcpSessionManager.h>
 #include <unordered_map>
@@ -37,7 +37,7 @@ class CNetManager
 {
 public:
 	CNetManager();
-	//Á¬½ÓËùÓĞÈÏÖ¤·şÎñºÍÖĞÑë·şÎñ
+	//è¿æ¥æ‰€æœ‰è®¤è¯æœåŠ¡å’Œä¸­å¤®æœåŠ¡
 	bool Start();
 	void event_OnConnect(ConnectorID cID);
 	void event_OnDisconnect(ConnectorID cID);
@@ -61,12 +61,12 @@ private:
 	std::unordered_map<AccountID, std::shared_ptr<AgentSessionInfo>> m_mapAccount;
 	std::unordered_map<CharacterID, std::shared_ptr<AgentSessionInfo>> m_mapChar;
 
-	tagAcceptorConfigTraits m_configListen; //±£´æ¼àÌıÅäÖÃ
+	tagAcceptorConfigTraits m_configListen; //ä¿å­˜ç›‘å¬é…ç½®
 
-	ConnectorID m_lastConnectID = 0; //×Ô¶¯µİÔöµÄconnectorID.
-	std::unordered_map<ConnectorID, tagConnctorConfigTraits> m_configCenter;  //cID ¶ÔÓ¦µÄÁ¬½ÓÅäÖÃ
+	ConnectorID m_lastConnectID = 0; //è‡ªåŠ¨é€’å¢çš„connectorID.
+	std::unordered_map<ConnectorID, tagConnctorConfigTraits> m_configCenter;  //cID å¯¹åº”çš„è¿æ¥é…ç½®
 
-	std::vector<ServerAuthConnect> m_onlineCenter; //ÔÚÏßµÄÖĞĞÄ·şÎñ, Ö÷±¸¹ØÏµ ²»¾ùºâ
+	std::vector<ServerAuthConnect> m_onlineCenter; //åœ¨çº¿çš„ä¸­å¿ƒæœåŠ¡, ä¸»å¤‡å…³ç³» ä¸å‡è¡¡
 
 	char m_chunkWriteStream[SEND_RECV_CHUNK_SIZE];
 };

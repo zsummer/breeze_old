@@ -1,4 +1,4 @@
-
+Ôªø
 
 /*
 * breeze License
@@ -19,15 +19,12 @@
 
 #ifndef _SERVER_CONFIG_H_
 #define _SERVER_CONFIG_H_
-
+#include <boost/lexical_cast.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
-#include <boost/lexical_cast.hpp>
-#include <log4z/log4z.h>
-#include <map>
 #include <iostream>
 #include <ProtoDefine.h>
-
+#include <log4z/log4z.h>
 
 
 
@@ -49,7 +46,7 @@ struct ConnectorConfig
 
 
 
-// ˝æ›ø‚
+//Êï∞ÊçÆÂ∫ì
 const std::string AuthMongoDB = "auth";
 const std::string InfoMongoDB = "info";
 

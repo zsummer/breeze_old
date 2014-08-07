@@ -1,6 +1,5 @@
-#include "NetManager.h"
+ï»¿#include "NetManager.h"
 #include <InProtoCommon.h>
-#include <ServerConfig.h>
 
 CNetManager::CNetManager()
 {
@@ -20,7 +19,7 @@ CNetManager::CNetManager()
 		std::bind(&CNetManager::msg_AuthAck, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
 
-	//×¢²áÊÂ¼ş
+	//æ³¨å†Œäº‹ä»¶
 	CMessageDispatcher::getRef().RegisterOnConnectorEstablished(std::bind(&CNetManager::event_OnConnect, this, std::placeholders::_1));
 	CMessageDispatcher::getRef().RegisterOnConnectorDisconnect(std::bind(&CNetManager::event_OnDisconnect, this, std::placeholders::_1));
 	CMessageDispatcher::getRef().RegisterOnSessionEstablished(std::bind(&CNetManager::event_OnSessionEstablished, this, std::placeholders::_1, std::placeholders::_2));
@@ -141,7 +140,7 @@ void CNetManager::msg_ConnectServerAuth(ConnectorID cID, ProtocolID pID, ReadStr
 		return;
 	}
 
-	//ËùÓĞconnectorÒÑ¾­½¨Á¢Á¬½Ó³É¹¦ ²¢ÇÒÊÇ³ÌĞòÆô¶¯Ê±µÄµÚÒ»´Î ´ËÊ±´ò¿ª¿Í»§¶Ë¼àÌı¶Ë¿Ú
+	//æ‰€æœ‰connectorå·²ç»å»ºç«‹è¿æ¥æˆåŠŸ å¹¶ä¸”æ˜¯ç¨‹åºå¯åŠ¨æ—¶çš„ç¬¬ä¸€æ¬¡ æ­¤æ—¶æ‰“å¼€å®¢æˆ·ç«¯ç›‘å¬ç«¯å£
 	if (CTcpSessionManager::getRef().AddAcceptor(m_configListen) == InvalidAccepterID)
 	{
 		LOGE("AddAcceptor Failed. listenIP=" << m_configListen.listenIP << ", listenPort=" << m_configListen.listenPort);

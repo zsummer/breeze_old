@@ -18,11 +18,13 @@
 
 #ifndef _MONGO_MANAGER_H_
 #define _MONGO_MANAGER_H_
+#include <ServerConfig.h>
 #include <ProtoDefine.h>
 #include <ProtoCommon.h>
 #include <InProtoCommon.h>
 #include <ProtoAuth.h>
-#include <ServerConfig.h>
+#include <boost/system/error_code.hpp>
+
 #include <mongo/client/dbclient.h>
 #include <zsummerX/FrameTcpSessionManager.h>
 

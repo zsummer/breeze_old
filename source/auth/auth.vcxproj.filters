@@ -47,9 +47,6 @@
     <ClInclude Include="Application.h">
       <Filter>main</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\protocol\in\ProtoDefine.h">
-      <Filter>protocol</Filter>
-    </ClInclude>
     <ClInclude Include="core\NetManager.h">
       <Filter>core</Filter>
     </ClInclude>
@@ -60,6 +57,9 @@
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="..\common\MongoManager.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\ProtoDefine.h">
       <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>

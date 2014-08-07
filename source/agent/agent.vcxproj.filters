@@ -44,13 +44,13 @@
     <ClInclude Include="Application.h">
       <Filter>main</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\protocol\in\ProtoDefine.h">
-      <Filter>protocol</Filter>
-    </ClInclude>
     <ClInclude Include="core\NetManager.h">
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\common\BaseHander.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\ProtoDefine.h">
       <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>
