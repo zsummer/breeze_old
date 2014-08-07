@@ -36,7 +36,7 @@ bool Appliction::Init(std::string filename, unsigned int index)
 		LOGE("getServerConfig failed." );
 		return ret;
 	}
-	ret = GlobalFacade::getRef().getMongoManger().ConnectInfo(GlobalFacade::getRef().getServerConfig().getInfoMongoDB());
+	ret = GlobalFacade::getRef().getMongoManger().ConnectMongo(GlobalFacade::getRef().getMongoManger().getInfoMongo(),GlobalFacade::getRef().getServerConfig().getInfoMongoDB());
 	if (!ret)
 	{
 		LOGE("ConnectInfo mongo failed.");

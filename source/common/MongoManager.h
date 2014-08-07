@@ -24,6 +24,7 @@
 #include <ProtoAuth.h>
 #include <ServerConfig.h>
 #include <mongo/client/dbclient.h>
+#include <zsummerX/FrameTcpSessionManager.h>
 
 
 
@@ -31,37 +32,79 @@
 class CMongoManager
 {
 public:
+	typedef std::shared_ptr<mongo::DBClientConnection> MongoPtr;
+public:
 	CMongoManager(){}
+	~CMongoManager(){}
+	inline bool StartPump();
+	inline bool StopPump();
+	inline bool ConnectMongo(MongoPtr &mongoPtr, const MongoConfig & mc);
 
-	inline bool ConnectAuth(const MongoConfig & mc);
-	inline bool ConnectInfo(const MongoConfig & mc);
+
+	inline void async_query(MongoPtr &mongoPtr, const string &ns, const mongo::Query & query,
+		const std::function<void(shared_ptr<mongo::DBClientCursor>, std::string)> & handler);
+
 
 public:
-	typedef std::shared_ptr<mongo::DBClientConnection> MongoPtr;
 
 	inline MongoPtr & getAuthMongo(){ return m_authMongo; }
 	inline MongoPtr & getInfoMongo(){ return m_infoMongo; }
+
+protected:
+	inline void _async_query(MongoPtr &mongoPtr, const string &ns, const mongo::Query & query,
+		std::function<void(shared_ptr<mongo::DBClientCursor>, std::string)> handler);
+	void Run()
+	{
+		do 
+		{
+			if (!m_bRuning)
+			{
+				break;
+			}
+			try
+			{
+				m_summer.RunOnce();
+			}
+			catch (...)
+			{
+			}
+			
+		} while (true);
+	}
 private:
 	std::shared_ptr<mongo::DBClientConnection> m_authMongo;
 	std::shared_ptr<mongo::DBClientConnection> m_infoMongo;
+	std::shared_ptr<std::thread> m_thread;
+	zsummer::network::CZSummer m_summer;
+	bool m_bRuning = false;
 };
 
-
-bool CMongoManager::ConnectAuth(const MongoConfig & mc)
+inline bool CMongoManager::StartPump()
 {
-	if (m_authMongo)
+	if (m_thread)
 	{
 		return false;
 	}
-	m_authMongo = std::shared_ptr<mongo::DBClientConnection>(new mongo::DBClientConnection(true));
+	m_bRuning = true;
+	m_thread = std::shared_ptr<std::thread>(new std::thread(std::bind(&CMongoManager::Run, this)));
+	return true;
+}
+
+bool CMongoManager::ConnectMongo(MongoPtr & mongoPtr, const MongoConfig & mc)
+{
+	if (mongoPtr)
+	{
+		return false;
+	}
+	mongoPtr = std::shared_ptr<mongo::DBClientConnection>(new mongo::DBClientConnection(true));
 	try
 	{
 		std::string dbhost = mc.ip + ":" + boost::lexical_cast<std::string>(mc.port);
-		m_authMongo->connect(dbhost);
+		mongoPtr->connect(dbhost);
 		if (mc.needAuth)
 		{
 			std::string errorMsg;
-			if (!m_authMongo->auth(mc.db, mc.user, mc.pwd, errorMsg))
+			if (!mongoPtr->auth(mc.db, mc.user, mc.pwd, errorMsg))
 			{
 				LOGI("ConnectAuth failed. db=" << mc.db << ", user=" << mc.user << ", pwd=" << mc.pwd << ", errMSG=" << errorMsg);
 				return false;
@@ -84,42 +127,32 @@ bool CMongoManager::ConnectAuth(const MongoConfig & mc)
 }
 
 
-
-
-bool CMongoManager::ConnectInfo(const MongoConfig & mc)
+void CMongoManager::async_query(MongoPtr & mongoPtr, const string &ns, const mongo::Query & query,
+	const std::function<void(shared_ptr<mongo::DBClientCursor>, std::string)> &handler)
 {
-	if (m_infoMongo)
-	{
-		return false;
-	}
-	m_infoMongo = std::make_shared<mongo::DBClientConnection>(new mongo::DBClientConnection(true));
+	m_summer.Post(std::bind(&CMongoManager::_async_query, this, mongoPtr, ns, query, handler));
+}
+
+
+void CMongoManager::_async_query(MongoPtr & mongoPtr, const string &ns, const mongo::Query & query,
+	std::function<void(shared_ptr<mongo::DBClientCursor>, std::string)>  handler)
+{
+	std::string ret;
 	try
 	{
-		std::string dbhost = mc.ip + ":" + boost::lexical_cast<std::string>(mc.port);
-		m_infoMongo->connect(dbhost);
-		if (mc.needAuth)
-		{
-			std::string errorMsg;
-			if (!m_infoMongo->auth(mc.db, mc.user, mc.pwd, errorMsg))
-			{
-				LOGI("ConnectInfo failed. db=" << mc.db << ", user=" << mc.user << ", pwd=" << mc.pwd << ", errMSG=" << errorMsg);
-				return false;
-			}
-		}
-
+		std::shared_ptr<mongo::DBClientCursor> sc(mongoPtr->query(ns, query));
+		CTcpSessionManager::getRef().Post(std::bind(handler, sc , ret));
+		return;
 	}
 	catch (const mongo::DBException &e)
 	{
-		LOGE("ConnectInfo caught:" << e.what());
-		return false;
+		ret += "mongodb async_query catch error. ns=" + ns + ", query=" + query.toString() + ", error=" + e.what();
 	}
 	catch (...)
 	{
-		LOGE("ConnectInfo mongo auth UNKNOWN ERROR");
-		return false;
+		ret += "mongodb async_query unknown error. ns=" + ns + ", query=" + query.toString();
 	}
-	LOGI("ConnectInfo mongo Success");
-	return true;
+	CTcpSessionManager::getRef().Post(std::bind(handler, shared_ptr<mongo::DBClientCursor>(), ret));
 }
 
 

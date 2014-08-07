@@ -1,4 +1,4 @@
-#include "Application.h"
+﻿#include "Application.h"
 #include <log4z/log4z.h>
 #include <zsummerX/FrameTcpSessionManager.h>
 #include <zsummerX/FrameMessageDispatch.h>

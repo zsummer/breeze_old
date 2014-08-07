@@ -1,4 +1,4 @@
-#include "LoginHandler.h"
+ï»¿#include "LoginHandler.h"
 #include <ProtoLogin.h>
 #include <MongoManager.h>
 
@@ -28,7 +28,7 @@ void CLoginHandler::msg_GetAccountInfoReq(AccepterID aID, SessionID sID, Protoco
 	{
 		try 
 		{
-// 			//debug ½Ø¶ÏÈÏÖ¤Á÷³Ì¼ì²âĞ­ÒéQPSËÙ¶È
+// 			//debug æˆªæ–­è®¤è¯æµç¨‹æ£€æµ‹åè®®QPSé€Ÿåº¦
 // 			ack.retCode = EC_SUCCESS;
 // 			break;
 // 			//end debug
