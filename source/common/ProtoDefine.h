@@ -1,4 +1,4 @@
-
+Ôªø
 
 /*
 * breeze License
@@ -21,7 +21,9 @@
 #define _DEFINE_PROTO_H_
 #include <string>
 #include <zsummerX/FrameHeader.h>
-//! ª˘±æ¿‡–Õ
+#include <algorithm>
+
+//! Âü∫Êú¨Á±ªÂûã
 typedef char i8;
 typedef unsigned char ui8;
 typedef short i16;
@@ -31,7 +33,7 @@ typedef unsigned int ui32;
 typedef long long i64;
 typedef unsigned long long ui64;
 
-//! ¬ﬂº≠¿‡–Õ
+//! ÈÄªËæëÁ±ªÂûã
 typedef ui64 AccountID;
 const ui64 InvalidAccountID = (AccountID) -1;
 typedef ui64 CharacterID;
@@ -54,19 +56,19 @@ const NodeIndex InvalideNodeIndex = (NodeIndex)-1;
 
 
 
-// ∑˛ŒÒ∆˜ƒ⁄≤øøÿ÷∆”√Õ®—∂–≠“È«¯º‰Œ™[)
+// ÊúçÂä°Âô®ÂÜÖÈÉ®ÊéßÂà∂Áî®ÈÄöËÆØÂçèËÆÆÂå∫Èó¥‰∏∫[)
 const ui16 MIN_SERVER_CONTROL_PROTO_ID = 0;
 const ui16 MAX_SERVER_CONTROL_PROTO_ID = 1000;
 
-// ∑˛ŒÒ∆˜ƒ⁄≤ø¬ﬂº≠”√Õ®—∂–≠“È«¯º‰Œ™[)
+// ÊúçÂä°Âô®ÂÜÖÈÉ®ÈÄªËæëÁî®ÈÄöËÆØÂçèËÆÆÂå∫Èó¥‰∏∫[)
 const ui16 MIN_IN_PROTO_ID = 1000;
 const ui16 MAX_IN_PROTO_ID = 20000;
 
-//∑«»œ÷§«Èøˆœ¬øÕªß∂ÀÕ®—∂–≠“È[)
+//ÈùûËÆ§ËØÅÊÉÖÂÜµ‰∏ãÂÆ¢Êà∑Á´ØÈÄöËÆØÂçèËÆÆ[)
 const ui16 MIN_OUT_UNAUTH_PROTO_ID = 20000;
 const ui16 MAX_OUT_UNAUTH_PROTO_ID = 20100;
 
-//»œ÷§∫ÛµƒÕ®—∂–≠“È«¯º‰Œ™[)
+//ËÆ§ËØÅÂêéÁöÑÈÄöËÆØÂçèËÆÆÂå∫Èó¥‰∏∫[)
 const ui16 MIN_OUT_PROTO_ID = 20100;
 
 const ui16 MAX_OUT_LOGIC_PROTO_ID = 30000;
@@ -76,12 +78,12 @@ const ui16 MAX_OUT_PROTO_ID = 40000;
 
 
 
-//øÕªß∂Àµƒ«Î«Û–≠“Èø…“‘∏˘æ›“‘œ¬∫Ø ˝≈–∂œ
+//ÂÆ¢Êà∑Á´ØÁöÑËØ∑Ê±ÇÂçèËÆÆÂèØ‰ª•Ê†πÊçÆ‰ª•‰∏ãÂáΩÊï∞Âà§Êñ≠
 inline bool isClientPROTO(ui16 protoID) { return protoID >= MIN_OUT_UNAUTH_PROTO_ID && protoID < MAX_OUT_PROTO_ID; }
 inline bool isNeedAuthClientPROTO(ui16 protoID) { return protoID >= MIN_OUT_PROTO_ID && protoID < MAX_OUT_PROTO_ID; }
 
 
-//∑˛ŒÒ∆˜ƒ⁄≤ø¥´ ‰ÃÌº”’‚∏ˆ–≈œ¢
+//ÊúçÂä°Âô®ÂÜÖÈÉ®‰º†ËæìÊ∑ªÂä†Ëøô‰∏™‰ø°ÊÅØ
 struct SessionInfo 
 {
 	//client
@@ -112,7 +114,7 @@ STM & operator >> (STM & stm, SessionInfo & info)
 	return stm;
 }
 
-//agent±£¥Êsession–≈œ¢
+//agent‰øùÂ≠òsession‰ø°ÊÅØ
 struct AgentSessionInfo
 {
 	SessionInfo sInfo;
@@ -152,7 +154,10 @@ struct ServerAuthConnect
 
 
 
-
+#include <ProtoServerControl.h>
+#include <ProtoCommon.h>
+#include <zsummerX/FrameTcpSessionManager.h>
+#include <zsummerX/FrameMessageDispatch.h>
 
 
 #endif

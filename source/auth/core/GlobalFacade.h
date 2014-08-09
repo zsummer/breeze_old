@@ -31,13 +31,9 @@ public:
 	static GlobalFacade & getRef();
 	static GlobalFacade * getPtr(){ return &getRef(); }
 	
-	inline ServerConfig & getServerConfig(){ return *m_serverConfig; }
-	inline CNetManager & getNetManger(){ return *m_netManger; }
-	inline CMongoManager & getMongoManger(){ return *m_mongoManager; }
-private:
-	ServerConfig * m_serverConfig;
-	CNetManager * m_netManger;
-	CMongoManager * m_mongoManager;
+	ServerConfig & getServerConfig();
+	CNetManager & getNetManger();
+	CMongoManager & getMongoManger();
 };
 
 

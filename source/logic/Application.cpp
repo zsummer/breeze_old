@@ -1,4 +1,5 @@
-﻿#include "Application.h"
+﻿#include <MongoManager.h>
+#include "Application.h"
 #include <ServerConfig.h>
 #include <log4z/log4z.h>
 #include <zsummerX/FrameTcpSessionManager.h>
@@ -37,6 +38,18 @@ bool Appliction::Init(std::string filename, unsigned int index)
 		LOGE("getServerConfig failed.");
 		return ret;
 	}
+	ret = GlobalFacade::getRef().getMongoManger().ConnectMongo(GlobalFacade::getRef().getMongoManger().getInfoMongo(), GlobalFacade::getRef().getServerConfig().getInfoMongoDB());
+	if (!ret )
+	{
+		LOGE("ConnectAuth mongo failed.");
+		return ret;
+	}
+	if (!GlobalFacade::getRef().getMongoManger().StartPump())
+	{
+		LOGE("startPump mongo failed.");
+		return ret;
+	}
+
 	ret = CTcpSessionManager::getRef().Start();
 	if (!ret)
 	{

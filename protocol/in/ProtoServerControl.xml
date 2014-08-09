@@ -2,7 +2,7 @@
 
 <ProtoTraits>
   <MinNo>10</MinNo>
-  <MaxNo>20</MaxNo>
+  <MaxNo>1000</MaxNo>
   <UseLog4z>0</UseLog4z>
 </ProtoTraits>
 

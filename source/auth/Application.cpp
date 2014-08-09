@@ -1,13 +1,13 @@
+#include <MongoManager.h>
 #include "Application.h"
+#include "core/GlobalFacade.h"
+#include "core/NetManager.h"
+#include "logic/AuthHandler.h"
+
 #include <ServerConfig.h>
 #include <log4z/log4z.h>
 #include <zsummerX/FrameTcpSessionManager.h>
 #include <zsummerX/FrameMessageDispatch.h>
-#include "core/GlobalFacade.h"
-
-#include "core/NetManager.h"
-#include "logic/AuthHandler.h"
-#include <MongoManager.h>
 using namespace zsummer::log4z;
 
 Appliction::Appliction()
@@ -41,6 +41,11 @@ bool Appliction::Init(std::string filename, unsigned int index)
 	if (!ret)
 	{
 		LOGE("ConnectAuth mongo failed.");
+		return ret;
+	}
+	if (!GlobalFacade::getRef().getMongoManger().StartPump())
+	{
+		LOGE("startPump mongo failed.");
 		return ret;
 	}
 	ret = CTcpSessionManager::getRef().Start();

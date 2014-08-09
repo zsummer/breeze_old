@@ -1,5 +1,5 @@
 ﻿#include "NetManager.h"
-#include <InProtoCommon.h>
+
 
 CNetManager::CNetManager()
 {

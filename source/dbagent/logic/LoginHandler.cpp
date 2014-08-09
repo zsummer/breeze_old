@@ -1,4 +1,6 @@
 ﻿#include "LoginHandler.h"
+#include <ProtoDefine.h>
+#include <ProtoAuth.h>
 #include <ProtoLogin.h>
 #include <MongoManager.h>
 

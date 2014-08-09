@@ -18,12 +18,13 @@
 
 #ifndef _AUTH_HANDLER_H_
 #define _AUTH_HANDLER_H_
-
-
-#include <BaseHander.h>
+#include <MongoManager.h>
 #include "../core/GlobalFacade.h"
+#include <BaseHander.h>
+#include <zsummerX/FrameHeader.h>
+#include <ProtoDefine.h>
 #include <ProtoAuth.h>
-
+#include <ProtoServerControl.h>
 
 
 class CAuthHandler : public CBaseHandler
@@ -33,6 +34,7 @@ public:
 	~CAuthHandler(){}
 	virtual bool Init() override final;
 	void msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
+	void mongo_GetAuthInfo(std::shared_ptr<mongo::DBClientCursor> & cursor, std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo info, const ProtoAuthReq & req);
 private:
 };
 

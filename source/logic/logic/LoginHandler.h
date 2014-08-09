@@ -22,6 +22,7 @@
 
 #include <BaseHander.h>
 #include "../core/GlobalFacade.h"
+#include <ProtoDefine.h>
 #include <ProtoLogin.h>
 
 

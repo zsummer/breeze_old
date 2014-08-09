@@ -21,6 +21,7 @@
 #define _GLOBAL_FACADE_H_
 class ServerConfig;
 class CNetManager;
+class CMongoManager;
 
 class GlobalFacade
 {
@@ -32,9 +33,11 @@ public:
 	
 	inline ServerConfig & getServerConfig(){ return *m_serverConfig; }
 	inline CNetManager & getNetManger(){ return *m_netManger; }
+	inline CMongoManager & getMongoManger(){ return *m_mongoManager; }
 private:
 	ServerConfig * m_serverConfig;
 	CNetManager * m_netManger;
+	CMongoManager * m_mongoManager;
 };
 
 

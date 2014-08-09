@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF - 8"?>
+<CacheNo>
+	<cache key = "ID_DT2OS_DirectServerAuth" No = "10" /> 
+	<cache key = "ID_RT2OS_RouteToOtherServer" No = "11" /> 
+</CacheNo>

@@ -19,12 +19,9 @@
 
 #ifndef _SERVER_CONFIG_H_
 #define _SERVER_CONFIG_H_
-#include <boost/lexical_cast.hpp>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/xml_parser.hpp>
-#include <iostream>
+
 #include <ProtoDefine.h>
-#include <log4z/log4z.h>
+
 
 
 
@@ -64,39 +61,11 @@ struct MongoConfig
 class ServerConfig
 {
 public:
-	inline bool Parse(std::string filename, ServerNode ownNode,NodeIndex ownIndex);
+	bool Parse(std::string filename, ServerNode ownNode,NodeIndex ownIndex);
 public:
-	inline const ListenConfig getConfigListen(ServerNode node, NodeIndex index = InvalidNodeIndex)
-	{
-		if (index == InvalidNodeIndex)
-		{
-			index = m_ownNodeIndex;
-		}
-		auto founder = std::find_if(m_configListen.begin(), m_configListen.end(),
-			[node, index](const ListenConfig & lc){return lc.node == node && lc.index == index; });
-		if (founder == m_configListen.end())
-		{
-			static ListenConfig lc;
-			return lc;
-		}
-		return *founder;
-	}
+	const ListenConfig getConfigListen(ServerNode node, NodeIndex index = InvalidNodeIndex);
+	std::vector<ConnectorConfig > getConfigConnect(ServerNode node);
 
-
-	inline std::vector<ConnectorConfig > getConfigConnect(ServerNode node)
-	{
-		std::vector<ConnectorConfig > ret;
-		for (const auto & cc : m_configConnect)
-		{
-			if (cc.srcNode != node)
-			{
-				continue;
-			}
-			ret.push_back(cc);
-		}
-	
-		return ret;
-	}
 	const ServerNode & getOwnServerNode(){ return m_ownServerNode; }
 	const NodeIndex & getOwnNodeIndex(){ return m_ownNodeIndex; }
 
@@ -113,110 +82,6 @@ private:
 	MongoConfig m_infoMongo;
 };
 
-
-
-
-
-
-static ServerNode toServerNode(std::string strNode)
-{
-	if (strNode == "agent")
-	{
-		return AgentNode;
-	}
-	else if (strNode == "center")
-	{
-		return CenterNode;
-	}
-	else if (strNode == "auth")
-	{
-		return AuthNode;
-	}
-	else if (strNode == "logic")
-	{
-		return LogicNode;
-	}
-	else if (strNode == "dbagent")
-	{
-		return DBAgentNode;
-	}
-	return InvalideServerNode;
-}
-
-bool ServerConfig::Parse(std::string filename, ServerNode ownNode, NodeIndex ownIndex)
-{
-	m_ownServerNode = ownNode;
-	m_ownNodeIndex = ownIndex;
-	try
-	{
-		boost::property_tree::ptree pt;
-		boost::property_tree::read_xml(filename, pt);
-		auto listener = pt.get_child("listen");
-		for (auto iter = listener.begin(); iter != listener.end(); ++iter)
-		{
-			std::string strNode = iter->first;
-			ListenConfig lconfig;
-			lconfig.ip = iter->second.get<std::string>("<xmlattr>.ip");
-			lconfig.port = iter->second.get<unsigned short>("<xmlattr>.port");
-			lconfig.index = iter->second.get<unsigned int>("<xmlattr>.index");
-			lconfig.node = toServerNode(strNode);
-			m_configListen.push_back(lconfig);
-			LOGD("strNode=" << strNode << ", ip=" << lconfig.ip << ", port=" << lconfig.port << ", lconfig.index=" << lconfig.index);
-		}
-
-
-		auto connecter = pt.get_child("connect");
-		for (auto iter = connecter.begin(); iter != connecter.end(); ++iter)
-		{
-			std::string srcStrNode = iter->first;
-			ConnectorConfig lconfig;
-			std::string dstStrNode = iter->second.get<std::string>("<xmlattr>.dstNode");
-			lconfig.remoteIP = iter->second.get<std::string>("<xmlattr>.ip");
-			lconfig.remotePort = iter->second.get<unsigned short>("<xmlattr>.port");
-			lconfig.srcNode = toServerNode(srcStrNode);
-			lconfig.dstNode = toServerNode(dstStrNode);
-			m_configConnect.push_back(lconfig);
-			LOGD("srcStrNode=" << srcStrNode << ", remoteIP=" << lconfig.remoteIP << ", remotePort=" << lconfig.remotePort << ", dstStrNode=" << dstStrNode);
-		}
-
-		auto mongoParse = pt.get_child("mongo");
-		for (auto iter = mongoParse.begin(); iter != mongoParse.end(); ++iter)
-		{
-			MongoConfig lconfig;
-			lconfig.ip = iter->second.get<std::string>("<xmlattr>.ip");
-			lconfig.port = iter->second.get<unsigned short>("<xmlattr>.port");
-			lconfig.db = iter->second.get<std::string>("<xmlattr>.db");
-			lconfig.user = iter->second.get<std::string>("<xmlattr>.user");
-			lconfig.pwd = iter->second.get<std::string>("<xmlattr>.pwd");
-			lconfig.needAuth = iter->second.get<bool>("<xmlattr>.needAuth");
-			if (iter->first == AuthMongoDB)
-			{
-				m_authMongo = lconfig;
-			}
-			else if (iter->first == InfoMongoDB)
-			{
-				m_infoMongo = lconfig;
-			}
-		}
-
-	}
-	catch (std::string err)
-	{
-		LOGE("ServerConfig catch exception: error=" << err);
-		return false;
-	}
-	catch (std::exception e)
-	{
-		LOGE("ServerConfig catch exception: error=" << e.what());
-		return false;
-	}
-	catch (...)
-	{
-		LOGE("ServerConfig catch exception: unknow exception.");
-		return false;
-	}
-	return true;
-}
 
 
 

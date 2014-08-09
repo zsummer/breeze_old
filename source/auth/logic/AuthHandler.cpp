@@ -1,6 +1,7 @@
+
 #include "AuthHandler.h"
 #include "../core/GlobalFacade.h"
-#include <MongoManager.h>
+
 
 
 
@@ -20,50 +21,59 @@ void CAuthHandler::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Re
 	LOGD("ID_C2AS_AuthReq user=" << req.info.user << ", pwd=" << req.info.pwd);
 
 
+
+
+
+	// 			//debug 截断认证流程检测协议QPS速度
+	// 			ack.retCode = EC_SUCCESS;
+	// 			ack.accountID = 101;
+	// 			break;
+	// 			//end debug
+
+	std::string ns = GlobalFacade::getRef().getServerConfig().getAuthMongoDB().db;
+	ns += ".cl_auth";
+	CMongoManager & mgr = GlobalFacade::getRef().getMongoManger();
+	mgr.async_query(mgr.getAuthMongo(), ns, QUERY("_id" << req.info.user),
+		std::bind(&CAuthHandler::mongo_GetAuthInfo, this, std::placeholders::_1, std::placeholders::_2, aID, sID, info, req));
+
+	// 			//debug
+	// 			static long long seq = 0;
+	// 			seq++;
+	// 			{
+	// 				authMongo->update(db, BSON("_id" << req.info.user + boost::lexical_cast<std::string>(seq)),
+	// 					 BSON("pwd" << "123" << "accID" << seq), true);
+	// 				std::string errStr = authMongo->getLastError();
+	// 				if (!errStr.empty())
+	// 				{
+	// 					LOGW("error: " << errStr);
+	// 				}
+	// 				
+	// 				else
+	// 				{
+	// 					ack.accountID = seq;
+	// 					ack.retCode = EC_SUCCESS;
+	// 					LOGD("auth success req user=" << req.info.user << ", req pwd=" << req.info.pwd << ", result pwd=" << "123" << ", result accID=" << seq);
+	// 					break;
+	// 				}
+	// 			}
+	// 			//!end debug
+
+
+
+
+
+}
+
+
+void CAuthHandler::mongo_GetAuthInfo(std::shared_ptr<mongo::DBClientCursor> & cursor, std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo info, const ProtoAuthReq & req)
+{
 	ProtoAuthAck ack;
 	ack.retCode = EC_AUTH_ERROR;
 	ack.accountID = InvalidAccountID;
-
 	do
 	{
-		try 
+		try
 		{
-// 			//debug 截断认证流程检测协议QPS速度
-// 			ack.retCode = EC_SUCCESS;
-// 			ack.accountID = 101;
-// 			break;
-// 			//end debug
-
-			std::string db = GlobalFacade::getRef().getServerConfig().getAuthMongoDB().db;
-			db += ".cl_auth";
-
-
-			auto & authMongo = GlobalFacade::getRef().getMongoManger().getAuthMongo();
-// 			//debug
-// 			static long long seq = 0;
-// 			seq++;
-// 			{
-// 				authMongo->update(db, BSON("_id" << req.info.user + boost::lexical_cast<std::string>(seq)),
-// 					 BSON("pwd" << "123" << "accID" << seq), true);
-// 				std::string errStr = authMongo->getLastError();
-// 				if (!errStr.empty())
-// 				{
-// 					LOGW("error: " << errStr);
-// 				}
-// 				
-// 				else
-// 				{
-// 					ack.accountID = seq;
-// 					ack.retCode = EC_SUCCESS;
-// 					LOGD("auth success req user=" << req.info.user << ", req pwd=" << req.info.pwd << ", result pwd=" << "123" << ", result accID=" << seq);
-// 					break;
-// 				}
-// 			}
-// 			//!end debug
-
-
-
-			auto cursor = authMongo->query(db, BSON("_id" << req.info.user));
 			if (cursor->more())
 			{
 				auto obj = cursor->next();
@@ -108,6 +118,5 @@ void CAuthHandler::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Re
 	info.srcIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
 	ws << ID_RT2OS_RouteToOtherServer << route << ID_AS2C_AuthAck << info << ack;
 	CTcpSessionManager::getRef().SendOrgSessionData(aID, sID, ws.GetStream(), ws.GetStreamLen());
+
 }
-
-

@@ -20,8 +20,6 @@
 #define _NET_MANAGER_H_
 
 #include <ProtoDefine.h>
-#include <ProtoCommon.h>
-#include <InProtoCommon.h>
 #include <ProtoAuth.h>
 #include "../core/GlobalFacade.h"
 #include <ServerConfig.h>

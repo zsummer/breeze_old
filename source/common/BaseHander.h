@@ -18,13 +18,7 @@
 
 #ifndef _BASE_HANDLER_H_
 #define _BASE_HANDLER_H_
-#include <ServerConfig.h>
 #include <ProtoDefine.h>
-#include <ProtoCommon.h>
-#include <InProtoCommon.h>
-#include <zsummerX/FrameMessageDispatch.h>
-#include <zsummerX/FrameTcpSessionManager.h>
-
 
 
 class CBaseHandler

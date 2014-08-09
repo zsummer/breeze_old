@@ -56,5 +56,11 @@
     <ClInclude Include="logic\LoginHandler.h">
       <Filter>logic</Filter>
     </ClInclude>
+    <ClInclude Include="..\common\MongoManager.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\ProtoDefine.h">
+      <Filter>common</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
