@@ -5,8 +5,7 @@ project(common)
 aux_source_directory(./ SRC)
 
 
-set(LIBRARY_OUTPUT_PATH, ${breeze_SOURCE_DIR}/lib)
-
+SET(LIBRARY_OUTPUT_PATH  ${breeze_SOURCE_DIR}/lib)
 add_library(common${LIB_SUFFIX} STATIC ${SRC})
 
 install(TARGETS common${LIB_SUFFIX} 

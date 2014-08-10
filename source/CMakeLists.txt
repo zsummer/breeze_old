@@ -13,7 +13,7 @@ include_directories(${breeze_SOURCE_DIR}/../protocol/out/C++)
 include_directories(${breeze_SOURCE_DIR}/common)
 
 link_directories(${breeze_SOURCE_DIR}/../depends_linux/lib/)
-
+link_directories(${breeze_SOURCE_DIR}/lib/)
 
 
 set(LIB_SUFFIX "")
