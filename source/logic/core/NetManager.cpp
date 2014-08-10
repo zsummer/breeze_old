@@ -30,14 +30,7 @@ bool CNetManager::Start()
 		tag.remotePort = con.remotePort;
 		tag.reconnectMaxCount = 2;
 		tag.reconnectInterval = 5000;
-		if (con.dstNode == DBAgentNode)
-		{
-			m_configConnect.insert(std::make_pair(tag.cID, tag));
-		}
-		else
-		{
-			continue;
-		}
+		continue;
 		if (CTcpSessionManager::getRef().AddConnector(tag) == InvalidConnectorID)
 		{
 			LOGE("AddConnector failed. remoteIP=" << tag.remoteIP << ", remotePort=" << tag.remotePort);
@@ -49,6 +42,13 @@ bool CNetManager::Start()
 	m_configListen.listenIP = GlobalFacade::getRef().getServerConfig().getConfigListen(LogicNode).ip;
 	m_configListen.listenPort = GlobalFacade::getRef().getServerConfig().getConfigListen(LogicNode).port;
 	m_configListen.maxSessions = 50;
+
+	if (CTcpSessionManager::getRef().AddAcceptor(m_configListen) == InvalidAccepterID)
+	{
+		LOGE("AddAcceptor Failed. listenIP=" << m_configListen.listenIP << ", listenPort=" << m_configListen.listenPort);
+		return false;
+	}
+	
 
 	LOGI("CNetManager Init Success.");
 	return true;
@@ -114,7 +114,7 @@ void CNetManager::msg_ConnectServerAuth(ConnectorID cID, ProtocolID pID, ReadStr
 	rs >> auth;
 	LOGI("msg_ConnectServerAuth. cID=" << cID << ", Node=" << auth.srcNode << ", index=" << auth.srcIndex);
 
-	if (auth.srcNode == DBAgentNode)
+	if (true)
 	{
 		auto founder = std::find_if(m_onlineConnect.begin(), m_onlineConnect.end(),
 			[auth](const ServerAuthConnect &sac){return sac.index == auth.srcIndex; });

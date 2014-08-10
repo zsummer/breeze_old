@@ -19,7 +19,7 @@
 #ifndef _LOGIN_HANDLER_H_
 #define _LOGIN_HANDLER_H_
 
-
+#include <MongoManager.h>
 #include <BaseHander.h>
 #include "../core/GlobalFacade.h"
 #include <ProtoDefine.h>
@@ -33,7 +33,7 @@ public:
 	~CLoginHandler(){}
 	virtual bool Init() override final;
 	void msg_GetAccountReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
-	void msg_GetAccountAck(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs);
+	void mongo_GetAccount(std::shared_ptr<mongo::DBClientCursor> & cursor, std::string &errMsg, AccepterID cID, SessionID sID, SessionInfo & info, const ProtoGetAccountInfoReq &req);
 
 private:
 };

@@ -31,7 +31,7 @@ public:
 	typedef std::shared_ptr<mongo::DBClientConnection> MongoPtr;
 public:
 	CMongoManager(){}
-	~CMongoManager(){}
+	~CMongoManager();
 	bool StartPump();
 	bool StopPump();
 	bool ConnectMongo(MongoPtr &mongoPtr, const MongoConfig & mc);

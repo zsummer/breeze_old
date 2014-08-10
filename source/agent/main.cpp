@@ -54,11 +54,12 @@ int main(int argc, char* argv[])
 	unsigned int serverIndex = 0;
 	if (argc > 1)
 	{
-		filename = argv[1];
+		serverIndex = atoi(argv[1]);
+		
 	}
 	if (argc > 2)
 	{
-		serverIndex = atoi(argv[2]);
+		filename = argv[2];
 	}
 	bool ret = false;
 	ILog4zManager::GetInstance()->Config("log.config");

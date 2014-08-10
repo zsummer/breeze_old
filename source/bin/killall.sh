@@ -1,9 +1,10 @@
 #!/bin/bash
-killall agent
-killall auth
-killall center
-killall logic
-killall dbagent
-killall StressTest
+set -v on
+killall stressTest -w
+killall agent -w
+killall auth -w
+killall center -w
+killall logic -w
 sleep 2
+set -v off
 

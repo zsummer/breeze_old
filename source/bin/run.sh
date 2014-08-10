@@ -1,24 +1,25 @@
 #!/usr/bin/bash
 cd auth
-./auth ../ServerConfig.xml 0  2>/dev/null 1>&2 &
-./auth ../ServerConfig.xml 1  2>/dev/null 1>&2 &
+./auth 0  2>/dev/null 1>&2 &
+./auth 1  2>/dev/null 1>&2 &
+ps -ef |grep "\bauth\b" |grep -v "grep"
 sleep 2
 
-cd ../dbagent
-./dbagent ../ServerConfig.xml 0  2>/dev/null 1>&2 &
-sleep 2
 
 cd ../logic
-./logic ../ServerConfig.xml 0  2>/dev/null 1>&2 &
+./logic 0  2>/dev/null 1>&2 &
+ps -ef |grep "\blogic\b" |grep -v "grep"
 sleep 2
 
 cd ../center
-./center ../ServerConfig.xml 0  2>/dev/null 1>&2 &
+./center 0  2>/dev/null 1>&2 &
+ps -ef |grep "\bcenter\b" | grep -v "grep"
 sleep 2
 
 
 cd ../agent
-./agent ../ServerConfig.xml 0  2>/dev/null 1>&2 &
-./agent ../ServerConfig.xml 1  2>/dev/null 1>&2 &
+./agent 0  2>/dev/null 1>&2 &
+./agent 1  2>/dev/null 1>&2 &
+ps -ef |grep "\bagent\b" | grep -v "grep"
 
 sleep 2

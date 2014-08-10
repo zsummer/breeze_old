@@ -1,7 +1,7 @@
 #!/bin/bash
 for svr in agent auth center  logic  dbagent StressTest; 
 do
-	netstat -nlp|grep svr
+	ps -ef|grep "\b$svr\b"	
 done
 
 

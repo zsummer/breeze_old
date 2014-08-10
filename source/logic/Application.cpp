@@ -85,6 +85,7 @@ void Appliction::RunPump()
 
 void Appliction::Stop()
 {
+	GlobalFacade::getRef().getMongoManger().StopPump();
 	CTcpSessionManager::getRef().Stop();
 }
 

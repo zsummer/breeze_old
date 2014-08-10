@@ -48,8 +48,7 @@ const ServerNode InvalideServerNode = (ServerNode)-1;
 const ServerNode AgentNode = 0;
 const ServerNode AuthNode = 1;
 const ServerNode CenterNode = 2;
-const ServerNode DBAgentNode = 3;
-const ServerNode LogicNode = 4;
+const ServerNode LogicNode = 3;
 
 typedef ui32 NodeIndex;
 const NodeIndex InvalideNodeIndex = (NodeIndex)-1;

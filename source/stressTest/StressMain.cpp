@@ -240,8 +240,8 @@ int main(int argc, char* argv[])
 		|| strcmp(argv[1], "/?") == 0))
 	{
 		cout << "please input like example:" << endl;
-		cout << "tcpTest maxClient" << endl;
-		cout << "./tcpTest 1" << endl;
+		cout << "tcpTest agentIndex maxClient" << endl;
+		cout << "./tcpTest 0 1" << endl;
 		cout << "maxClient: limit max" << endl;
 		return 0;
 	}
@@ -249,6 +249,8 @@ int main(int argc, char* argv[])
 		g_agentIndex = atoi(argv[1]);
 	if (argc > 2)
 		g_maxClient = atoi(argv[2]);
+		
+		
 
 
 	ILog4zManager::GetInstance()->Config("log.config");
