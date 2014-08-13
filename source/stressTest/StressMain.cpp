@@ -1,4 +1,4 @@
-/*
+ï»¿/*
 * breeze License
 * Copyright (C) 2014 YaweiZhang <yawei_zhang@foxmail.com>.
 *
@@ -16,7 +16,7 @@
 */
 
 
-//! ²âÊÔ
+//! æµ‹è¯•
 #include <ServerConfig.h>
 #include <ProtoDefine.h>
 #include <ProtoCommon.h>
@@ -30,13 +30,13 @@
 
 using namespace zsummer::log4z;
 
-//! Ä¬ÈÏÆô¶¯²ÎÊı
+//! é»˜è®¤å¯åŠ¨å‚æ•°
 
 unsigned short g_agentIndex = 0; //
-unsigned short g_maxClient = 1; //ÈçÆô¶¯µÄ¿Í»§¶Ë×ÜÊı.
+unsigned short g_maxClient = 1; //å¦‚å¯åŠ¨çš„å®¢æˆ·ç«¯æ€»æ•°.
 
 
-//!ÊÕ·¢°ü²âÊÔÍ³¼ÆÊı¾İ
+//!æ”¶å‘åŒ…æµ‹è¯•ç»Ÿè®¡æ•°æ®
 unsigned long long g_totalEchoCount = 0;
 unsigned long long g_lastEchoCount = 0;
 unsigned long long g_totalSendCount = 0;
@@ -55,7 +55,7 @@ class CStressHeartBeatManager
 public:
 	CStressHeartBeatManager()
 	{
-		//! ×¢²áÊÂ¼şºÍÏûÏ¢
+		//! æ³¨å†Œäº‹ä»¶å’Œæ¶ˆæ¯
 		CMessageDispatcher::getRef().RegisterOnConnectorEstablished(std::bind(&CStressHeartBeatManager::OnConnecotrConnected, this,
 			std::placeholders::_1));
 		CMessageDispatcher::getRef().RegisterOnMyConnectorHeartbeatTimer(std::bind(&CStressHeartBeatManager::OnConnecotrHeartbeatTimer, this,
@@ -223,7 +223,7 @@ int main(int argc, char* argv[])
 {
 
 #ifndef _WIN32
-	//! linuxÏÂĞèÒªÆÁ±ÎµÄÒ»Ğ©ĞÅºÅ
+	//! linuxä¸‹éœ€è¦å±è”½çš„ä¸€äº›ä¿¡å·
 	signal( SIGHUP, SIG_IGN );
 	signal( SIGALRM, SIG_IGN ); 
 	signal( SIGPIPE, SIG_IGN );
@@ -274,13 +274,13 @@ int main(int argc, char* argv[])
 
 	CTcpSessionManager::getRef().CreateTimer(5000, MonitorFunc);
 
-	//´´½¨ĞÄÌø¹ÜÀíhandlerµÄÊµÀı Ö»Òª´´½¨¼´¿É, ¹¹Ôìº¯ÊıÖĞ»á×¢²á¶ÔÓ¦ÊÂ¼ş
+	//åˆ›å»ºå¿ƒè·³ç®¡ç†handlerçš„å®ä¾‹ åªè¦åˆ›å»ºå³å¯, æ„é€ å‡½æ•°ä¸­ä¼šæ³¨å†Œå¯¹åº”äº‹ä»¶
 	CStressHeartBeatManager statusManager;
 
-	//ÕâÀï´´½¨·şÎñhandlerºÍ¿Í»§¶Ëhandler ¸ù¾İÆô¶¯²ÎÊı²»Í¬Ìí¼Ó²»Í¬½ÇÉ«.
+	//è¿™é‡Œåˆ›å»ºæœåŠ¡handlerå’Œå®¢æˆ·ç«¯handler æ ¹æ®å¯åŠ¨å‚æ•°ä¸åŒæ·»åŠ ä¸åŒè§’è‰².
 	CStressClientHandler client;
 	
-	//Ìí¼Ó¶à¸öconnector.
+	//æ·»åŠ å¤šä¸ªconnector.
 	for (int i = 0; i < g_maxClient; ++i)
 	{
 		tagConnctorConfigTraits traits;
@@ -292,7 +292,7 @@ int main(int argc, char* argv[])
 		CTcpSessionManager::getRef().AddConnector(traits);
 	}
 	
-	//Æô¶¯Ö÷Ñ­»·.
+	//å¯åŠ¨ä¸»å¾ªç¯.
 	CTcpSessionManager::getRef().Run();
 
 	return 0;

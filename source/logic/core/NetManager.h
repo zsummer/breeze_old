@@ -1,4 +1,4 @@
-
+ï»¿
 /*
 * breeze License
 * Copyright (C) 2014 YaweiZhang <yawei_zhang@foxmail.com>.
@@ -34,7 +34,7 @@ class CNetManager
 {
 public:
 	CNetManager();
-	//Á¬½ÓËùÓĞÈÏÖ¤·şÎñºÍÖĞÑë·şÎñ
+	//è¿æ¥æ‰€æœ‰è®¤è¯æœåŠ¡å’Œä¸­å¤®æœåŠ¡
 	bool Start();
 	void event_OnConnect(ConnectorID cID);
 	void event_OnDisconnect(ConnectorID cID);
@@ -45,6 +45,8 @@ public:
 	void msg_ConnectServerAuth(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs);
 	void msg_SessionServerAuth(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
 
+	void event_OnSessionHeartbeat(AccepterID aID, SessionID sID);
+	void msg_OnDirectServerPulse(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
 public:
 	inline void SendOrgDataToCenter(const char * orgData, unsigned int orgDataLen)
 	{
@@ -67,9 +69,9 @@ public:
 		CTcpSessionManager::getRef().SendOrgConnectorData(sac.cID,orgData, orgDataLen);
 	}
 private:
-	tagAcceptorConfigTraits m_configListen; //±£´æ¼àÌıÅäÖÃ
-	ConnectorID m_lastConnectID = 0; //×Ô¶¯µİÔöµÄconnectorID.
-	std::unordered_map<ConnectorID, tagConnctorConfigTraits> m_configConnect; //cID ¶ÔÓ¦µÄÁ¬½ÓÅäÖÃ
+	tagAcceptorConfigTraits m_configListen; //ä¿å­˜ç›‘å¬é…ç½®
+	ConnectorID m_lastConnectID = 0; //è‡ªåŠ¨é€’å¢çš„connectorID.
+	std::unordered_map<ConnectorID, tagConnctorConfigTraits> m_configConnect; //cID å¯¹åº”çš„è¿æ¥é…ç½®
 
 	std::vector<ServerAuthSession> m_onlineSession;
 	std::vector<ServerAuthConnect> m_onlineConnect;

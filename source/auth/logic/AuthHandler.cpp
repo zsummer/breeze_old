@@ -1,4 +1,4 @@
-
+ï»¿
 #include "AuthHandler.h"
 #include "../core/GlobalFacade.h"
 
@@ -24,7 +24,7 @@ void CAuthHandler::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Re
 
 
 
-	// 			//debug ½Ø¶ÏÈÏÖ¤Á÷³Ì¼ì²âĞ­ÒéQPSËÙ¶È
+	// 			//debug æˆªæ–­è®¤è¯æµç¨‹æ£€æµ‹åè®®QPSé€Ÿåº¦
 	// 			ack.retCode = EC_SUCCESS;
 	// 			ack.accountID = 101;
 	// 			break;

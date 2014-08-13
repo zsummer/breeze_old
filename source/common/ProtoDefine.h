@@ -17,6 +17,12 @@
 * limitations under the License.
 */
 
+/*
+*  文件说明
+*  所有服务通用的定义可以放在这里
+*
+*/
+
 #ifndef _DEFINE_PROTO_H_
 #define _DEFINE_PROTO_H_
 #include <string>
@@ -127,6 +133,7 @@ struct ServerAuthSession
 	SessionID sID = InvalidSeesionID;
 	ServerNode node = InvalideServerNode;
 	NodeIndex index = InvalidNodeIndex;
+	time_t  lastActiveTime = time(NULL);
 };
 
 struct ServerAuthConnect
@@ -134,6 +141,7 @@ struct ServerAuthConnect
 	ConnectorID cID = InvalidConnectorID;
 	ServerNode node = InvalideServerNode;
 	NodeIndex index = InvalidNodeIndex;
+	time_t  lastActiveTime = time(NULL);
 };
 
 

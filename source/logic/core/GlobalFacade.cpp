@@ -1,4 +1,4 @@
-#include <MongoManager.h>
+﻿#include <MongoManager.h>
 #include "GlobalFacade.h"
 #include <ServerConfig.h>
 #include "NetManager.h"

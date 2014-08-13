@@ -11,6 +11,11 @@ CNetManager::CNetManager()
 
 	CMessageDispatcher::getRef().RegisterSessionMessage(ID_DT2OS_DirectServerAuth,
 		std::bind(&CNetManager::msg_SessionServerAuth, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+
+	//×¢²áÐÄÌø
+	CMessageDispatcher::getRef().RegisterOnMySessionHeartbeatTimer(std::bind(&CNetManager::event_OnSessionHeartbeat, this, std::placeholders::_1, std::placeholders::_2));
+	CMessageDispatcher::getRef().RegisterSessionMessage(ID_DT2OS_DirectServerPulse,
+		std::bind(&CNetManager::msg_OnDirectServerPulse, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 }
 
 bool CNetManager::Start()
@@ -76,6 +81,40 @@ void CNetManager::msg_SessionServerAuth(AccepterID aID, SessionID sID, ProtocolI
 		m_onlineCenter.erase(founder);
 	}
 	m_onlineCenter.push_back(sac);
+}
+
+void CNetManager::msg_OnDirectServerPulse(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs)
+{
+	auto founder = std::find_if(m_onlineCenter.begin(), m_onlineCenter.end(), [sID](const ServerAuthSession & sas) {return sas.sID == sID; });
+	if (founder != m_onlineCenter.end())
+	{
+		LOGD("msg_OnDirectServerPulse lastActiveTime=" << founder->lastActiveTime);
+		founder->lastActiveTime = time(NULL);
+		return;
+	}
+}
+void CNetManager::event_OnSessionHeartbeat(AccepterID aID, SessionID sID)
+{
+	auto founder = std::find_if(m_onlineCenter.begin(), m_onlineCenter.end(), [sID](const ServerAuthSession & sas) {return sas.sID == sID; });
+	if (founder == m_onlineCenter.end())
+	{
+		CTcpSessionManager::getRef().KickSession(aID, sID);
+		LOGW("close session because  not found sID in online center. sID=" << sID);
+		return;
+	}
+	if (founder->lastActiveTime + HEARTBEART_INTERVAL * 2 / 1000 < time(NULL))
+	{
+		CTcpSessionManager::getRef().KickSession(aID, sID);
+		LOGW("close session because  not found sID in online center. sID=" << sID << ", lastActiveTime=" << founder->lastActiveTime);
+		return;
+	}
+
+	WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);
+	ProtoDirectServerPulse pulse;
+	pulse.srcNode = GlobalFacade::getRef().getServerConfig().getOwnServerNode();
+	pulse.srcIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
+	ws << ID_DT2OS_DirectServerPulse << pulse;
+	CTcpSessionManager::getRef().SendOrgSessionData(aID, sID, ws.GetStream(), ws.GetStreamLen());
 }
 
 

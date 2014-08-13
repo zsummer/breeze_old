@@ -1,4 +1,4 @@
-
+ï»¿
 /*
 * breeze License
 * Copyright (C) 2014 YaweiZhang <yawei_zhang@foxmail.com>.
@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
 {
 
 #ifndef _WIN32
-//! linuxÏÂĞèÒªÆÁ±ÎµÄÒ»Ğ©ĞÅºÅ
+//! linuxä¸‹éœ€è¦å±è”½çš„ä¸€äº›ä¿¡å·
 	signal( SIGHUP, SIG_IGN );
 	signal( SIGALRM, SIG_IGN );
 	signal( SIGPIPE, SIG_IGN );

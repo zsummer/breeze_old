@@ -16,6 +16,11 @@
     <member name="srcIndex" type="ui32"   desc="当前服务节点索引ID"/>
   </proto>
 
+  <!-- 内部服务节点存活脉冲 -->
+  <proto from="DT" to="OS" name="DirectServerPulse" desc= "服务节点生命脉冲">
+    <member name="srcNode" type="ui32"   desc="当前服务节点"/>
+    <member name="srcIndex" type="ui32"   desc="当前服务节点索引ID"/>
+  </proto>
 
   <!-- 一个经过center节点的标准内部协议格式  包头长度+路由协议ID+路由信息数据+原始协议ID+SessionDEBUG+原始信息数据 -->
   <!-- 例如: 客户端发上来的包要经过添加SessionDEBUG,添加路由信息发送到center, 

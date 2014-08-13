@@ -1,4 +1,4 @@
-
+﻿
 #include "LoginHandler.h"
 #include "../core/GlobalFacade.h"
 #include "../core/NetManager.h"

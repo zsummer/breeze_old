@@ -1,4 +1,4 @@
-#include "NetManager.h"
+﻿#include "NetManager.h"
 
 CNetManager::CNetManager()
 {
@@ -11,11 +11,16 @@ CNetManager::CNetManager()
 
 	
 
-	//ע���¼�
+	//注册事件
 	CMessageDispatcher::getRef().RegisterOnConnectorEstablished(std::bind(&CNetManager::event_OnConnect, this, std::placeholders::_1));
 	CMessageDispatcher::getRef().RegisterOnConnectorDisconnect(std::bind(&CNetManager::event_OnDisconnect, this, std::placeholders::_1));
 	CMessageDispatcher::getRef().RegisterOnSessionEstablished(std::bind(&CNetManager::event_OnSessionEstablished, this, std::placeholders::_1, std::placeholders::_2));
 	CMessageDispatcher::getRef().RegisterOnSessionDisconnect(std::bind(&CNetManager::event_OnSessionDisconnect, this, std::placeholders::_1, std::placeholders::_2));
+
+	//注册心跳
+	CMessageDispatcher::getRef().RegisterOnMySessionHeartbeatTimer(std::bind(&CNetManager::event_OnSessionHeartbeat, this, std::placeholders::_1, std::placeholders::_2));
+	CMessageDispatcher::getRef().RegisterSessionMessage(ID_DT2OS_DirectServerPulse,
+		std::bind(&CNetManager::msg_OnDirectServerPulse, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 }
 
 bool CNetManager::Start()
@@ -161,3 +166,36 @@ void CNetManager::msg_SessionServerAuth(AccepterID aID, SessionID sID, ProtocolI
 	m_onlineSession.push_back(sas);
 }
 
+void CNetManager::msg_OnDirectServerPulse(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs)
+{
+	auto founder = std::find_if(m_onlineSession.begin(), m_onlineSession.end(), [sID](const ServerAuthSession & sas) {return sas.sID == sID; });
+	if (founder != m_onlineSession.end())
+	{
+		LOGD("msg_OnDirectServerPulse lastActiveTime=" << founder->lastActiveTime);
+		founder->lastActiveTime = time(NULL);
+		return;
+	}
+}
+void CNetManager::event_OnSessionHeartbeat(AccepterID aID, SessionID sID)
+{
+	auto founder = std::find_if(m_onlineSession.begin(), m_onlineSession.end(), [sID](const ServerAuthSession & sas) {return sas.sID == sID; });
+	if (founder == m_onlineSession.end())
+	{
+		CTcpSessionManager::getRef().KickSession(aID, sID);
+		LOGW("close session because  not found sID in online center. sID=" << sID);
+		return;
+	}
+	if (founder->lastActiveTime + HEARTBEART_INTERVAL * 2 / 1000 < time(NULL))
+	{
+		CTcpSessionManager::getRef().KickSession(aID, sID);
+		LOGW("close session because  not found sID in online center. sID=" << sID << ", lastActiveTime=" << founder->lastActiveTime);
+		return;
+	}
+
+	WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);
+	ProtoDirectServerPulse pulse;
+	pulse.srcNode = GlobalFacade::getRef().getServerConfig().getOwnServerNode();
+	pulse.srcIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
+	ws << ID_DT2OS_DirectServerPulse << pulse;
+	CTcpSessionManager::getRef().SendOrgSessionData(aID, sID, ws.GetStream(), ws.GetStreamLen());
+}

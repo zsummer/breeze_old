@@ -16,6 +16,15 @@
 * limitations under the License.
 */
 
+
+/*
+ *  文件说明
+ *  CBaseHandler主要作用是给Application提供一个统一管理消息Hander类的一个机制. 
+ *  这个机制目前主要有两个. 1是实例化.  2是初始化. 
+ *  注册消息可以放在handler类的构造函数中 也可以放在Init()中.
+ */
+
+
 #ifndef _BASE_HANDLER_H_
 #define _BASE_HANDLER_H_
 #include <ProtoDefine.h>

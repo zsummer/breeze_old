@@ -51,6 +51,8 @@ public:
 		CTcpSessionManager::getRef().SendOrgSessionData(sas.aID, sas.sID, orgData, orgDataLen);
 	}
 
+	void event_OnSessionHeartbeat(AccepterID aID, SessionID sID);
+	void msg_OnDirectServerPulse(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
 
 	//register 
 	void event_OnSessionEstablished(AccepterID, SessionID);

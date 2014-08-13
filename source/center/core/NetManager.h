@@ -52,17 +52,21 @@ public:
 
 	bool msg_OrgMessageReq(AccepterID aID, SessionID sID, const char * blockBegin, FrameStreamTraits::Integer blockSize);
 
+	void event_OnSessionHeartbeat(AccepterID aID, SessionID sID);
+	void event_OnConnectorHeartbeat(ConnectorID cID);
+	void msg_OnConnectorPulse(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs);
+	void msg_OnSessionPulse(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
+
 protected:
 	void msg_TranslateToOtherServer(ProtocolID pID, ReadStreamPack & rs);
 private:
 	tagAcceptorConfigTraits m_configListen; //保存监听配置
+	bool m_bListening = false;
 	ConnectorID m_lastConnectID = 0; //自动递增的connectorID.
 	std::unordered_map<ConnectorID, tagConnctorConfigTraits> m_configConnect; //cID 对应的连接配置
 
 	std::vector<ServerAuthSession> m_onlineSession;
 	std::vector<ServerAuthConnect> m_onlineConnect;
-
-	char m_chunkWriteStream[SEND_RECV_CHUNK_SIZE]; // proto4z  write optimize
 };
 
 

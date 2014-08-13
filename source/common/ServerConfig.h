@@ -17,6 +17,12 @@
 * limitations under the License.
 */
 
+/*
+*  文件说明
+*  所有服务节点务必在这里写节点的启动配置信息.
+*/
+
+
 #ifndef _SERVER_CONFIG_H_
 #define _SERVER_CONFIG_H_
 

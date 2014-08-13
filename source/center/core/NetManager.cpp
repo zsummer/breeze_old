@@ -23,6 +23,15 @@ CNetManager::CNetManager()
 	CMessageDispatcher::getRef().RegisterOnConnectorDisconnect(std::bind(&CNetManager::event_OnDisconnect, this, std::placeholders::_1));
 	CMessageDispatcher::getRef().RegisterOnSessionEstablished(std::bind(&CNetManager::event_OnSessionEstablished, this, std::placeholders::_1, std::placeholders::_2));
 	CMessageDispatcher::getRef().RegisterOnSessionDisconnect(std::bind(&CNetManager::event_OnSessionDisconnect, this, std::placeholders::_1, std::placeholders::_2));
+
+	//×¢²áÐÄÌø
+	CMessageDispatcher::getRef().RegisterOnMySessionHeartbeatTimer(std::bind(&CNetManager::event_OnSessionHeartbeat, this, std::placeholders::_1, std::placeholders::_2));
+	CMessageDispatcher::getRef().RegisterOnMyConnectorHeartbeatTimer(std::bind(&CNetManager::event_OnConnectorHeartbeat, this, std::placeholders::_1));
+	CMessageDispatcher::getRef().RegisterSessionMessage(ID_DT2OS_DirectServerPulse,
+		std::bind(&CNetManager::msg_OnSessionPulse, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+	CMessageDispatcher::getRef().RegisterConnectorMessage(ID_DT2OS_DirectServerPulse,
+		std::bind(&CNetManager::msg_OnConnectorPulse, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+
 }
 
 bool CNetManager::Start()
@@ -35,7 +44,7 @@ bool CNetManager::Start()
 		tag.cID = m_lastConnectID++;
 		tag.remoteIP = con.remoteIP;
 		tag.remotePort = con.remotePort;
-		tag.reconnectMaxCount = 2;
+		tag.reconnectMaxCount = 120;
 		tag.reconnectInterval = 5000;
 		if (CTcpSessionManager::getRef().AddConnector(tag) == InvalidConnectorID)
 		{
@@ -127,13 +136,14 @@ void CNetManager::msg_ConnectServerAuth(ConnectorID cID, ProtocolID pID, ReadStr
 	m_onlineConnect.push_back(sac);
 
 
-	if (m_onlineConnect.size() == m_configConnect.size())
+	if (!m_bListening &&  m_onlineConnect.size() == m_configConnect.size())
 	{
 		if (CTcpSessionManager::getRef().AddAcceptor(m_configListen) == InvalidAccepterID)
 		{
 			LOGE("AddAcceptor Failed. listenIP=" << m_configListen.listenIP << ", listenPort=" << m_configListen.listenPort);
 			return;
 		}
+		m_bListening = true;
 	}
 }
 
@@ -176,6 +186,78 @@ void CNetManager::msg_DefaultSessionReq(AccepterID aID, SessionID sID, ProtocolI
 };
 
 
+
+void CNetManager::event_OnSessionHeartbeat(AccepterID aID, SessionID sID)
+{
+	auto founder = std::find_if(m_onlineSession.begin(), m_onlineSession.end(), [sID](const ServerAuthSession & sas) {return sas.sID == sID; });
+	if (founder == m_onlineSession.end())
+	{
+		CTcpSessionManager::getRef().KickSession(aID, sID);
+		LOGW("close session because  not found sID in online center. sID=" << sID);
+		return;
+	}
+	if (founder->lastActiveTime + HEARTBEART_INTERVAL * 2 / 1000 < time(NULL))
+	{
+		CTcpSessionManager::getRef().KickSession(aID, sID);
+		LOGW("close session because  not found sID in online center. sID=" << sID << ", lastActiveTime=" << founder->lastActiveTime);
+		return;
+	}
+
+	WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);
+	ProtoDirectServerPulse pulse;
+	pulse.srcNode = GlobalFacade::getRef().getServerConfig().getOwnServerNode();
+	pulse.srcIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
+	ws << ID_DT2OS_DirectServerPulse << pulse;
+	CTcpSessionManager::getRef().SendOrgSessionData(aID, sID, ws.GetStream(), ws.GetStreamLen());
+}
+
+void CNetManager::event_OnConnectorHeartbeat(ConnectorID cID)
+{
+	auto founder = std::find_if(m_onlineConnect.begin(), m_onlineConnect.end(), [cID](const ServerAuthConnect & sac) {return sac.cID == cID; });
+	if (founder == m_onlineConnect.end())
+	{
+		CTcpSessionManager::getRef().BreakConnector(cID);
+		LOGW("break connector because the connector not founder in online center. cID=" << cID);
+		return;
+	}
+	if (founder->lastActiveTime + HEARTBEART_INTERVAL * 2 / 1000 < time(NULL))
+	{
+		CTcpSessionManager::getRef().BreakConnector(cID);
+		LOGW("break connector because the connector heartbeat timeout. cID=" << cID << ", lastActiveTime=" << founder->lastActiveTime);
+		return;
+	}
+	WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);
+	ProtoDirectServerPulse pulse;
+	pulse.srcNode = GlobalFacade::getRef().getServerConfig().getOwnServerNode();
+	pulse.srcIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
+
+	ws << ID_DT2OS_DirectServerPulse << pulse;
+	CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
+}
+
+void CNetManager::msg_OnConnectorPulse(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs)
+{
+	auto founder = std::find_if(m_onlineConnect.begin(), m_onlineConnect.end(), [cID](const ServerAuthConnect & sac) {return sac.cID == cID; });
+	if (founder != m_onlineConnect.end())
+	{
+		LOGD("msg_OnDirectServerPulse lastActiveTime=" << founder->lastActiveTime);
+		founder->lastActiveTime = time(NULL);
+		return;
+	}
+}
+void CNetManager::msg_OnSessionPulse(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs)
+{
+	auto founder = std::find_if(m_onlineSession.begin(), m_onlineSession.end(), [sID](const ServerAuthSession & sas) {return sas.sID == sID; });
+	if (founder != m_onlineSession.end())
+	{
+		LOGD("msg_OnDirectServerPulse lastActiveTime=" << founder->lastActiveTime);
+		founder->lastActiveTime = time(NULL);
+		return;
+	}
+}
+
+
+
 void CNetManager::msg_TranslateToOtherServer(ProtocolID pID, ReadStreamPack & rs)
 {
 	if (pID == ID_RT2OS_RouteToOtherServer)
@@ -192,7 +274,7 @@ void CNetManager::msg_TranslateToOtherServer(ProtocolID pID, ReadStreamPack & rs
 					[route](const ServerAuthConnect & sas){return sas.node == route.dstNode && (route.routerType == 3 || sas.index == route.dstIndex); });
 				if (founder != m_onlineConnect.end())
 				{
-					WriteStreamPack  ws(m_chunkWriteStream, SEND_RECV_CHUNK_SIZE);
+					WriteStreamPack  ws(zsummer::proto4z::UBT_STATIC_AUTO);
 					ws.AppendOriginalData(rs.GetStreamUnread(), rs.GetStreamUnreadLen());
 					CTcpSessionManager::getRef().SendOrgConnectorData(founder->cID, ws.GetStream(), ws.GetStreamLen());
 					return;
@@ -204,7 +286,7 @@ void CNetManager::msg_TranslateToOtherServer(ProtocolID pID, ReadStreamPack & rs
 					[route](const ServerAuthSession & sas){return sas.node == route.dstNode && (route.routerType == 3 || sas.index == route.dstIndex); });
 				if (founder != m_onlineSession.end())
 				{
-					WriteStreamPack  ws(m_chunkWriteStream, SEND_RECV_CHUNK_SIZE);
+					WriteStreamPack  ws(zsummer::proto4z::UBT_STATIC_AUTO);
 					ws.AppendOriginalData(rs.GetStreamUnread(), rs.GetStreamUnreadLen());
 					CTcpSessionManager::getRef().SendOrgSessionData(founder->aID, founder->sID, ws.GetStream(), ws.GetStreamLen());
 					return;
@@ -220,7 +302,7 @@ void CNetManager::msg_TranslateToOtherServer(ProtocolID pID, ReadStreamPack & rs
 				{
 					if (c.node == route.dstNode)
 					{
-						WriteStreamPack  ws(m_chunkWriteStream, SEND_RECV_CHUNK_SIZE);
+						WriteStreamPack  ws(zsummer::proto4z::UBT_STATIC_AUTO);
 						ws.AppendOriginalData(rs.GetStreamUnread(), rs.GetStreamUnreadLen());
 						CTcpSessionManager::getRef().SendOrgConnectorData(c.cID, ws.GetStream(), ws.GetStreamLen());
 					}
@@ -232,7 +314,7 @@ void CNetManager::msg_TranslateToOtherServer(ProtocolID pID, ReadStreamPack & rs
 				{
 					if (s.node == route.dstNode)
 					{
-						WriteStreamPack  ws(m_chunkWriteStream, SEND_RECV_CHUNK_SIZE);
+						WriteStreamPack  ws(zsummer::proto4z::UBT_STATIC_AUTO);
 						ws.AppendOriginalData(rs.GetStreamUnread(), rs.GetStreamUnreadLen());
 						CTcpSessionManager::getRef().SendOrgSessionData(s.aID, s.sID, ws.GetStream(), ws.GetStreamLen());
 					}

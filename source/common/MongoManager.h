@@ -1,4 +1,4 @@
-
+﻿
 /*
 * breeze License
 * Copyright (C) 2014 YaweiZhang <yawei_zhang@foxmail.com>.
@@ -16,6 +16,17 @@
 * limitations under the License.
 */
 
+/*
+*  文件说明
+*  CMongoManager为mongodb的操作管理类, 并提供一个简单的异步操作mongodb方案.
+*  如果某个服务节点需要访问mongodb 可以在这里添加一个mongodb句柄 并进行相应的初始化.
+*  该服务开辟一个单独的线程去做mongodb的阻塞操作, 因此程序使用该类的时候 要进行启动, 并在程序退出时调用停止接口.
+*  该服务提供的异步方式是并非为完全隔离的异步封装, 为了简化逻辑书写, 只对query,update等操作的阻塞部分进行异步, 实现方式为在调用原生query时候 
+*    把原生querry所需的参数和mongodb句柄,handler回调句柄一起传给async_query. 在回调中得到的数据为原生query返回后的所有原生数据.
+*  
+*/
+
+
 #ifndef _MONGO_MANAGER_H_
 #define _MONGO_MANAGER_H_
 #include <mongo/client/dbclient.h>
@@ -24,7 +35,6 @@
 
 
 
-//! ����ڵ����ñ����Ѿ������òſ��Ե��������ĳ�ʼ��
 class CMongoManager
 {
 public:

@@ -3,16 +3,19 @@
 
 CNetManager::CNetManager()
 {
+	//注册来自客户端的默认协议处理逻辑
 	CMessageDispatcher::getRef().RegisterSessionDefaultMessage(
 		std::bind(&CNetManager::msg_DefaultSessionReq, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-	CMessageDispatcher::getRef().RegisterSessionOrgMessage(
-		std::bind(&CNetManager::msg_OrgMessageReq, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 
+	//注册来自服务器内部默认协议处理逻辑
 	CMessageDispatcher::getRef().RegisterConnectorDefaultMessage(
 		std::bind(&CNetManager::msg_DefaultConnectReq, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+
+	//服务器内部的节点注册
 	CMessageDispatcher::getRef().RegisterConnectorMessage(ID_DT2OS_DirectServerAuth,
 		std::bind(&CNetManager::msg_ConnectServerAuth, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	
+	//认证逻辑 支持帐号多次认证
 	CMessageDispatcher::getRef().RegisterSessionMessage(ID_C2AS_AuthReq,
 		std::bind(&CNetManager::msg_AuthReq, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 	CMessageDispatcher::getRef().RegisterConnectorMessage(ID_AS2C_AuthAck,
@@ -24,6 +27,14 @@ CNetManager::CNetManager()
 	CMessageDispatcher::getRef().RegisterOnConnectorDisconnect(std::bind(&CNetManager::event_OnDisconnect, this, std::placeholders::_1));
 	CMessageDispatcher::getRef().RegisterOnSessionEstablished(std::bind(&CNetManager::event_OnSessionEstablished, this, std::placeholders::_1, std::placeholders::_2));
 	CMessageDispatcher::getRef().RegisterOnSessionDisconnect(std::bind(&CNetManager::event_OnSessionDisconnect, this, std::placeholders::_1, std::placeholders::_2));
+
+	//注册心跳
+	CMessageDispatcher::getRef().RegisterOnMySessionHeartbeatTimer(std::bind(&CNetManager::event_OnSessionHeartbeat, this, std::placeholders::_1, std::placeholders::_2));
+	CMessageDispatcher::getRef().RegisterOnMyConnectorHeartbeatTimer(std::bind(&CNetManager::event_OnConnectorHeartbeat, this, std::placeholders::_1));
+	CMessageDispatcher::getRef().RegisterSessionMessage(ID_C2AS_ClientPulse,
+		std::bind(&CNetManager::msg_OnClientPulse, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+	CMessageDispatcher::getRef().RegisterConnectorMessage(ID_DT2OS_DirectServerPulse,
+		std::bind(&CNetManager::msg_OnDirectServerPulse, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 }
 
 bool CNetManager::Start()
@@ -36,7 +47,7 @@ bool CNetManager::Start()
 		tag.cID = m_lastConnectID++;
 		tag.remoteIP = con.remoteIP;
 		tag.remotePort = con.remotePort;
-		tag.reconnectMaxCount = 2;
+		tag.reconnectMaxCount = 120;
 		tag.reconnectInterval = 5000;
 		if (con.dstNode == CenterNode)
 		{
@@ -135,7 +146,7 @@ void CNetManager::msg_ConnectServerAuth(ConnectorID cID, ProtocolID pID, ReadStr
 	m_onlineCenter.push_back(sac);
 
 
-	if (m_configCenter.size() !=  m_onlineCenter.size())
+	if (m_bListening || m_configCenter.size() !=  m_onlineCenter.size())
 	{
 		return;
 	}
@@ -146,6 +157,7 @@ void CNetManager::msg_ConnectServerAuth(ConnectorID cID, ProtocolID pID, ReadStr
 		LOGE("AddAcceptor Failed. listenIP=" << m_configListen.listenIP << ", listenPort=" << m_configListen.listenPort);
 		return;
 	}
+	m_bListening = true;
 	LOGI("AddAcceptor Success. listenIP=" << m_configListen.listenIP << ", listenPort=" << m_configListen.listenPort);
 }
 
@@ -225,10 +237,74 @@ void CNetManager::msg_AuthAck(ConnectorID cID, ProtocolID pID, ReadStreamPack &r
 	CTcpSessionManager::getRef().SendOrgSessionData(info.aID, info.sID, ws.GetStream(), ws.GetStreamLen());
 }
 
-bool CNetManager::msg_OrgMessageReq(AccepterID aID, SessionID sID, const char * blockBegin,  FrameStreamTraits::Integer blockSize)
+void CNetManager::event_OnSessionHeartbeat(AccepterID aID, SessionID sID)
 {
-	return true;
-};
+	auto founder = m_mapSession.find(sID);
+	if (founder == m_mapSession.end())
+	{
+		CTcpSessionManager::getRef().KickSession(aID, sID);
+		LOGW("kick session because session not found in m_mapSession. aID=" << aID << ", sID=" << sID);
+		return;
+	}
+	if (founder->second->lastActiveTime + HEARTBEART_INTERVAL * 2 / 1000 < time(NULL))
+	{
+		CTcpSessionManager::getRef().KickSession(aID, sID);
+		LOGW("kick session because session heartbeat timeout. aID=" << aID << ", sID=" << sID << ", lastActiveTime=" << founder->second->lastActiveTime);
+		return;
+	}
+	WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);
+	ProtoClientPulseAck ack;
+	ack.svrTimeStamp = time(NULL);
+	ws << ID_AS2C_ClientPulseAck << ack;
+	CTcpSessionManager::getRef().SendOrgSessionData(aID, sID, ws.GetStream(), ws.GetStreamLen());
+}
+
+void CNetManager::event_OnConnectorHeartbeat(ConnectorID cID)
+{
+	auto founder = std::find_if(m_onlineCenter.begin(), m_onlineCenter.end(), [cID](const ServerAuthConnect & sac) {return sac.cID == cID; });
+	if (founder == m_onlineCenter.end())
+	{
+		CTcpSessionManager::getRef().BreakConnector(cID);
+		LOGW("break connector because the connector not founder in online center. cID=" << cID);
+		return;
+	}
+	if (founder->lastActiveTime + HEARTBEART_INTERVAL * 2 / 1000 < time(NULL))
+	{
+		CTcpSessionManager::getRef().BreakConnector(cID);
+		LOGW("break connector because the connector heartbeat timeout. cID=" << cID << ", lastActiveTime=" << founder->lastActiveTime);
+		return;
+	}
+	WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);
+	ProtoDirectServerPulse pulse;
+	pulse.srcNode = GlobalFacade::getRef().getServerConfig().getOwnServerNode();
+	pulse.srcIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
+
+	ws << ID_DT2OS_DirectServerPulse << pulse;
+	CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
+}
+
+void CNetManager::msg_OnDirectServerPulse(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs)
+{
+	auto founder = std::find_if(m_onlineCenter.begin(), m_onlineCenter.end(), [cID](const ServerAuthConnect & sac) {return sac.cID == cID; });
+	if (founder != m_onlineCenter.end())
+	{
+		LOGD("msg_OnDirectServerPulse lastActiveTime=" << founder->lastActiveTime);
+		founder->lastActiveTime = time(NULL);
+		return;
+	}
+}
+void CNetManager::msg_OnClientPulse(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs)
+{
+	auto founder = m_mapSession.find(sID);
+	if (founder != m_mapSession.end())
+	{
+		founder->second->lastActiveTime = time(NULL);
+		LOGD("msg_OnClientPulse lastActiveTime=" << founder->second->lastActiveTime);
+		return;
+	}
+}
+
+
 void CNetManager::msg_DefaultConnectReq(ConnectorID cID, ProtocolID pID, ReadStreamPack & rs)
 {
 	SessionInfo info;

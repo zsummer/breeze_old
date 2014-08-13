@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF - 8"?>
 <CacheNo>
-	<cache key = "ID_C2LS_GetAccountInfoReq" No = "20100" /> 
-	<cache key = "ID_LS2C_GetAccountInfoAck" No = "20101" /> 
+	<cache key = "ID_C2LS_GetAccountInfoReq" No = "20200" /> 
+	<cache key = "ID_LS2C_GetAccountInfoAck" No = "20201" /> 
 </CacheNo>
