@@ -26,6 +26,12 @@
 #include <ProtoCommon.h>
 #include <ProtoLogin.h>
 
+struct LogicCharacterInfo 
+{
+	CharacterInfo charInfo;
+	SessionInfo sInfo;
+};
+
 
 class CCharacterManager : public CBaseHandler
 {
@@ -36,10 +42,18 @@ public:
 	void msg_LoadAccountInfoReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
 	void mongo_LoadAccountInfo(std::shared_ptr<mongo::DBClientCursor> & cursor, std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info);
 	void mongo_LoadLittleCharInfo(std::shared_ptr<mongo::DBClientCursor> & cursor, std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info);
+
+	void msg_CreateCharacterReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
+	void mongo_CreateCharacter(std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info, const LittleCharInfo & lci);
+
+	void msg_CharacterLoginReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
+	void mongo_LoadCharacterInfo(std::shared_ptr<mongo::DBClientCursor> & cursor, std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info);
 private:
 public:
 private:
-	std::unordered_map<AccountID, std::shared_ptr<AccountInfo> > m_accountCache;
+	std::unordered_map<AccountID, std::shared_ptr<AccountInfo> > m_accInfo;
+	std::unordered_map<CharacterID, std::shared_ptr<LogicCharacterInfo> > m_charInfo;
+	CharacterID m_seqCharID = 1;
 };
 
 

@@ -20,7 +20,8 @@ CNetManager::CNetManager()
 		std::bind(&CNetManager::msg_AuthReq, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 	CMessageDispatcher::getRef().RegisterConnectorMessage(ID_AS2C_AuthAck,
 		std::bind(&CNetManager::msg_AuthAck, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-
+	CMessageDispatcher::getRef().RegisterConnectorMessage(ID_LS2AS_KickCharacter,
+		std::bind(&CNetManager::msg_KickCharacter, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
 	//注册事件
 	CMessageDispatcher::getRef().RegisterOnConnectorEstablished(std::bind(&CNetManager::event_OnConnect, this, std::placeholders::_1));
@@ -121,6 +122,8 @@ void CNetManager::event_OnSessionDisconnect(AccepterID aID, SessionID sID)
 	{
 		return;
 	}
+	founder->second->sInfo.aID = InvalidAccepterID;
+	founder->second->sInfo.sID = InvalidSeesionID;
 	m_mapSession.erase(founder);
 }
 
@@ -235,6 +238,45 @@ void CNetManager::msg_AuthAck(ConnectorID cID, ProtocolID pID, ReadStreamPack &r
 	WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);
 	ws << ID_AS2C_AuthAck << ack;
 	CTcpSessionManager::getRef().SendOrgSessionData(info.aID, info.sID, ws.GetStream(), ws.GetStreamLen());
+}
+
+void CNetManager::msg_KickCharacter(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs)
+{
+	SessionInfo info;
+	rs >> info;
+	auto fouder = m_mapChar.find(info.charID);
+	if (fouder == m_mapChar.end())
+	{
+		if (info.agentIndex != GlobalFacade::getRef().getServerConfig().getOwnNodeIndex())
+		{
+			return;
+		}
+		
+		auto fouderSession = m_mapSession.find(info.sID);
+		if (fouderSession == m_mapSession.end())
+		{
+			return;
+		}
+		
+		if (fouderSession->second->sInfo.accID != info.accID)
+		{
+			return;
+		}
+		m_mapChar.erase(fouderSession->second->sInfo.charID);
+		fouderSession->second->sInfo.charID = info.charID;
+		m_mapChar.insert(std::make_pair(info.charID, fouderSession->second));
+	}
+	else
+	{
+		SessionInfo & fInfo = fouder->second->sInfo;
+		if (fInfo.agentIndex != GlobalFacade::getRef().getServerConfig().getOwnNodeIndex()
+			|| fInfo.sID != info.sID)
+		{
+			fInfo.charID = InvalidCharacterID;
+			CTcpSessionManager::getRef().KickSession(fInfo.aID, fInfo.sID);
+		}
+	}
+	
 }
 
 void CNetManager::event_OnSessionHeartbeat(AccepterID aID, SessionID sID)

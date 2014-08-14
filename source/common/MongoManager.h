@@ -29,7 +29,10 @@
 
 #ifndef _MONGO_MANAGER_H_
 #define _MONGO_MANAGER_H_
+#pragma warning(push)
+#pragma warning(disable:4244 4267 4819)
 #include <mongo/client/dbclient.h>
+#pragma warning(pop)
 #include <ProtoDefine.h>
 #include <ServerConfig.h>
 
@@ -49,7 +52,8 @@ public:
 
 	void async_query(MongoPtr &mongoPtr, const string &ns, const mongo::Query &query,
 		const std::function<void(std::shared_ptr<mongo::DBClientCursor> &, std::string &)> & handler);
-
+	void async_update(MongoPtr &mongoPtr, const string &ns, const mongo::Query &query, const mongo::BSONObj &obj, bool upsert,
+		const std::function<void(std::string &)> & handler);
 
 public:
 
@@ -59,6 +63,10 @@ public:
 protected:
 	void _async_query(MongoPtr &mongoPtr, const string &ns, const mongo::Query &query,
 		std::function<void(shared_ptr<mongo::DBClientCursor>&, std::string &)> &handler);
+
+	void _async_update(MongoPtr &mongoPtr, const string &ns, const mongo::Query &query, const mongo::BSONObj &obj, bool upsert,
+		const std::function<void(std::string &)> & handler);
+
 	inline void Run()
 	{
 		do 

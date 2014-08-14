@@ -36,6 +36,9 @@
   </proto>
 
 
+  <proto from="LS" to="AS" name="KickCharacter" desc= "踢掉指定角色, 该协议需要通过路由协议交给agent. 默认使用方式为广播形式路由给所有agent节点">
+  </proto>
+
 
 
 </Proto>

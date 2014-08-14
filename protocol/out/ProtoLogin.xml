@@ -23,7 +23,7 @@
 
   <proto from="LS" to="C" name="CreateCharacterAck" desc= "创建角色应答" >
   	<member name="retCode" type="ui16"   desc=""/>
-    <member name="charID" type="ui64"   desc=""/>
+    <member name="lci" type="LittleCharInfo"   desc=""/>
   </proto>
 
   <proto from="C" to="LS" name="CharacterLoginReq" desc= "角色登录">

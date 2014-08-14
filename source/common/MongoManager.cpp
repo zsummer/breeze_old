@@ -120,10 +120,34 @@ void CMongoManager::_async_query(MongoPtr & mongoPtr, const string &ns, const mo
 
 
 
+void CMongoManager::async_update(MongoPtr &mongoPtr, const string &ns, const mongo::Query &query, const mongo::BSONObj &obj, bool upsert,
+	const std::function<void(std::string &)> & handler)
+{
+	m_summer.Post(std::bind(&CMongoManager::_async_update, this, mongoPtr, ns, query, obj, upsert, handler));
+}
 
 
-
-
+void CMongoManager::_async_update(MongoPtr &mongoPtr, const string &ns, const mongo::Query &query, const mongo::BSONObj &obj, bool upsert,
+	const std::function<void(std::string &)> & handler)
+{
+	std::string ret;
+	try
+	{
+		mongoPtr->update(ns, query, obj, upsert);
+		ret = mongoPtr->getLastError();
+		CTcpSessionManager::getRef().Post(std::bind(handler, ret));
+		return;
+	}
+	catch (const mongo::DBException &e)
+	{
+		ret += "mongodb _async_update catch error. ns=" + ns + ", query=" + query.toString() + ", error=" + e.what();
+	}
+	catch (...)
+	{
+		ret += "mongodb _async_update unknown error. ns=" + ns + ", query=" + query.toString();
+	}
+	CTcpSessionManager::getRef().Post(std::bind(handler, ret));
+}
 
 
 

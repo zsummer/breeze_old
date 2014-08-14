@@ -69,6 +69,7 @@ public:
 
 	void msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
 	void msg_AuthAck(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs);
+	void msg_KickCharacter(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs);
 
 	void event_OnSessionHeartbeat(AccepterID aID, SessionID sID);
 	void event_OnConnectorHeartbeat(ConnectorID cID);
