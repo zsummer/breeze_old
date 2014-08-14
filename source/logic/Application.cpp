@@ -8,7 +8,7 @@
 
 #include <BaseHander.h>
 #include "core/NetManager.h"
-#include "logic/LoginHandler.h"
+#include "logic/CharacterManager.h"
 using namespace zsummer::log4z;
 
 Appliction::Appliction()
@@ -62,9 +62,15 @@ bool Appliction::Init(std::string filename, unsigned int index)
 		LOGE("NetManager Start false.");
 		return ret;
 	}
+	ret = GlobalFacade::getRef().getCharManager().Init();
+	if (!ret)
+	{
+		LOGE("CharManager Init false.");
+		return ret;
+	}
+	
 
 	std::vector<CBaseHandler*> handlers;
-	handlers.push_back(new CLoginHandler());
 	for (auto ptr : handlers)
 	{
 		if (!ptr->Init())

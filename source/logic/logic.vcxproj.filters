@@ -33,7 +33,7 @@
     <ClCompile Include="core\NetManager.cpp">
       <Filter>core</Filter>
     </ClCompile>
-    <ClCompile Include="logic\LoginHandler.cpp">
+    <ClCompile Include="logic\CharacterManager.cpp">
       <Filter>logic</Filter>
     </ClCompile>
   </ItemGroup>
@@ -53,14 +53,14 @@
     <ClInclude Include="..\common\BaseHander.h">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="logic\LoginHandler.h">
-      <Filter>logic</Filter>
-    </ClInclude>
     <ClInclude Include="..\common\MongoManager.h">
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="..\common\ProtoDefine.h">
       <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="logic\CharacterManager.h">
+      <Filter>logic</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

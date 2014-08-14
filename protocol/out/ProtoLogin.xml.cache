@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF - 8"?>
 <CacheNo>
+	<cache key = "ID_C2LS_CharacterLoginReq" No = "20206" /> 
+	<cache key = "ID_C2LS_CreateCharacterReq" No = "20204" /> 
 	<cache key = "ID_C2LS_GetAccountInfoReq" No = "20200" /> 
+	<cache key = "ID_C2LS_LoadAccountInfoReq" No = "20202" /> 
+	<cache key = "ID_LS2C_CharacterLoginAck" No = "20207" /> 
+	<cache key = "ID_LS2C_CreateCharacterAck" No = "20205" /> 
 	<cache key = "ID_LS2C_GetAccountInfoAck" No = "20201" /> 
+	<cache key = "ID_LS2C_LoadAccountInfoAck" No = "20203" /> 
 </CacheNo>

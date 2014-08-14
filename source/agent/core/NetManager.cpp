@@ -206,7 +206,7 @@ void CNetManager::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Rea
 	route.dstNode = AuthNode;
 	route.routerType = 1;
 	route.dstIndex = 0;
-	WriteStreamPack ws(m_chunkWriteStream, SEND_RECV_CHUNK_SIZE);
+	WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);
 	ws << inProtoID << route << ID_C2AS_AuthReq << sinfo->sInfo << req;
 	CTcpSessionManager::getRef().SendOrgConnectorData(m_onlineCenter.at(0).cID, ws.GetStream(), ws.GetStreamLen());
 }
@@ -232,7 +232,7 @@ void CNetManager::msg_AuthAck(ConnectorID cID, ProtocolID pID, ReadStreamPack &r
 		m_mapAccount[ack.accountID] = founder->second;
 	}
 
-	WriteStreamPack ws;
+	WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);
 	ws << ID_AS2C_AuthAck << ack;
 	CTcpSessionManager::getRef().SendOrgSessionData(info.aID, info.sID, ws.GetStream(), ws.GetStreamLen());
 }
@@ -252,11 +252,7 @@ void CNetManager::event_OnSessionHeartbeat(AccepterID aID, SessionID sID)
 		LOGW("kick session because session heartbeat timeout. aID=" << aID << ", sID=" << sID << ", lastActiveTime=" << founder->second->lastActiveTime);
 		return;
 	}
-	WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);
-	ProtoClientPulseAck ack;
-	ack.svrTimeStamp = time(NULL);
-	ws << ID_AS2C_ClientPulseAck << ack;
-	CTcpSessionManager::getRef().SendOrgSessionData(aID, sID, ws.GetStream(), ws.GetStreamLen());
+
 }
 
 void CNetManager::event_OnConnectorHeartbeat(ConnectorID cID)
@@ -302,6 +298,11 @@ void CNetManager::msg_OnClientPulse(AccepterID aID, SessionID sID, ProtocolID pI
 		LOGD("msg_OnClientPulse lastActiveTime=" << founder->second->lastActiveTime);
 		return;
 	}
+	WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);
+	ProtoClientPulseAck ack;
+	ack.svrTimeStamp = time(NULL);
+	ws << ID_AS2C_ClientPulseAck << ack;
+	CTcpSessionManager::getRef().SendOrgSessionData(aID, sID, ws.GetStream(), ws.GetStreamLen());
 }
 
 
@@ -311,7 +312,7 @@ void CNetManager::msg_DefaultConnectReq(ConnectorID cID, ProtocolID pID, ReadStr
 	rs >> info;
 	if (info.aID != InvalidAccepterID && info.sID != InvalidSeesionID)
 	{
-		WriteStreamPack ws(m_chunkWriteStream, SEND_RECV_CHUNK_SIZE);
+		WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);
 		ws << pID;
 		ws.AppendOriginalData(rs.GetStreamUnread(), rs.GetStreamUnreadLen());
 		CTcpSessionManager::getRef().SendOrgSessionData(info.aID, info.sID, ws.GetStream(), ws.GetStreamLen());
@@ -328,7 +329,7 @@ void CNetManager::msg_DefaultSessionReq(AccepterID aID, SessionID sID, ProtocolI
 		ack.accountID = InvalidAccountID;
 		if (ack.retCode != EC_SUCCESS)
 		{
-			WriteStreamPack ws(m_chunkWriteStream, SEND_RECV_CHUNK_SIZE);
+			WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);
 			ws << ID_AS2C_AuthAck << ack;
 			CTcpSessionManager::getRef().SendOrgSessionData(aID, sID, ws.GetStream(), ws.GetStreamLen());
 		}
@@ -344,7 +345,7 @@ void CNetManager::msg_DefaultSessionReq(AccepterID aID, SessionID sID, ProtocolI
 			route.routerType = 1;
 			route.dstIndex = 0;
 			
-			WriteStreamPack ws(m_chunkWriteStream, SEND_RECV_CHUNK_SIZE);
+			WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);
 			ws << inProtoID << route << pID << finditer->second->sInfo;
 			ws.AppendOriginalData(rs.GetStreamUnread(), rs.GetStreamUnreadLen());
 			CTcpSessionManager::getRef().SendOrgConnectorData(m_onlineCenter.at(0).cID,  ws.GetStream(), ws.GetStreamLen());

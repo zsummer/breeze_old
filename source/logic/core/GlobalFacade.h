@@ -16,12 +16,17 @@
 * limitations under the License.
 */
 
+/*
+*  文件说明
+*  全局外观类 如果一个类是提供给所有人使用的 那就在这里添加一个访问方法.
+*/
 
 #ifndef _GLOBAL_FACADE_H_
 #define _GLOBAL_FACADE_H_
 class ServerConfig;
 class CNetManager;
 class CMongoManager;
+class CCharacterManager;
 
 class GlobalFacade
 {
@@ -34,10 +39,12 @@ public:
 	inline ServerConfig & getServerConfig(){ return *m_serverConfig; }
 	inline CNetManager & getNetManger(){ return *m_netManger; }
 	inline CMongoManager & getMongoManger(){ return *m_mongoManager; }
+	inline CCharacterManager & getCharManager() { return *m_charManager; }
 private:
 	ServerConfig * m_serverConfig;
 	CNetManager * m_netManger;
 	CMongoManager * m_mongoManager;
+	CCharacterManager * m_charManager;
 };
 
 

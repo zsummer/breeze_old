@@ -1,4 +1,4 @@
-
+ï»¿
 /*
 * breeze License
 * Copyright (C) 2014 YaweiZhang <yawei_zhang@foxmail.com>.
@@ -15,6 +15,16 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
+
+
+/*
+*  æ–‡ä»¶è¯´æ˜
+*  ç½‘ç»œç®¡ç†ç±»
+*  æä¾›æœåŠ¡èŠ‚ç‚¹çš„ç½‘ç»œæ¨¡å—é…ç½®å¯åŠ¨,ç»´æŠ¤ç½‘ç»œçš„è¿æ¥/æ–­å¼€,å¿ƒè·³è„‰å†², èŠ‚ç‚¹æ³¨å†Œ, é»˜è®¤æ¶ˆæ¯å¤„ç†ç­‰.
+*  æä¾›æ‰€æœ‰äººè¾ƒåŸå§‹çš„ç½‘ç»œè®¿é—®æ¥å£.
+*/
+
+
 
 #ifndef _NET_MANAGER_H_
 #define _NET_MANAGER_H_
@@ -34,7 +44,7 @@ class CNetManager
 {
 public:
 	CNetManager();
-	//Á¬½ÓËùÓĞÈÏÖ¤·şÎñºÍÖĞÑë·şÎñ
+	//è¿æ¥æ‰€æœ‰è®¤è¯æœåŠ¡å’Œä¸­å¤®æœåŠ¡
 	bool Start();
 	void event_OnConnect(ConnectorID cID);
 	void event_OnDisconnect(ConnectorID cID);
@@ -60,10 +70,10 @@ public:
 protected:
 	void msg_TranslateToOtherServer(ProtocolID pID, ReadStreamPack & rs);
 private:
-	tagAcceptorConfigTraits m_configListen; //±£´æ¼àÌıÅäÖÃ
+	tagAcceptorConfigTraits m_configListen; //ä¿å­˜ç›‘å¬é…ç½®
 	bool m_bListening = false;
-	ConnectorID m_lastConnectID = 0; //×Ô¶¯µİÔöµÄconnectorID.
-	std::unordered_map<ConnectorID, tagConnctorConfigTraits> m_configConnect; //cID ¶ÔÓ¦µÄÁ¬½ÓÅäÖÃ
+	ConnectorID m_lastConnectID = 0; //è‡ªåŠ¨é€’å¢çš„connectorID.
+	std::unordered_map<ConnectorID, tagConnctorConfigTraits> m_configConnect; //cID å¯¹åº”çš„è¿æ¥é…ç½®
 
 	std::vector<ServerAuthSession> m_onlineSession;
 	std::vector<ServerAuthConnect> m_onlineConnect;

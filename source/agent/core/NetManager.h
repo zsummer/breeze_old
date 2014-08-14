@@ -16,6 +16,17 @@
 * limitations under the License.
 */
 
+
+/*
+*  文件说明
+*  网络管理类
+*  提供服务节点的网络模块配置启动,维护网络的连接/断开,心跳脉冲, 节点注册, 默认消息处理等.
+*  提供所有人较原始的网络访问接口.
+*/
+
+
+
+
 #ifndef _NET_MANAGER_H_
 #define _NET_MANAGER_H_
 #include <ServerConfig.h>
@@ -26,9 +37,16 @@
 #include <zsummerX/FrameMessageDispatch.h>
 #include <zsummerX/FrameTcpSessionManager.h>
 #include <unordered_map>
+
+
 /*
-* NetManager
+*  文件说明
+*  网络管理类
+*  提供服务节点的网络模块配置启动,维护网络的连接/断开,心跳脉冲, 节点注册, 默认消息处理等.
+*  提供所有人较原始的网络访问接口.
 */
+
+
 
 
 class CNetManager
@@ -69,8 +87,6 @@ private:
 	std::unordered_map<ConnectorID, tagConnctorConfigTraits> m_configCenter;  //cID 对应的连接配置
 
 	std::vector<ServerAuthConnect> m_onlineCenter;
-
-	char m_chunkWriteStream[SEND_RECV_CHUNK_SIZE];
 };
 
 

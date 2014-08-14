@@ -1,4 +1,4 @@
-
+﻿
 /*
 * breeze License
 * Copyright (C) 2014 YaweiZhang <yawei_zhang@foxmail.com>.
@@ -16,6 +16,14 @@
 * limitations under the License.
 */
 
+/*
+*  文件说明
+*  网络管理类
+*  提供服务节点的网络模块配置启动,维护网络的连接/断开,心跳脉冲, 节点注册, 默认消息处理等.
+*  提供所有人较原始的网络访问接口.
+*/
+
+
 #ifndef _NET_MANAGER_H_
 #define _NET_MANAGER_H_
 
@@ -23,20 +31,13 @@
 #include <zsummerX/FrameMessageDispatch.h>
 #include <zsummerX/FrameTcpSessionManager.h>
 #include <ProtoDefine.h>
-/*
-* NetManager
-*/
 
-namespace mongo
-{
-	class DBClientConnection;
-};
 
 class CNetManager
 {
 public:
 	CNetManager();
-	//����������֤������������
+	//连接所有认证服务和中央服务
 	bool Start();
 
 	//
@@ -60,7 +61,7 @@ public:
 	void msg_SessionServerAuth(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
 
 private:
-	tagAcceptorConfigTraits m_configListen; //�����������
+	tagAcceptorConfigTraits m_configListen; //保存监听配置
 
 	std::vector<ServerAuthSession> m_onlineCenter;
 

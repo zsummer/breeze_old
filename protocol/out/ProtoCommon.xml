@@ -9,24 +9,44 @@
 
 <Proto>
 
-    <!-- 这里是配置统一的错误代码 -->
-    <const name="EC_SUCCESS" value="0" type="ui16"  desc="成功"/>
-    <const name="EC_UNKOWN_ERROR" value="1"  type="ui16" desc="未知错误"/>
-    <const name="EC_SERVER_ERROR"  value="2" type="ui16" desc="服务器内部错误"/>
-    <const name="EC_AUTH_NOT_FOUND" value="3"  type="ui16" desc="认证错误:找不到用户名"/>
-    <const name="EC_AUTH_ERROR"  value="4" type="ui16" desc="认证失败"/>
-    <const name="EC_AUTH_ING"  value="5" type="ui16" desc="正在认证中..."/>
-    <const name="EC_AUTH_DOUBLE"  value="6" type="ui16" desc="重复认证"/>
-    <const name="EC_KEY_NOTFOUND"  value="7" type="ui16" desc="KEY找不到"/>
+  <!-- 这里是配置统一的错误代码 -->
+  <const name="EC_SUCCESS" value="0" type="ui16"  desc="成功"/>
+  <const name="EC_UNKOWN_ERROR" value="1"  type="ui16" desc="未知错误"/>
+  <const name="EC_SERVER_ERROR"  value="2" type="ui16" desc="服务器内部错误"/>
+  <const name="EC_AUTH_NOT_FOUND" value="3"  type="ui16" desc="认证错误:找不到用户名"/>
+  <const name="EC_AUTH_ERROR"  value="4" type="ui16" desc="认证失败"/>
+  <const name="EC_AUTH_ING"  value="5" type="ui16" desc="正在认证中..."/>
+  <const name="EC_AUTH_DOUBLE"  value="6" type="ui16" desc="重复认证"/>
+  <const name="EC_KEY_NOTFOUND"  value="7" type="ui16" desc="KEY找不到"/>
+
+  <struct name="LittleCharInfo" desc="简要角色信息">
+    <member name="charID" type="ui64"   desc="角色ID"/>
+    <member name="iconID"  type="ui32" desc="头像"/>
+    <member name="level"  type="ui32" desc="等级"/>
+    <member name="charName"  type="string" desc="昵称"/>
+  </struct>
+  <array name="LittleCharInfoVec" type="LittleCharInfo" desc="角色数组类型" />
+
+  <struct name="AccountInfo" desc="帐号信息">
+    <member name="accName" type="string"   desc=""/>
+    <member name="accID" type="ui64"   desc=""/>
+    <member name="diamond"  type="ui32" desc="当前剩余的充值钻石"/>
+    <member name="hisDiamond"  type="ui32" desc="历史充值钻石总额"/>
+    <member name="giftDmd"  type="ui32" desc="当前剩余的赠送钻石"/>
+    <member name="hisGiftDmd"  type="ui32" desc="历往赠送钻石总额"/>
+    <member name="charInfos"  type="LittleCharInfoVec" desc="角色信息"/>
+  </struct>
 
 
   <!-- 用户角色信息 -->
-  <struct name="CharactorInfo" desc="角色信息">
-    <member name="accountName" type="string"   desc=""/>
+  <struct name="CharacterInfo" desc="角色信息">
     <member name="accountID" type="ui64"   desc=""/>
-    <member name="charName" type="string"   desc=""/>
-    <member name="charID" type="ui64"   desc=""/>
+    <member name="charID" type="ui64"   desc="角色ID"/>
+    <member name="iconID"  type="ui32" desc="头像"/>
+    <member name="level"  type="ui32" desc="等级"/>
+    <member name="charName"  type="string" desc="昵称"/>
   </struct>
+
 
   <!-- 客户端存活脉冲  该协议属于需要认证的协议 所以如果客户端连接到服务器在一个脉冲周期内未能认证成功 就会被踢掉-->
   <proto from="C" to="AS" name="ClientPulse" desc= "客户端存活脉冲">

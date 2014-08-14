@@ -1,4 +1,4 @@
-
+﻿
 /*
 * breeze License
 * Copyright (C) 2014 YaweiZhang <yawei_zhang@foxmail.com>.
@@ -14,6 +14,12 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 * See the License for the specific language governing permissions and
 * limitations under the License.
+*/
+
+
+/*
+*  文件说明
+*  全局外观类 如果一个类是提供给所有人使用的 那就在这里添加一个访问方法.
 */
 
 

@@ -16,26 +16,30 @@
 * limitations under the License.
 */
 
-#ifndef _LOGIN_HANDLER_H_
-#define _LOGIN_HANDLER_H_
+#ifndef _CHARACTER_MANAGER_H_
+#define _CHARACTER_MANAGER_H_
 
 #include <MongoManager.h>
 #include <BaseHander.h>
 #include "../core/GlobalFacade.h"
 #include <ProtoDefine.h>
+#include <ProtoCommon.h>
 #include <ProtoLogin.h>
 
 
-class CLoginHandler : public CBaseHandler
+class CCharacterManager : public CBaseHandler
 {
 public:
-	CLoginHandler(){}
-	~CLoginHandler(){}
+	CCharacterManager(){}
+	~CCharacterManager(){}
 	virtual bool Init() override final;
-	void msg_GetAccountReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
-	void mongo_GetAccount(std::shared_ptr<mongo::DBClientCursor> & cursor, std::string &errMsg, AccepterID cID, SessionID sID, SessionInfo & info, const ProtoGetAccountInfoReq &req);
-
+	void msg_LoadAccountInfoReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
+	void mongo_LoadAccountInfo(std::shared_ptr<mongo::DBClientCursor> & cursor, std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info);
+	void mongo_LoadLittleCharInfo(std::shared_ptr<mongo::DBClientCursor> & cursor, std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info);
 private:
+public:
+private:
+	std::unordered_map<AccountID, std::shared_ptr<AccountInfo> > m_accountCache;
 };
 
 

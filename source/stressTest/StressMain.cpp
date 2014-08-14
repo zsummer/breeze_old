@@ -103,7 +103,7 @@ public:
 		CMessageDispatcher::getRef().RegisterOnConnectorEstablished(std::bind(&CStressClientHandler::OnConnected, this, std::placeholders::_1));
 		CMessageDispatcher::getRef().RegisterConnectorMessage(ID_AS2C_AuthAck,
 			std::bind(&CStressClientHandler::msg_AuthAck_fun, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-		CMessageDispatcher::getRef().RegisterConnectorMessage(ID_LS2C_GetAccountInfoAck,
+		CMessageDispatcher::getRef().RegisterConnectorMessage(ID_LS2C_LoadAccountInfoAck,
 			std::bind(&CStressClientHandler::msg_GetAccountInfoAck_fun, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
 		CMessageDispatcher::getRef().RegisterOnConnectorDisconnect(std::bind(&CStressClientHandler::OnConnectDisconnect, this, std::placeholders::_1));
@@ -160,18 +160,17 @@ public:
 // 		}
 
 		WriteStreamPack ws;
-		ProtoGetAccountInfoReq req;
-		req.accountID = ack.accountID;
-		ws << ID_C2LS_GetAccountInfoReq << req;
+		ProtoLoadAccountInfoReq req;
+		ws << ID_C2LS_LoadAccountInfoReq << req;
 		CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
-		LOGD("msg_AuthAck. Send LoginReq. cID=" << cID << ", user=" << req.accountID);
+		LOGD("msg_AuthAck. Send LoginReq. cID=" << cID);
 		g_totalSendCount++;
 		
 
 	};
 	inline void msg_GetAccountInfoAck_fun(ConnectorID cID, ProtocolID pID, ReadStreamPack & rs)
 	{
-		ProtoGetAccountInfoAck ack;
+		ProtoLoadAccountInfoAck ack;
 		rs >> ack;
 
 		g_totalRecvCount++;
@@ -193,12 +192,11 @@ public:
 // 			}
 
 			{
-				WriteStreamPack ws;
-				ProtoGetAccountInfoReq req;
-				req.accountID = ack.info.accID;
-				ws << ID_C2LS_GetAccountInfoReq << req;
+				WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);
+				ProtoLoadAccountInfoReq req;
+				ws << ID_C2LS_LoadAccountInfoReq << req;
 				CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
-				LOGD("msg_AuthAck. Send LoginReq. cID=" << cID << ", user=" << req.accountID);
+				LOGD("msg_AuthAck. Send LoginReq. cID=" << cID);
 				g_totalSendCount++;
 			}
 		}
