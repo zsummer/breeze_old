@@ -49,15 +49,19 @@ const ui64 InvalidItemID = (ItemID)-1;
 typedef ui32 NodeIndex;
 const NodeIndex InvalidNodeIndex = (NodeIndex)-1;
 
+//服务节点类型
 typedef ui32 ServerNode;
 const ServerNode InvalideServerNode = (ServerNode)-1;
 const ServerNode AgentNode = 0;
 const ServerNode AuthNode = 1;
 const ServerNode CenterNode = 2;
 const ServerNode LogicNode = 3;
-
+//服务节点编号
 typedef ui32 NodeIndex;
 const NodeIndex InvalideNodeIndex = (NodeIndex)-1;
+
+typedef ui32 GameID;
+typedef ui32 AreaID;
 
 
 

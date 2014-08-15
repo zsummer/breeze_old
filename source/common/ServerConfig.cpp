@@ -91,6 +91,11 @@ bool ServerConfig::Parse(std::string filename, ServerNode ownNode, NodeIndex own
 	{
 		boost::property_tree::ptree pt;
 		boost::property_tree::read_xml(filename, pt);
+
+		auto server = pt.get_child("server");
+		m_gameid = server.get<unsigned int>("<xmlattr>.gameid");
+		m_areaid = server.get<unsigned int>("<xmlattr>.areaid");
+
 		auto listener = pt.get_child("listen");
 		for (auto iter = listener.begin(); iter != listener.end(); ++iter)
 		{

@@ -39,6 +39,7 @@ public:
 	CCharacterManager(){}
 	~CCharacterManager(){}
 	virtual bool Init() override final;
+	bool mongo_LoadLastCharID();
 	void msg_LoadAccountInfoReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
 	void mongo_LoadAccountInfo(std::shared_ptr<mongo::DBClientCursor> & cursor, std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info);
 	void mongo_LoadLittleCharInfo(std::shared_ptr<mongo::DBClientCursor> & cursor, std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info);

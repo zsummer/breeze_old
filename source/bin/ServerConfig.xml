@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
+<server gameid="1000" areaid="1000" />
+
 <mongo>
 	<auth ip="127.0.0.1" port="27017" db="db_auth" user="zhangyawei" pwd="123" needAuth="true" />
 	<info ip="127.0.0.1" port="27017" db="db_info" user="zhangyawei" pwd="123" needAuth="true" />

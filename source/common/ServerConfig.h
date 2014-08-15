@@ -72,8 +72,10 @@ public:
 	const ListenConfig getConfigListen(ServerNode node, NodeIndex index = InvalidNodeIndex);
 	std::vector<ConnectorConfig > getConfigConnect(ServerNode node);
 
-	const ServerNode & getOwnServerNode(){ return m_ownServerNode; }
-	const NodeIndex & getOwnNodeIndex(){ return m_ownNodeIndex; }
+	ServerNode getOwnServerNode(){ return m_ownServerNode; }
+	NodeIndex getOwnNodeIndex(){ return m_ownNodeIndex; }
+	GameID getGameID() { return m_gameid; }
+	AreaID getAreaID() { return m_areaid; }
 
 	inline const MongoConfig & getAuthMongoDB(){ return m_authMongo; }
 	inline const MongoConfig & getInfoMongoDB(){ return m_infoMongo; }
@@ -81,6 +83,9 @@ public:
 private:
 	ServerNode m_ownServerNode = InvalideServerNode;
 	NodeIndex m_ownNodeIndex = InvalidNodeIndex;
+	GameID m_gameid = 0;
+	AreaID m_areaid = 0;
+
 	std::vector<ListenConfig> m_configListen;
 	std::vector<ConnectorConfig> m_configConnect;
 

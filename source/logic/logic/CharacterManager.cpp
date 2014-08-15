@@ -6,16 +6,34 @@
 
 bool CCharacterManager::Init()
 {
+	//注册消息
 	CMessageDispatcher::getRef().RegisterSessionMessage(ID_C2LS_LoadAccountInfoReq,
 		std::bind(&CCharacterManager::msg_LoadAccountInfoReq, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 	CMessageDispatcher::getRef().RegisterSessionMessage(ID_C2LS_CreateCharacterReq,
 		std::bind(&CCharacterManager::msg_CreateCharacterReq, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 	CMessageDispatcher::getRef().RegisterSessionMessage(ID_C2LS_CharacterLoginReq,
 		std::bind(&CCharacterManager::msg_CharacterLoginReq, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-	return true;
+
+
+	return mongo_LoadLastCharID();
 }
 
-
+bool CCharacterManager::mongo_LoadLastCharID()
+{
+	//初始化
+	long long curArea = GlobalFacade::getRef().getServerConfig().getAreaID();
+	long long nextArea = curArea + 1;
+	curArea = curArea << 32;
+	nextArea = nextArea << 32;
+	CMongoManager & mgr = GlobalFacade::getRef().getMongoManger();
+	std::string ns = GlobalFacade::getRef().getServerConfig().getInfoMongoDB().db;
+	ns += ".cl_character";
+	mongo::BSONObjBuilder b;
+	b << "_id" << mongo::GTE << curArea << "_id" << mongo::LT << nextArea;
+	
+	auto cursor = mgr.getInfoMongo()->query(ns, mongo::Query(b.obj()).sort("_id", -1), 1);
+	
+}
 void CCharacterManager::msg_LoadAccountInfoReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs)
 {
 	SessionInfo info;

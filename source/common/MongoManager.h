@@ -67,24 +67,8 @@ protected:
 	void _async_update(MongoPtr &mongoPtr, const string &ns, const mongo::Query &query, const mongo::BSONObj &obj, bool upsert,
 		const std::function<void(std::string &)> & handler);
 
-	inline void Run()
-	{
-		do 
-		{
-			if (!m_bRuning)
-			{
-				break;
-			}
-			try
-			{
-				m_summer.RunOnce();
-			}
-			catch (...)
-			{
-			}
-			
-		} while (true);
-	}
+	inline void Run();
+
 private:
 	std::shared_ptr<mongo::DBClientConnection> m_authMongo;
 	std::shared_ptr<mongo::DBClientConnection> m_infoMongo;
@@ -101,7 +85,24 @@ private:
 
 
 
+void CMongoManager::Run()
+{
+	do
+	{
+		if (!m_bRuning)
+		{
+			break;
+		}
+		try
+		{
+			m_summer.RunOnce();
+		}
+		catch (...)
+		{
+		}
 
+	} while (true);
+}
 
 
 
