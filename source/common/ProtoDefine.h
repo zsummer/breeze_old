@@ -107,7 +107,7 @@ struct SessionInfo
 };
 
 template <class STM>
-STM & operator << (STM & stm, const SessionInfo & info)
+inline STM & operator << (STM & stm, const SessionInfo & info)
 {
 	stm << info.accID << info.charID
 		<< info.agentIndex << info.aID << info.sID
@@ -115,13 +115,25 @@ STM & operator << (STM & stm, const SessionInfo & info)
 	return stm;
 }
 template <class STM>
-STM & operator >> (STM & stm, SessionInfo & info)
+inline STM & operator >> (STM & stm, SessionInfo & info)
 {
 	stm >> info.accID >> info.charID
 		>> info.agentIndex >> info.aID >> info.sID
 		>> info.srcNode >> info.srcIndex;;
 	return stm;
 }
+
+template <>
+inline zsummer::log4z::CStringStream & operator << (zsummer::log4z::CStringStream & stm, const SessionInfo & info)
+{
+	stm << "accID=" << info.accID << ", charID=" << info.charID
+		<< ",agentIndex=" << info.agentIndex << ", aID=" << info.aID
+		<< ", sID=" << info.sID
+		<< ",srcNode=" << info.srcNode;
+	return stm;
+}
+
+
 
 //agent保存session信息
 struct AgentSessionInfo
@@ -130,6 +142,14 @@ struct AgentSessionInfo
 	time_t lastLoginTime = time(NULL);
 	time_t lastActiveTime = time(NULL);
 };
+
+
+inline zsummer::log4z::CStringStream & operator << (zsummer::log4z::CStringStream & stm, const AgentSessionInfo & info)
+{
+	stm << info.sInfo
+		<< ",lastLoginTime=" << info.lastActiveTime << ", lastActiveTime=" << info.lastActiveTime;
+	return stm;
+}
 
 struct ServerAuthSession
 {

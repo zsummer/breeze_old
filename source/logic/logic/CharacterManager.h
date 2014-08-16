@@ -49,6 +49,13 @@ public:
 
 	void msg_CharacterLoginReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
 	void mongo_LoadCharacterInfo(std::shared_ptr<mongo::DBClientCursor> & cursor, std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info);
+
+	void mongo_UpdateNormalHandler(std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info, const std::string & msg);
+
+
+	void msg_CharacterLogout(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
+	void on_CharLogin(const LogicCharacterInfo & info);
+	void on_CharLogout(const LogicCharacterInfo & info);
 private:
 public:
 private:

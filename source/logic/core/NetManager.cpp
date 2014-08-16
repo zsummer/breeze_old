@@ -185,7 +185,7 @@ void CNetManager::event_OnSessionHeartbeat(AccepterID aID, SessionID sID)
 		LOGW("close session because  not found sID in online center. sID=" << sID);
 		return;
 	}
-	if (founder->lastActiveTime + HEARTBEART_INTERVAL * 2 / 1000 < time(NULL))
+	if (founder->lastActiveTime + HEARTBEART_INTERVAL * 10 / 1000 < time(NULL))
 	{
 		CTcpSessionManager::getRef().KickSession(aID, sID);
 		LOGW("close session because  not found sID in online center. sID=" << sID << ", lastActiveTime=" << founder->lastActiveTime);

@@ -78,7 +78,7 @@ public:
 
 private:
 	std::unordered_map<SessionID, std::shared_ptr<AgentSessionInfo>> m_mapSession;
-	std::unordered_map<AccountID, std::shared_ptr<AgentSessionInfo>> m_mapAccount;
+//	std::unordered_map<AccountID, std::shared_ptr<AgentSessionInfo>> m_mapAccount;
 	std::unordered_map<CharacterID, std::shared_ptr<AgentSessionInfo>> m_mapChar;
 
 	tagAcceptorConfigTraits m_configListen; //保存监听配置

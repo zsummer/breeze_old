@@ -29,10 +29,14 @@
 
 #ifndef _MONGO_MANAGER_H_
 #define _MONGO_MANAGER_H_
+#ifdef WIN32
 #pragma warning(push)
 #pragma warning(disable:4244 4267 4819)
 #include <mongo/client/dbclient.h>
 #pragma warning(pop)
+#else
+#include <mongo/client/dbclient.h>
+#endif
 #include <ProtoDefine.h>
 #include <ServerConfig.h>
 

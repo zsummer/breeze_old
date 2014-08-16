@@ -122,6 +122,17 @@ void CNetManager::event_OnSessionDisconnect(AccepterID aID, SessionID sID)
 	{
 		return;
 	}
+	if (founder->second->sInfo.charID != InvalidCharacterID)
+	{
+		LOGI("CNetManager::event_OnSessionDisconnect. send ID_AS2LS_CharacterLogout. info=" << *founder->second);
+		ProtoRouteToOtherServer route;
+		route.dstNode = AuthNode;
+		route.routerType = 1;
+		route.dstIndex = 0;
+		WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);
+		ws << ID_RT2OS_RouteToOtherServer << route << ID_AS2LS_CharacterLogout << founder->second->sInfo;
+		CTcpSessionManager::getRef().SendOrgConnectorData(m_onlineCenter.at(0).cID, ws.GetStream(), ws.GetStreamLen());
+	}
 	founder->second->sInfo.aID = InvalidAccepterID;
 	founder->second->sInfo.sID = InvalidSeesionID;
 	m_mapSession.erase(founder);
@@ -232,7 +243,6 @@ void CNetManager::msg_AuthAck(ConnectorID cID, ProtocolID pID, ReadStreamPack &r
 			return;
 		}
 		founder->second->sInfo.accID = ack.accountID;
-		m_mapAccount[ack.accountID] = founder->second;
 	}
 
 	WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);
@@ -240,43 +250,49 @@ void CNetManager::msg_AuthAck(ConnectorID cID, ProtocolID pID, ReadStreamPack &r
 	CTcpSessionManager::getRef().SendOrgSessionData(info.aID, info.sID, ws.GetStream(), ws.GetStreamLen());
 }
 
+//踢掉其他登录的到该节点的角色.
 void CNetManager::msg_KickCharacter(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs)
 {
 	SessionInfo info;
 	rs >> info;
-	auto fouder = m_mapChar.find(info.charID);
-	if (fouder == m_mapChar.end())
+	LOGI("CNetManager::msg_KickCharacter.info=" << info);
+	//在其他节点登录 踢掉并清除登录信息
+	if (info.agentIndex != GlobalFacade::getRef().getServerConfig().getOwnNodeIndex())
 	{
-		if (info.agentIndex != GlobalFacade::getRef().getServerConfig().getOwnNodeIndex())
+		auto founder = m_mapChar.find(info.charID);
+		if (founder != m_mapChar.end())
 		{
-			return;
+			SessionInfo & si = founder->second->sInfo;
+			CTcpSessionManager::getRef().KickSession(si.aID, si.sID);
+			m_mapSession.erase(si.sID);
+			si.aID = InvalidAccepterID;
+			si.sID = InvalidSeesionID;
+			si.charID = InvalidCharacterID;
+			m_mapChar.erase(founder);
 		}
-		
-		auto fouderSession = m_mapSession.find(info.sID);
-		if (fouderSession == m_mapSession.end())
-		{
-			return;
-		}
-		
-		if (fouderSession->second->sInfo.accID != info.accID)
-		{
-			return;
-		}
-		m_mapChar.erase(fouderSession->second->sInfo.charID);
-		fouderSession->second->sInfo.charID = info.charID;
-		m_mapChar.insert(std::make_pair(info.charID, fouderSession->second));
 	}
+	//本节点登录 踢掉已有session并覆盖新的session数据
 	else
 	{
-		SessionInfo & fInfo = fouder->second->sInfo;
-		if (fInfo.agentIndex != GlobalFacade::getRef().getServerConfig().getOwnNodeIndex()
-			|| fInfo.sID != info.sID)
+		auto founder = m_mapChar.find(info.charID);
+		if (founder != m_mapChar.end())
 		{
-			fInfo.charID = InvalidCharacterID;
-			CTcpSessionManager::getRef().KickSession(fInfo.aID, fInfo.sID);
+			SessionInfo & si = founder->second->sInfo;
+			CTcpSessionManager::getRef().KickSession(si.aID, si.sID);
+			m_mapSession.erase(si.sID);
+			si.aID = InvalidAccepterID;
+			si.sID = InvalidSeesionID;
+			si.charID = InvalidCharacterID;
+			m_mapChar.erase(founder);
+		}
+		auto iter = m_mapSession.find(info.sID);
+		if (iter != m_mapSession.end())
+		{
+			SessionInfo & si = iter->second->sInfo;
+			si.charID = info.charID;
+			m_mapChar.insert(std::make_pair(info.charID, iter->second));
 		}
 	}
-	
 }
 
 void CNetManager::event_OnSessionHeartbeat(AccepterID aID, SessionID sID)
@@ -288,7 +304,7 @@ void CNetManager::event_OnSessionHeartbeat(AccepterID aID, SessionID sID)
 		LOGW("kick session because session not found in m_mapSession. aID=" << aID << ", sID=" << sID);
 		return;
 	}
-	if (founder->second->lastActiveTime + HEARTBEART_INTERVAL * 2 / 1000 < time(NULL))
+	if (founder->second->lastActiveTime + HEARTBEART_INTERVAL * 10 / 1000 < time(NULL))
 	{
 		CTcpSessionManager::getRef().KickSession(aID, sID);
 		LOGW("kick session because session heartbeat timeout. aID=" << aID << ", sID=" << sID << ", lastActiveTime=" << founder->second->lastActiveTime);
@@ -306,7 +322,7 @@ void CNetManager::event_OnConnectorHeartbeat(ConnectorID cID)
 		LOGW("break connector because the connector not founder in online center. cID=" << cID);
 		return;
 	}
-	if (founder->lastActiveTime + HEARTBEART_INTERVAL * 2 / 1000 < time(NULL))
+	if (founder->lastActiveTime + HEARTBEART_INTERVAL * 10 / 1000 < time(NULL))
 	{
 		CTcpSessionManager::getRef().BreakConnector(cID);
 		LOGW("break connector because the connector heartbeat timeout. cID=" << cID << ", lastActiveTime=" << founder->lastActiveTime);
