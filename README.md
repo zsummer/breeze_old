@@ -1,4 +1,11 @@
-breeze
-======
 
-A open source game server's framework.
+breeze是一个C++的轻量级分布式跨平台的应用服务器框架, 适合端游/页游/手游/棋牌/IM等服务器端.  
+  
+依赖三方库为 boost, mongodb, lua, log4z, zsummerX, 其中boost的使用原因在于mongodb依赖boost 如果用mysqlclient 则可脱离boost.  
+  
+支持特性如下:  
+支持负载均衡. 只要通过配置扩充服务节点数量便可无限扩容.(设计负载上限为单服百万活跃并发).  
+认证和登录分离, 支持多平台认证/绑定, 支持本地帐号密码认证.  
+支持一个帐号对应多个角色. 单个角色不能多处登录(互踢).  
+支持合服.  
+支持跨服.  
