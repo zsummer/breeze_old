@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
 		filename = argv[2];
 	}
 	bool ret = false;
-	ILog4zManager::GetInstance()->Config("log.config");
+	ILog4zManager::GetInstance()->Config("../log.config");
 	ret = ILog4zManager::GetInstance()->Start();
 	if (!ret)
 	{

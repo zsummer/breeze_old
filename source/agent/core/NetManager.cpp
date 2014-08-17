@@ -385,12 +385,9 @@ void CNetManager::msg_DefaultSessionReq(AccepterID aID, SessionID sID, ProtocolI
 		ProtoAuthAck ack;
 		ack.retCode = EC_AUTH_NOT_FOUND;
 		ack.accountID = InvalidAccountID;
-		if (ack.retCode != EC_SUCCESS)
-		{
-			WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);
-			ws << ID_AS2C_AuthAck << ack;
-			CTcpSessionManager::getRef().SendOrgSessionData(aID, sID, ws.GetStream(), ws.GetStreamLen());
-		}
+		WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);
+		ws << ID_AS2C_AuthAck << ack;
+		CTcpSessionManager::getRef().SendOrgSessionData(aID, sID, ws.GetStream(), ws.GetStreamLen());
 	}
 	else
 	{

@@ -257,7 +257,7 @@ public:
 			return;
 		}
 
-		LOGI("msg_CharacterLoginAck_fun Success. cID=" << cID << ", charName=" << ack.info.charName << ", charID=" << ack.info.charID);
+		LOGD("msg_CharacterLoginAck_fun Success. cID=" << cID << ", charName=" << ack.info.charName << ", charID=" << ack.info.charID);
 	}
 
 private:
@@ -305,7 +305,7 @@ int main(int argc, char* argv[])
 		
 
 
-	ILog4zManager::GetInstance()->Config("log.config");
+	ILog4zManager::GetInstance()->Config("../log.config");
 	ILog4zManager::GetInstance()->Start();
 
 
