@@ -25,6 +25,8 @@
 
 #ifndef _DEFINE_PROTO_H_
 #define _DEFINE_PROTO_H_
+#pragma warning(disable:4996)
+#pragma warning(disable:4819)
 #include <string>
 #include <zsummerX/FrameHeader.h>
 #include <algorithm>

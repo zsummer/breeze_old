@@ -25,7 +25,7 @@ bool CNetManager::Start()
 	m_configListen.listenPort = GlobalFacade::getRef().getServerConfig().getConfigListen(AuthNode).port;
 	m_configListen.maxSessions = 100;
 
-	if (CTcpSessionManager::getRef().AddAcceptor(m_configListen) == InvalidAccepterID)
+	if (!CTcpSessionManager::getRef().AddAcceptor(m_configListen))
 	{
 		LOGE("AddAcceptor Failed. listenIP=" << m_configListen.listenIP << ", listenPort=" << m_configListen.listenPort);
 		return false;

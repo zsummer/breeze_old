@@ -46,7 +46,7 @@ bool CNetManager::Start()
 		tag.remotePort = con.remotePort;
 		tag.reconnectMaxCount = 120;
 		tag.reconnectInterval = 5000;
-		if (CTcpSessionManager::getRef().AddConnector(tag) == InvalidConnectorID)
+		if (!CTcpSessionManager::getRef().AddConnector(tag))
 		{
 			LOGE("AddConnector failed. remoteIP=" << tag.remoteIP << ", remotePort=" << tag.remotePort);
 			return false;
@@ -138,7 +138,7 @@ void CNetManager::msg_ConnectServerAuth(ConnectorID cID, ProtocolID pID, ReadStr
 
 	if (!m_bListening &&  m_onlineConnect.size() == m_configConnect.size())
 	{
-		if (CTcpSessionManager::getRef().AddAcceptor(m_configListen) == InvalidAccepterID)
+		if (!CTcpSessionManager::getRef().AddAcceptor(m_configListen))
 		{
 			LOGE("AddAcceptor Failed. listenIP=" << m_configListen.listenIP << ", listenPort=" << m_configListen.listenPort);
 			return;

@@ -58,7 +58,7 @@ bool CNetManager::Start()
 		{
 			continue;
 		}
-		if (CTcpSessionManager::getRef().AddConnector(tag) == InvalidConnectorID)
+		if (!CTcpSessionManager::getRef().AddConnector(tag))
 		{
 			LOGE("AddConnector failed. remoteIP=" << tag.remoteIP << ", remotePort=" << tag.remotePort);
 			return false;
@@ -166,7 +166,7 @@ void CNetManager::msg_ConnectServerAuth(ConnectorID cID, ProtocolID pID, ReadStr
 	}
 
 	//所有connector已经建立连接成功 并且是程序启动时的第一次 此时打开客户端监听端口
-	if (CTcpSessionManager::getRef().AddAcceptor(m_configListen) == InvalidAccepterID)
+	if (!CTcpSessionManager::getRef().AddAcceptor(m_configListen))
 	{
 		LOGE("AddAcceptor Failed. listenIP=" << m_configListen.listenIP << ", listenPort=" << m_configListen.listenPort);
 		return;
