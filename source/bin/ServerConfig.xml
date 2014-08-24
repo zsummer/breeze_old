@@ -3,9 +3,9 @@
 <server gameid="1000" areaid="1000" />
 
 <mongo>
-	<auth ip="192.168.1.111" port="27017" db="db_auth" user="zhangyawei" pwd="123" needAuth="true" />
-	<info ip="192.168.1.111" port="27017" db="db_info" user="zhangyawei" pwd="123" needAuth="true" />
-	<log ip="192.168.1.111" port="27017" db="db_info" user="zhangyawei" pwd="123" needAuth="true" />
+	<auth ip="127.0.0.1" port="27017" db="db_auth" user="zhangyawei" pwd="123" needAuth="true" />
+	<info ip="127.0.0.1" port="27017" db="db_info" user="zhangyawei" pwd="123" needAuth="true" />
+	<log ip="127.0.0.1" port="27017" db="db_info" user="zhangyawei" pwd="123" needAuth="true" />
 </mongo>
 
 <listen>
