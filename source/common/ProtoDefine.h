@@ -106,6 +106,8 @@ struct SessionInfo
 	//internal
 	ServerNode srcNode = InvalideServerNode;
 	NodeIndex srcIndex = InvalideNodeIndex;
+	//login time
+	ui64 loginTime = time(NULL);
 };
 
 template <class STM>
@@ -113,7 +115,8 @@ inline STM & operator << (STM & stm, const SessionInfo & info)
 {
 	stm << info.accID << info.charID
 		<< info.agentIndex << info.aID << info.sID
-		<< info.srcNode << info.srcIndex;
+		<< info.srcNode << info.srcIndex
+		<< info.loginTime;
 	return stm;
 }
 template <class STM>
@@ -121,7 +124,8 @@ inline STM & operator >> (STM & stm, SessionInfo & info)
 {
 	stm >> info.accID >> info.charID
 		>> info.agentIndex >> info.aID >> info.sID
-		>> info.srcNode >> info.srcIndex;;
+		>> info.srcNode >> info.srcIndex
+		>> info.loginTime;
 	return stm;
 }
 
@@ -131,7 +135,8 @@ inline zsummer::log4z::CStringStream & operator << (zsummer::log4z::CStringStrea
 	stm << "accID=" << info.accID << ", charID=" << info.charID
 		<< ",agentIndex=" << info.agentIndex << ", aID=" << info.aID
 		<< ", sID=" << info.sID
-		<< ",srcNode=" << info.srcNode;
+		<< ",srcNode=" << info.srcNode
+		<< ", loginTime=" << info.loginTime;
 	return stm;
 }
 

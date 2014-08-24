@@ -15,7 +15,7 @@ CNetManager::CNetManager()
 	CMessageDispatcher::getRef().RegisterConnectorMessage(ID_DT2OS_DirectServerAuth,
 		std::bind(&CNetManager::msg_ConnectServerAuth, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	
-	//认证逻辑 支持帐号多次认证
+	//认证逻辑 支持帐号多点认证
 	CMessageDispatcher::getRef().RegisterSessionMessage(ID_C2AS_AuthReq,
 		std::bind(&CNetManager::msg_AuthReq, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 	CMessageDispatcher::getRef().RegisterConnectorMessage(ID_AS2C_AuthAck,
@@ -73,7 +73,20 @@ bool CNetManager::Start()
 	LOGI("CNetManager Init Success.");
 	return true;
 }
-
+bool CNetManager::Stop()
+{
+	CTcpSessionManager::getRef().ShutdownAllAccepter();
+	m_bListening = false;
+	for (auto &s : m_mapSession)
+	{
+		CTcpSessionManager::getRef().KickSession(s.second->sInfo.aID, s.second->sInfo.sID);
+	}
+	if (!m_bListening && m_mapSession.empty())
+	{
+		CTcpSessionManager::getRef().CreateTimer(2000, std::bind(&CTcpSessionManager::Stop, CTcpSessionManager::getPtr()));
+	}
+	return true;
+}
 
 void CNetManager::event_OnConnect(ConnectorID cID)
 {
@@ -110,9 +123,9 @@ void CNetManager::event_OnDisconnect(ConnectorID cID)
 }
 
 
-void CNetManager::event_OnSessionEstablished(AccepterID, SessionID)
+void CNetManager::event_OnSessionEstablished(AccepterID aID, SessionID sID)
 {
-
+	LOGT("CNetManager::event_OnSessionEstablished. AcceptID=" << aID << ", SessionID=" << sID);
 }
 
 void CNetManager::event_OnSessionDisconnect(AccepterID aID, SessionID sID)
@@ -126,7 +139,7 @@ void CNetManager::event_OnSessionDisconnect(AccepterID aID, SessionID sID)
 	{
 		LOGI("CNetManager::event_OnSessionDisconnect. send ID_AS2LS_CharacterLogout. info=" << *founder->second);
 		ProtoRouteToOtherServer route;
-		route.dstNode = AuthNode;
+		route.dstNode = LogicNode;
 		route.routerType = 1;
 		route.dstIndex = 0;
 		WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);
@@ -136,6 +149,10 @@ void CNetManager::event_OnSessionDisconnect(AccepterID aID, SessionID sID)
 	founder->second->sInfo.aID = InvalidAccepterID;
 	founder->second->sInfo.sID = InvalidSeesionID;
 	m_mapSession.erase(founder);
+	if (!m_bListening && m_mapSession.empty())
+	{
+		CTcpSessionManager::getRef().CreateTimer(2000, std::bind(&CTcpSessionManager::Stop, CTcpSessionManager::getPtr()));
+	}
 }
 
 
@@ -255,7 +272,7 @@ void CNetManager::msg_KickCharacter(ConnectorID cID, ProtocolID pID, ReadStreamP
 {
 	SessionInfo info;
 	rs >> info;
-	LOGI("CNetManager::msg_KickCharacter.info=" << info);
+	LOGT("CNetManager::msg_KickCharacter.info=" << info);
 	//在其他节点登录 踢掉并清除登录信息
 	if (info.agentIndex != GlobalFacade::getRef().getServerConfig().getOwnNodeIndex())
 	{
@@ -264,6 +281,16 @@ void CNetManager::msg_KickCharacter(ConnectorID cID, ProtocolID pID, ReadStreamP
 		{
 			SessionInfo & si = founder->second->sInfo;
 			CTcpSessionManager::getRef().KickSession(si.aID, si.sID);
+
+			LOGI("CNetManager::msg_KickCharacter. send ID_AS2LS_CharacterLogout. info=" << *founder->second);
+			ProtoRouteToOtherServer route;
+			route.dstNode = LogicNode;
+			route.routerType = 1;
+			route.dstIndex = 0;
+			WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);
+			ws << ID_RT2OS_RouteToOtherServer << route << ID_AS2LS_CharacterLogout << si;
+			CTcpSessionManager::getRef().SendOrgConnectorData(m_onlineCenter.at(0).cID, ws.GetStream(), ws.GetStreamLen());
+
 			m_mapSession.erase(si.sID);
 			si.aID = InvalidAccepterID;
 			si.sID = InvalidSeesionID;
@@ -279,6 +306,16 @@ void CNetManager::msg_KickCharacter(ConnectorID cID, ProtocolID pID, ReadStreamP
 		{
 			SessionInfo & si = founder->second->sInfo;
 			CTcpSessionManager::getRef().KickSession(si.aID, si.sID);
+
+			LOGI("CNetManager::msg_KickCharacter kick old Character. send ID_AS2LS_CharacterLogout. info=" << *founder->second);
+			ProtoRouteToOtherServer route;
+			route.dstNode = LogicNode;
+			route.routerType = 1;
+			route.dstIndex = 0;
+			WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);
+			ws << ID_RT2OS_RouteToOtherServer << route << ID_AS2LS_CharacterLogout << si;
+			CTcpSessionManager::getRef().SendOrgConnectorData(m_onlineCenter.at(0).cID, ws.GetStream(), ws.GetStreamLen());
+
 			m_mapSession.erase(si.sID);
 			si.aID = InvalidAccepterID;
 			si.sID = InvalidSeesionID;
@@ -290,7 +327,9 @@ void CNetManager::msg_KickCharacter(ConnectorID cID, ProtocolID pID, ReadStreamP
 		{
 			SessionInfo & si = iter->second->sInfo;
 			si.charID = info.charID;
+			si.loginTime = info.loginTime;
 			m_mapChar.insert(std::make_pair(info.charID, iter->second));
+			LOGI("CNetManager::msg_KickCharacter Character On login. info=" << si);
 		}
 	}
 }

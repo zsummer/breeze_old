@@ -47,6 +47,8 @@ int main(int argc, char* argv[])
 	signal( SIGQUIT, SIG_IGN );
 	signal( SIGCHLD, SIG_IGN);
 #endif
+	signal(SIGINT, &sigInt);
+	signal(SIGTERM, &sigInt);
 
 	
 	

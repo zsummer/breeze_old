@@ -52,6 +52,7 @@ struct ConnectorConfig
 //数据库
 const std::string AuthMongoDB = "auth";
 const std::string InfoMongoDB = "info";
+const std::string LogMongoDB = "log";
 
 struct MongoConfig 
 {
@@ -79,6 +80,7 @@ public:
 
 	inline const MongoConfig & getAuthMongoDB(){ return m_authMongo; }
 	inline const MongoConfig & getInfoMongoDB(){ return m_infoMongo; }
+	inline const MongoConfig & getLogMongoDB(){ return m_logMongo; }
 
 private:
 	ServerNode m_ownServerNode = InvalideServerNode;
@@ -91,6 +93,7 @@ private:
 
 	MongoConfig m_authMongo;
 	MongoConfig m_infoMongo;
+	MongoConfig m_logMongo;
 };
 
 

@@ -72,7 +72,10 @@ void Appliction::RunPump()
 
 void Appliction::Stop()
 {
-	CTcpSessionManager::getRef().Stop();
+	CTcpSessionManager::getRef().CreateTimer(100, std::bind(&Appliction::_Stop, this));
 }
 
-
+void Appliction::_Stop()
+{
+	GlobalFacade::getRef().getNetManger().Stop();
+}

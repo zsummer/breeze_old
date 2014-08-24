@@ -111,9 +111,11 @@ public:
 	void OnConnected(ConnectorID cID)
 	{
 		LOGI("OnConnected. ConnectorID=" << cID);
+		char userName[100];
+		sprintf(userName, "zhangyawei%04d", (int)cID);
 		WriteStreamPack ws;
 		ProtoAuthReq req;
-		req.info.user = "zhangyawei";
+		req.info.user = userName;
 		req.info.pwd = "123";
 		ws << ID_C2AS_AuthReq << req;
 		CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
@@ -155,9 +157,11 @@ public:
 		}
 		else if (g_stressType == ST_AUTH)
 		{
+			char userName[100];
+			sprintf(userName, "zhangyawei%04d", (int)cID);
 			WriteStreamPack ws;
 			ProtoAuthReq req;
-			req.info.user = "zhangyawei";
+			req.info.user = userName;
 			req.info.pwd = "123";
 			ws << ID_C2AS_AuthReq << req;
 			CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
@@ -286,7 +290,9 @@ int main(int argc, char* argv[])
 	signal( SIGQUIT, SIG_IGN );
 	signal( SIGCHLD, SIG_IGN);
 #endif
-	signal(SIGINT, sigInt);
+	signal(SIGINT, &sigInt);
+	signal(SIGTERM, &sigInt);
+
 	if (argc == 2 && 
 		(strcmp(argv[1], "--help") == 0 
 		|| strcmp(argv[1], "/?") == 0))
@@ -301,6 +307,11 @@ int main(int argc, char* argv[])
 		g_agentIndex = atoi(argv[1]);
 	if (argc > 2)
 		g_maxClient = atoi(argv[2]);
+	if (g_maxClient > 6000)
+	{
+		g_maxClient = 6000;
+	}
+	
 		
 		
 
@@ -320,10 +331,35 @@ int main(int argc, char* argv[])
 	}
 	LOGI("g_remoteIP=" << "127.0.0.1" << ", g_remotePort=" << serverConfig.getConfigListen(AgentNode).port << ", g_maxClient=" << g_maxClient);
 
-	CTcpSessionManager::getRef().Start();
+
+	CMongoManager mongoMgr;
+	if (!mongoMgr.ConnectMongo(mongoMgr.getAuthMongo(), serverConfig.getAuthMongoDB()))
+	{
+		LOGE("connect mongo error");
+		return 0;
+	}
+
+	for (size_t i = 0; i < 6000; i++)
+	{
+		char buf[100];
+		sprintf(buf, "zhangyawei%04d", (int)i);
+		std::string dbcl = serverConfig.getAuthMongoDB().db;
+		dbcl += ".cl_auth";
+		mongoMgr.getAuthMongo()->update(dbcl, QUERY("_id" << buf), BSON("pwd" << "123" << "accID" << (long long)i), true);
+		std::string errMsg = mongoMgr.getAuthMongo()->getLastError();
+		if (!errMsg.empty())
+		{
+			LOGE("update auth db error: " << errMsg);
+			return 0;
+		}
+	}
 	
 	
 
+
+
+	CTcpSessionManager::getRef().Start();
+	
 	CTcpSessionManager::getRef().CreateTimer(5000, MonitorFunc);
 
 	//创建心跳管理handler的实例 只要创建即可, 构造函数中会注册对应事件

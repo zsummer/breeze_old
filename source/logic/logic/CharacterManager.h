@@ -54,8 +54,8 @@ public:
 
 
 	void msg_CharacterLogout(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
-	void on_CharLogin(const LogicCharacterInfo & info);
-	void on_CharLogout(const LogicCharacterInfo & info);
+	void on_CharLogin(const SessionInfo & info);
+	void on_CharLogout(const SessionInfo & info);
 private:
 public:
 private:

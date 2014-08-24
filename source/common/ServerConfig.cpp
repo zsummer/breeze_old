@@ -142,6 +142,11 @@ bool ServerConfig::Parse(std::string filename, ServerNode ownNode, NodeIndex own
 			{
 				m_infoMongo = lconfig;
 			}
+			else if (iter->first == LogMongoDB)
+			{
+				m_logMongo = lconfig;
+			}
+			
 		}
 
 	}

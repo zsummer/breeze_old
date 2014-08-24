@@ -35,6 +35,7 @@ class CBaseHandler
 public:
 	CBaseHandler(){}
 	virtual ~CBaseHandler(){};
+	//! 初始化中所有mongo操作必须是同步 禁止在Init中调用异步操作方法.
 	virtual bool Init() = 0;
 };
 

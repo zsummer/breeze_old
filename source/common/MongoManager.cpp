@@ -127,6 +127,7 @@ void CMongoManager::async_update(MongoPtr &mongoPtr, const string &ns, const mon
 }
 
 
+
 void CMongoManager::_async_update(MongoPtr &mongoPtr, const string &ns, const mongo::Query &query, const mongo::BSONObj &obj, bool upsert,
 	const std::function<void(std::string &)> & handler)
 {
@@ -149,8 +150,33 @@ void CMongoManager::_async_update(MongoPtr &mongoPtr, const string &ns, const mo
 	CTcpSessionManager::getRef().Post(std::bind(handler, ret));
 }
 
+void CMongoManager::async_insert(MongoPtr &mongoPtr, const string &ns, const mongo::BSONObj &obj,
+	const std::function<void(std::string &)> & handler)
+{
+	m_summer.Post(std::bind(&CMongoManager::_async_insert, this, mongoPtr, ns, obj, handler));
+}
 
-
+void CMongoManager::_async_insert(MongoPtr &mongoPtr, const string &ns, const mongo::BSONObj &obj,
+	const std::function<void(std::string &)> & handler)
+{
+	std::string ret;
+	try
+	{
+		mongoPtr->insert(ns, obj);
+		ret = mongoPtr->getLastError();
+		CTcpSessionManager::getRef().Post(std::bind(handler, ret));
+		return;
+	}
+	catch (const mongo::DBException &e)
+	{
+		ret += "mongodb _async_insert catch error. ns=" + ns + ", obj=" + obj.toString() + ", error=" + e.what();
+	}
+	catch (...)
+	{
+		ret += "mongodb _async_insert unknown error. ns=" + ns + ", obj=" + obj.toString();
+	}
+	CTcpSessionManager::getRef().Post(std::bind(handler, ret));
+}
 
 
 

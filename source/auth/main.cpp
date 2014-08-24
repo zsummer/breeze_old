@@ -47,8 +47,9 @@ int main(int argc, char* argv[])
 	signal( SIGCHLD, SIG_IGN);
 #endif
 
-	signal(SIGINT, sigInt);
-	
+	signal(SIGINT, &sigInt);
+	signal(SIGTERM, &sigInt);
+
 	std::string filename = "../ServerConfig.xml";
 	unsigned int serverIndex = 0;
 	if (argc > 1)

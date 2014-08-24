@@ -43,7 +43,7 @@
 *  文件说明
 *  网络管理类
 *  提供服务节点的网络模块配置启动,维护网络的连接/断开,心跳脉冲, 节点注册, 默认消息处理等.
-*  提供所有人较原始的网络访问接口.
+*  提供较原始的网络访问接口.
 */
 
 
@@ -55,6 +55,7 @@ public:
 	CNetManager();
 	//连接所有认证服务和中央服务
 	bool Start();
+	bool Stop();
 	void event_OnConnect(ConnectorID cID);
 	void event_OnDisconnect(ConnectorID cID);
 
@@ -78,7 +79,6 @@ public:
 
 private:
 	std::unordered_map<SessionID, std::shared_ptr<AgentSessionInfo>> m_mapSession;
-//	std::unordered_map<AccountID, std::shared_ptr<AgentSessionInfo>> m_mapAccount;
 	std::unordered_map<CharacterID, std::shared_ptr<AgentSessionInfo>> m_mapChar;
 
 	tagAcceptorConfigTraits m_configListen; //保存监听配置

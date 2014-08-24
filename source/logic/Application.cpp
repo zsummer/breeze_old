@@ -42,7 +42,14 @@ bool Appliction::Init(std::string filename, unsigned int index)
 	ret = GlobalFacade::getRef().getMongoManger().ConnectMongo(GlobalFacade::getRef().getMongoManger().getInfoMongo(), GlobalFacade::getRef().getServerConfig().getInfoMongoDB());
 	if (!ret )
 	{
-		LOGE("ConnectAuth mongo failed.");
+		LOGE("Connect Info mongo failed.");
+		return ret;
+	}
+	//连接mongodb
+	ret = GlobalFacade::getRef().getMongoManger().ConnectMongo(GlobalFacade::getRef().getMongoManger().getLogMongo(), GlobalFacade::getRef().getServerConfig().getLogMongoDB());
+	if (!ret)
+	{
+		LOGE("Connect Log mongo failed.");
 		return ret;
 	}
 	if (!GlobalFacade::getRef().getMongoManger().StartPump())
@@ -103,8 +110,13 @@ void Appliction::RunPump()
 
 void Appliction::Stop()
 {
-	GlobalFacade::getRef().getMongoManger().StopPump();
-	CTcpSessionManager::getRef().Stop();
+	CTcpSessionManager::getRef().CreateTimer(100, std::bind(&Appliction::_Stop, this));	
 }
 
 
+
+void Appliction::_Stop()
+{
+	GlobalFacade::getRef().getMongoManger().StopPump();
+	CTcpSessionManager::getRef().Stop();
+}

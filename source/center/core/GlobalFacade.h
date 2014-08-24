@@ -1,4 +1,4 @@
-
+ï»¿
 /*
 * breeze License
 * Copyright (C) 2014 YaweiZhang <yawei_zhang@foxmail.com>.
@@ -17,8 +17,8 @@
 */
 
 /*
-*  ÎÄ¼þËµÃ÷
-*  È«¾ÖÍâ¹ÛÀà Èç¹ûÒ»¸öÀàÊÇÌá¹©¸øËùÓÐÈËÊ¹ÓÃµÄ ÄÇ¾ÍÔÚÕâÀïÌí¼ÓÒ»¸ö·ÃÎÊ·½·¨.
+*  æ–‡ä»¶è¯´æ˜Ž
+*  å…¨å±€å¤–è§‚ç±» å¦‚æžœä¸€ä¸ªç±»æ˜¯æä¾›ç»™æ‰€æœ‰äººä½¿ç”¨çš„ é‚£å°±åœ¨è¿™é‡Œæ·»åŠ ä¸€ä¸ªè®¿é—®æ–¹æ³•.
 */
 
 #ifndef _GLOBAL_FACADE_H_

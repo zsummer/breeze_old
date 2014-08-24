@@ -15,6 +15,8 @@ public:
 	bool Init(std::string filename, unsigned int index);
 	void RunPump();
 	void Stop();
+protected:
+	void _Stop();
 
 };
 

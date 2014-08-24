@@ -53,16 +53,18 @@ public:
 	bool StopPump();
 	bool ConnectMongo(MongoPtr &mongoPtr, const MongoConfig & mc);
 
+public:
+	inline MongoPtr & getAuthMongo(){ return m_authMongo; }
+	inline MongoPtr & getInfoMongo(){ return m_infoMongo; }
+	inline MongoPtr & getLogMongo(){ return m_logMongo; }
 
+public:
 	void async_query(MongoPtr &mongoPtr, const string &ns, const mongo::Query &query,
 		const std::function<void(std::shared_ptr<mongo::DBClientCursor> &, std::string &)> & handler);
 	void async_update(MongoPtr &mongoPtr, const string &ns, const mongo::Query &query, const mongo::BSONObj &obj, bool upsert,
 		const std::function<void(std::string &)> & handler);
-
-public:
-
-	inline MongoPtr & getAuthMongo(){ return m_authMongo; }
-	inline MongoPtr & getInfoMongo(){ return m_infoMongo; }
+	void async_insert(MongoPtr &mongoPtr, const string &ns, const mongo::BSONObj &obj, 
+		const std::function<void(std::string &)> & handler);
 
 protected:
 	void _async_query(MongoPtr &mongoPtr, const string &ns, const mongo::Query &query,
@@ -71,11 +73,15 @@ protected:
 	void _async_update(MongoPtr &mongoPtr, const string &ns, const mongo::Query &query, const mongo::BSONObj &obj, bool upsert,
 		const std::function<void(std::string &)> & handler);
 
+	void _async_insert(MongoPtr &mongoPtr, const string &ns, const mongo::BSONObj &obj, 
+		const std::function<void(std::string &)> & handler);
+
 	inline void Run();
 
 private:
 	std::shared_ptr<mongo::DBClientConnection> m_authMongo;
 	std::shared_ptr<mongo::DBClientConnection> m_infoMongo;
+	std::shared_ptr<mongo::DBClientConnection> m_logMongo;
 	std::shared_ptr<std::thread> m_thread;
 	zsummer::network::CZSummer m_summer;
 	bool m_bRuning = false;
