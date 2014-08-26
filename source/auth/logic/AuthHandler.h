@@ -18,14 +18,12 @@
 
 #ifndef _AUTH_HANDLER_H_
 #define _AUTH_HANDLER_H_
-#include <MongoManager.h>
-#include "../core/GlobalFacade.h"
-#include <BaseHander.h>
-#include <zsummerX/FrameHeader.h>
 #include <ProtoDefine.h>
 #include <ProtoAuth.h>
 #include <ProtoServerControl.h>
-
+#include "../core/GlobalFacade.h"
+#include <BaseHander.h>
+#include <MongoManager.h>
 
 class CAuthHandler : public CBaseHandler
 {

@@ -25,11 +25,15 @@
 
 #ifndef _DEFINE_PROTO_H_
 #define _DEFINE_PROTO_H_
+#ifdef WIN32
 #pragma warning(disable:4996)
 #pragma warning(disable:4819)
+#endif
+
 #include <string>
-#include <zsummerX/FrameHeader.h>
 #include <algorithm>
+#include <zsummerX/FrameHeader.h>
+
 
 //! 基本类型
 typedef char i8;

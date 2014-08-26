@@ -18,13 +18,13 @@
 
 #ifndef _CHARACTER_MANAGER_H_
 #define _CHARACTER_MANAGER_H_
-
-#include <MongoManager.h>
-#include <BaseHander.h>
-#include "../core/GlobalFacade.h"
 #include <ProtoDefine.h>
 #include <ProtoCommon.h>
 #include <ProtoLogin.h>
+#include <MongoManager.h>
+#include <BaseHander.h>
+#include "../core/GlobalFacade.h"
+
 
 struct LogicCharacterInfo 
 {

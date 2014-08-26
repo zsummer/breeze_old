@@ -1,4 +1,4 @@
-#include "Application.h"
+﻿#include "Application.h"
 #include <ServerConfig.h>
 #include <log4z/log4z.h>
 #include <zsummerX/FrameTcpSessionManager.h>
@@ -7,6 +7,10 @@
 
 #include "core/NetManager.h"
 using namespace zsummer::log4z;
+
+//文件说明
+//应用程序类
+//封装程序启动-初始化-运行-结束的功能
 
 Appliction::Appliction()
 {
