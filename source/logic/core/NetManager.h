@@ -68,7 +68,7 @@ private:
 
 
 
-
+//helper
 void CNetManager::SendOrgDataToCenter(const char * orgData, unsigned int orgDataLen)
 {
 	if (m_onlineSession.empty())

@@ -86,7 +86,7 @@ void CCharacterManager::msg_LoadAccountInfoReq(AccepterID aID, SessionID sID, Pr
 		ProtoRouteToOtherServer route;
 		route.dstIndex = info.agentIndex;
 		route.dstNode = AgentNode;
-		route.routerType = 0;
+		route.routerType = RT_SPECIFIED;
 		info.srcNode = GlobalFacade::getRef().getServerConfig().getOwnServerNode();
 		info.srcIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
 		ws << ID_RT2OS_RouteToOtherServer << route << ID_LS2C_LoadAccountInfoAck << info << ack;
@@ -146,7 +146,7 @@ void CCharacterManager::mongo_LoadAccountInfo(std::shared_ptr<mongo::DBClientCur
 				ProtoRouteToOtherServer route;
 				route.dstIndex = info.agentIndex;
 				route.dstNode = AgentNode;
-				route.routerType = 0;
+				route.routerType = RT_SPECIFIED;
 				info.srcNode = GlobalFacade::getRef().getServerConfig().getOwnServerNode();
 				info.srcIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
 				ws << ID_RT2OS_RouteToOtherServer << route << ID_LS2C_LoadAccountInfoAck << info << ack;
@@ -170,12 +170,12 @@ void CCharacterManager::mongo_LoadAccountInfo(std::shared_ptr<mongo::DBClientCur
 	}
 
 	ProtoLoadAccountInfoAck ack;
-	ack.retCode = EC_SERVER_ERROR;
+	ack.retCode = EC_DB_ERROR;
 	WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);;
 	ProtoRouteToOtherServer route;
 	route.dstIndex = info.agentIndex;
 	route.dstNode = AgentNode;
-	route.routerType = 0;
+	route.routerType = RT_SPECIFIED;
 	info.srcNode = GlobalFacade::getRef().getServerConfig().getOwnServerNode();
 	info.srcIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
 	ws << ID_RT2OS_RouteToOtherServer << route << ID_LS2C_LoadAccountInfoAck << info << ack;
@@ -216,7 +216,7 @@ void CCharacterManager::mongo_LoadLittleCharInfo(std::shared_ptr<mongo::DBClient
 		ProtoRouteToOtherServer route;
 		route.dstIndex = info.agentIndex;
 		route.dstNode = AgentNode;
-		route.routerType = 0;
+		route.routerType = RT_SPECIFIED;
 		info.srcNode = GlobalFacade::getRef().getServerConfig().getOwnServerNode();
 		info.srcIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
 		ws << ID_RT2OS_RouteToOtherServer << route << ID_LS2C_LoadAccountInfoAck << info << ack;
@@ -237,7 +237,7 @@ void CCharacterManager::mongo_LoadLittleCharInfo(std::shared_ptr<mongo::DBClient
 	ProtoRouteToOtherServer route;
 	route.dstIndex = info.agentIndex;
 	route.dstNode = AgentNode;
-	route.routerType = 0;
+	route.routerType = RT_SPECIFIED;
 	info.srcNode = GlobalFacade::getRef().getServerConfig().getOwnServerNode();
 	info.srcIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
 	ws << ID_RT2OS_RouteToOtherServer << route << ID_LS2C_LoadAccountInfoAck << info << ack;
@@ -266,7 +266,7 @@ void CCharacterManager::msg_CreateCharacterReq(AccepterID aID, SessionID sID, Pr
 		ProtoRouteToOtherServer route;
 		route.dstIndex = info.agentIndex;
 		route.dstNode = AgentNode;
-		route.routerType = 0;
+		route.routerType = RT_SPECIFIED;
 		info.srcNode = GlobalFacade::getRef().getServerConfig().getOwnServerNode();
 		info.srcIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
 		ws << ID_RT2OS_RouteToOtherServer << route << ID_LS2C_CreateCharacterAck << info << ack;
@@ -314,7 +314,7 @@ void CCharacterManager::mongo_CreateCharacter(std::string &errMsg, AccepterID aI
 		ProtoRouteToOtherServer route;
 		route.dstIndex = info.agentIndex;
 		route.dstNode = AgentNode;
-		route.routerType = 0;
+		route.routerType = RT_SPECIFIED;
 		info.srcNode = GlobalFacade::getRef().getServerConfig().getOwnServerNode();
 		info.srcIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
 		ws << ID_RT2OS_RouteToOtherServer << route << ID_LS2C_CreateCharacterAck << info << ack;
@@ -330,7 +330,7 @@ void CCharacterManager::mongo_CreateCharacter(std::string &errMsg, AccepterID aI
 		ProtoRouteToOtherServer route;
 		route.dstIndex = info.agentIndex;
 		route.dstNode = AgentNode;
-		route.routerType = 0;
+		route.routerType = RT_SPECIFIED;
 		info.srcNode = GlobalFacade::getRef().getServerConfig().getOwnServerNode();
 		info.srcIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
 		ws << ID_RT2OS_RouteToOtherServer << route << ID_LS2C_CreateCharacterAck << info << ack;
@@ -374,7 +374,7 @@ void CCharacterManager::msg_CharacterLoginReq(AccepterID aID, SessionID sID, Pro
 		ProtoRouteToOtherServer route;
 		route.dstIndex = info.agentIndex;
 		route.dstNode = AgentNode;
-		route.routerType = 0;
+		route.routerType = RT_SPECIFIED;
 		ws << ID_RT2OS_RouteToOtherServer << route << ID_LS2C_CharacterLoginAck << info << ack;
 		GlobalFacade::getRef().getNetManger().SendOrgDataToCenter(ws.GetStream(), ws.GetStreamLen());
 		return;
@@ -401,7 +401,16 @@ void CCharacterManager::msg_CharacterLoginReq(AccepterID aID, SessionID sID, Pro
 		on_CharLogin(founder->second->sInfo);
 	}
 
-
+	//登陆成功 踢人广播
+	{
+		WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);;
+		ProtoRouteToOtherServer route;
+		route.dstIndex = info.agentIndex;
+		route.dstNode = AgentNode;
+		route.routerType = RT_BROADCAST;
+		ws << ID_RT2OS_RouteToOtherServer << route << ID_LS2AS_CharacterLogin << info;
+		GlobalFacade::getRef().getNetManger().SendOrgDataToCenter(ws.GetStream(), ws.GetStreamLen());
+	}
 
 	//登陆成功 返回通知
 	{
@@ -412,21 +421,12 @@ void CCharacterManager::msg_CharacterLoginReq(AccepterID aID, SessionID sID, Pro
 		ProtoRouteToOtherServer route;
 		route.dstIndex = info.agentIndex;
 		route.dstNode = AgentNode;
-		route.routerType = 0;
+		route.routerType = RT_SPECIFIED;
 		ws << ID_RT2OS_RouteToOtherServer << route << ID_LS2C_CharacterLoginAck << info << ack;
 		GlobalFacade::getRef().getNetManger().SendOrgDataToCenter(ws.GetStream(), ws.GetStreamLen());
 	}
 
-	//登陆成功 踢人广播
-	{
-		WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);;
-		ProtoRouteToOtherServer route;
-		route.dstIndex = info.agentIndex;
-		route.dstNode = AgentNode;
-		route.routerType = 2;
-		ws << ID_RT2OS_RouteToOtherServer << route << ID_LS2AS_KickCharacter << info;
-		GlobalFacade::getRef().getNetManger().SendOrgDataToCenter(ws.GetStream(), ws.GetStreamLen());
-	}
+
 
 
 	
@@ -461,6 +461,17 @@ void CCharacterManager::mongo_LoadCharacterInfo(std::shared_ptr<mongo::DBClientC
 				on_CharLogin(plci->sInfo);
 			}
 
+			//角色登陆广播
+			{
+				WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);;
+				ProtoRouteToOtherServer route;
+				route.dstIndex = info.agentIndex;
+				route.dstNode = AgentNode;
+				route.routerType = RT_BROADCAST;
+				ws << ID_RT2OS_RouteToOtherServer << route << ID_LS2AS_CharacterLogin << info;
+				GlobalFacade::getRef().getNetManger().SendOrgDataToCenter(ws.GetStream(), ws.GetStreamLen());
+			}
+
 			{
 				ProtoCharacterLoginAck ack;
 				ack.retCode = EC_SUCCESS;
@@ -469,21 +480,12 @@ void CCharacterManager::mongo_LoadCharacterInfo(std::shared_ptr<mongo::DBClientC
 				ProtoRouteToOtherServer route;
 				route.dstIndex = info.agentIndex;
 				route.dstNode = AgentNode;
-				route.routerType = 0;
+				route.routerType = RT_SPECIFIED;
 				ws << ID_RT2OS_RouteToOtherServer << route << ID_LS2C_CharacterLoginAck << info << ack;
 				GlobalFacade::getRef().getNetManger().SendOrgDataToCenter(ws.GetStream(), ws.GetStreamLen());
 			}
 
-			//登陆成功 踢人广播
-			{
-				WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);;
-				ProtoRouteToOtherServer route;
-				route.dstIndex = info.agentIndex;
-				route.dstNode = AgentNode;
-				route.routerType = 2;
-				ws << ID_RT2OS_RouteToOtherServer << route << ID_LS2AS_KickCharacter << info;
-				GlobalFacade::getRef().getNetManger().SendOrgDataToCenter(ws.GetStream(), ws.GetStreamLen());
-			}
+
 			return;
 		}
 		else
@@ -508,7 +510,7 @@ void CCharacterManager::mongo_LoadCharacterInfo(std::shared_ptr<mongo::DBClientC
 		ProtoRouteToOtherServer route;
 		route.dstIndex = info.agentIndex;
 		route.dstNode = AgentNode;
-		route.routerType = 0;
+		route.routerType = RT_SPECIFIED;
 		ws << ID_RT2OS_RouteToOtherServer << route << ID_LS2C_CharacterLoginAck << info << ack;
 		GlobalFacade::getRef().getNetManger().SendOrgDataToCenter(ws.GetStream(), ws.GetStreamLen());
 	}

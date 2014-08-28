@@ -117,6 +117,13 @@ void Appliction::Stop()
 
 void Appliction::_Stop()
 {
-	GlobalFacade::getRef().getMongoManger().StopPump();
-	CTcpSessionManager::getRef().Stop();
+	if (GlobalFacade::getRef().getMongoManger().getPostCount() == GlobalFacade::getRef().getMongoManger().getPostCount())
+	{
+		GlobalFacade::getRef().getMongoManger().StopPump();
+		CTcpSessionManager::getRef().Stop();
+	}
+	else
+	{
+		CTcpSessionManager::getRef().CreateTimer(1000, std::bind(&Appliction::_Stop, this));
+	}
 }

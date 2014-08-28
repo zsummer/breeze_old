@@ -60,7 +60,8 @@ public:
 	inline MongoPtr & getAuthMongo(){ return m_authMongo; }
 	inline MongoPtr & getInfoMongo(){ return m_infoMongo; }
 	inline MongoPtr & getLogMongo(){ return m_logMongo; }
-
+	inline const std::atomic_ullong & getPostCount(){ return m_uPostCount; }
+	inline const std::atomic_ullong & getFinalCount(){ return m_uFinalCount; }
 public:
 	void async_query(MongoPtr &mongoPtr, const string &ns, const mongo::Query &query,
 		const std::function<void(std::shared_ptr<mongo::DBClientCursor> &, std::string &)> & handler);
@@ -88,6 +89,11 @@ private:
 	std::shared_ptr<std::thread> m_thread;
 	zsummer::network::CZSummer m_summer;
 	bool m_bRuning = false;
+	char __tmpAlignas1[128];
+	std::atomic_ullong m_uPostCount;
+	char __tmpAlignas2[128];
+	std::atomic_ullong m_uFinalCount;
+	char __tmpAlignas3[128];
 };
 
 

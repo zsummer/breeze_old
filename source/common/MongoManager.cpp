@@ -39,6 +39,8 @@ bool CMongoManager::StartPump()
 		return false;
 	}
 	m_bRuning = true;
+	m_uPostCount.store(0);
+	m_uFinalCount.store(0);
 	m_thread = std::shared_ptr<std::thread>(new std::thread(std::bind(&CMongoManager::Run, this)));
 	return true;
 }
@@ -93,6 +95,7 @@ bool CMongoManager::ConnectMongo(MongoPtr & mongoPtr, const MongoConfig & mc)
 void CMongoManager::async_query(MongoPtr & mongoPtr, const string &ns, const mongo::Query  &query,
 	const std::function<void(shared_ptr<mongo::DBClientCursor> &, std::string &)> &handler)
 {
+	m_uPostCount++;
 	m_summer.Post(std::bind(&CMongoManager::_async_query, this, mongoPtr, ns, query, handler));
 }
 
@@ -116,6 +119,7 @@ void CMongoManager::_async_query(MongoPtr & mongoPtr, const string &ns, const mo
 		ret += "mongodb async_query unknown error. ns=" + ns + ", query=" + query.toString();
 	}
 	CTcpSessionManager::getRef().Post(std::bind(handler, shared_ptr<mongo::DBClientCursor>(), ret));
+	m_uFinalCount++;
 }
 
 
@@ -123,6 +127,7 @@ void CMongoManager::_async_query(MongoPtr & mongoPtr, const string &ns, const mo
 void CMongoManager::async_update(MongoPtr &mongoPtr, const string &ns, const mongo::Query &query, const mongo::BSONObj &obj, bool upsert,
 	const std::function<void(std::string &)> & handler)
 {
+	m_uPostCount++;
 	m_summer.Post(std::bind(&CMongoManager::_async_update, this, mongoPtr, ns, query, obj, upsert, handler));
 }
 
@@ -148,11 +153,13 @@ void CMongoManager::_async_update(MongoPtr &mongoPtr, const string &ns, const mo
 		ret += "mongodb _async_update unknown error. ns=" + ns + ", query=" + query.toString();
 	}
 	CTcpSessionManager::getRef().Post(std::bind(handler, ret));
+	m_uFinalCount++;
 }
 
 void CMongoManager::async_insert(MongoPtr &mongoPtr, const string &ns, const mongo::BSONObj &obj,
 	const std::function<void(std::string &)> & handler)
 {
+	m_uPostCount++;
 	m_summer.Post(std::bind(&CMongoManager::_async_insert, this, mongoPtr, ns, obj, handler));
 }
 
@@ -176,6 +183,7 @@ void CMongoManager::_async_insert(MongoPtr &mongoPtr, const string &ns, const mo
 		ret += "mongodb _async_insert unknown error. ns=" + ns + ", obj=" + obj.toString();
 	}
 	CTcpSessionManager::getRef().Post(std::bind(handler, ret));
+	m_uFinalCount++;
 }
 
 

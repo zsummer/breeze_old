@@ -13,11 +13,18 @@
   <const name="EC_SUCCESS" value="0" type="ui16"  desc="成功"/>
   <const name="EC_UNKOWN_ERROR" value="1"  type="ui16" desc="未知错误"/>
   <const name="EC_SERVER_ERROR"  value="2" type="ui16" desc="服务器内部错误"/>
-  <const name="EC_AUTH_NOT_FOUND" value="3"  type="ui16" desc="认证错误:找不到用户名"/>
-  <const name="EC_AUTH_ERROR"  value="4" type="ui16" desc="认证失败"/>
-  <const name="EC_AUTH_ING"  value="5" type="ui16" desc="正在认证中..."/>
-  <const name="EC_AUTH_DOUBLE"  value="6" type="ui16" desc="重复认证"/>
-  <const name="EC_KEY_NOTFOUND"  value="7" type="ui16" desc="KEY找不到"/>
+  <const name="EC_DB_ERROR"  value="3" type="ui16" desc="服务器内部错误"/>
+  <const name="EC_INVALIDE_CHAR_ID"  value="4" type="ui16" desc="角色ID无效"/>
+  <const name="EC_INVALIDE_ACC_ID"  value="5" type="ui16" desc="帐号ID无效"/>
+
+  <const name="EC_AUTH_NOT_FOUND_USER" value="20"  type="ui16" desc="认证错误:找不到用户名"/>
+  <const name="EC_AUTH_PWD_INCORRECT"  value="21" type="ui16" desc="认证错误:密码错误"/>
+  <const name="EC_AUTH_ING"  value="22" type="ui16" desc="认证错误:正在认证中..."/>
+  <const name="EC_AUTH_AREADY_AUTH"  value="23" type="ui16" desc="认证错误:重复认证"/>
+  <const name="EC_AUTH_LIMITE_COUNT"  value="24" type="ui16" desc="认证错误:认证次数超过限制"/>
+  <const name="EC_LOGIN_CHAR_ID_NOT_FOUND"  value="25" type="ui16" desc="角色ID不存在"/>
+  <const name="EC_LOGIN_CHAR_ID_INCORRECT"  value="26" type="ui16" desc="角色ID错误"/>
+  <const name="EC_LOGIN_CHAR_NAME_INCORRECT"  value="27" type="ui16" desc="角色名冲突"/>
 
   <struct name="LittleCharInfo" desc="简要角色信息">
     <member name="charID" type="ui64"   desc="角色ID"/>

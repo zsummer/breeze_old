@@ -265,13 +265,13 @@ void CNetManager::msg_TranslateToOtherServer(ProtocolID pID, ReadStreamPack & rs
 		ProtoRouteToOtherServer route;
 		rs >> route;
 
-		if (route.routerType == 0 || route.routerType == 1)
+		if (route.routerType == RT_SPECIFIED || route.routerType == RT_ANY)
 		{
 			if (route.dstNode == LogicNode
 				|| route.dstNode == AuthNode)
 			{
 				auto founder = std::find_if(m_onlineConnect.begin(), m_onlineConnect.end(),
-					[route](const ServerAuthConnect & sas){return sas.node == route.dstNode && (route.routerType == 3 || sas.index == route.dstIndex); });
+					[route](const ServerAuthConnect & sas){return sas.node == route.dstNode && (route.routerType == RT_ANY || sas.index == route.dstIndex); });
 				if (founder != m_onlineConnect.end())
 				{
 					WriteStreamPack  ws(zsummer::proto4z::UBT_STATIC_AUTO);
@@ -283,7 +283,7 @@ void CNetManager::msg_TranslateToOtherServer(ProtocolID pID, ReadStreamPack & rs
 			else
 			{
 				auto founder = std::find_if(m_onlineSession.begin(), m_onlineSession.end(),
-					[route](const ServerAuthSession & sas){return sas.node == route.dstNode && (route.routerType == 3 || sas.index == route.dstIndex); });
+					[route](const ServerAuthSession & sas){return sas.node == route.dstNode && (route.routerType == RT_ANY || sas.index == route.dstIndex); });
 				if (founder != m_onlineSession.end())
 				{
 					WriteStreamPack  ws(zsummer::proto4z::UBT_STATIC_AUTO);
@@ -293,31 +293,76 @@ void CNetManager::msg_TranslateToOtherServer(ProtocolID pID, ReadStreamPack & rs
 				}
 			}
 		}
-		else if (route.routerType == 2)
+		else/* if (route.routerType == RT_RAND || RT_WITHOUT_SPECIFIED || RT_BROADCAST)*/
 		{
 			if (route.dstNode == LogicNode
 				|| route.dstNode == AuthNode)
 			{
+				ConnectorID rIDs[20];
+				ui32 lCount = 0;
 				for (const auto & c : m_onlineConnect)
 				{
 					if (c.node == route.dstNode)
 					{
+						if (route.routerType == RT_WITHOUT_SPECIFIED && route.dstIndex == c.index)
+						{
+							continue;
+						}
+						else if (route.routerType == RT_RAND)
+						{
+							if (lCount < 20)
+							{
+								lCount++;
+								rIDs[lCount - 1] = c.cID;
+							}
+							continue;
+						}
 						WriteStreamPack  ws(zsummer::proto4z::UBT_STATIC_AUTO);
 						ws.AppendOriginalData(rs.GetStreamUnread(), rs.GetStreamUnreadLen());
 						CTcpSessionManager::getRef().SendOrgConnectorData(c.cID, ws.GetStream(), ws.GetStreamLen());
 					}
 				}
+				if (route.routerType == RT_RAND && lCount > 0)
+				{
+					size_t rIndex = rand() % lCount;
+					WriteStreamPack  ws(zsummer::proto4z::UBT_STATIC_AUTO);
+					ws.AppendOriginalData(rs.GetStreamUnread(), rs.GetStreamUnreadLen());
+					CTcpSessionManager::getRef().SendOrgConnectorData(rIDs[rIndex], ws.GetStream(), ws.GetStreamLen());
+				}
 			}
 			else
 			{
+				std::pair<AccepterID, SessionID> rIDs[20];
+				ui32 lCount = 0;
 				for (const auto & s : m_onlineSession)
 				{
 					if (s.node == route.dstNode)
 					{
+						if (route.routerType == RT_WITHOUT_SPECIFIED && route.dstIndex == s.index)
+						{
+							continue;
+						}
+						else if (route.routerType == RT_RAND)
+						{
+							if (lCount < 20)
+							{
+								lCount++;
+								rIDs[lCount - 1].first = s.aID;
+								rIDs[lCount - 1].second = s.sID;
+							}
+							continue;
+						}
 						WriteStreamPack  ws(zsummer::proto4z::UBT_STATIC_AUTO);
 						ws.AppendOriginalData(rs.GetStreamUnread(), rs.GetStreamUnreadLen());
 						CTcpSessionManager::getRef().SendOrgSessionData(s.aID, s.sID, ws.GetStream(), ws.GetStreamLen());
 					}
+				}
+				if (route.routerType == RT_RAND && lCount > 0)
+				{
+					size_t rIndex = rand() % lCount;
+					WriteStreamPack  ws(zsummer::proto4z::UBT_STATIC_AUTO);
+					ws.AppendOriginalData(rs.GetStreamUnread(), rs.GetStreamUnreadLen());
+					CTcpSessionManager::getRef().SendOrgSessionData(rIDs[rIndex].first, rIDs[rIndex].second, ws.GetStream(), ws.GetStreamLen());
 				}
 			}
 		}

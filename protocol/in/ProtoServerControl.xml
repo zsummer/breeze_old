@@ -28,17 +28,21 @@
         目标服务处理协议首先从流中流出SesssionDEBUG 其次才是原始信息数据,  返回协议参照请求协议流程 -->
   <!-- 备注: 如果协议为广播, 或者玩家与玩家通讯 在推送/返回协议时 应忽略或者重新设置SessionDEBUG的信息内容 -->
 
-
+  <const name="RT_SPECIFIED" value="0" type="ui16"  desc="指定dstIndex为路由目标"/>
+  <const name="RT_ANY" value="1" type="ui16"  desc="(任意)符合路由目标类型的任意一个节点为路由目标"/>
+  <const name="RT_RAND" value="2" type="ui16"  desc="(随机)符合路由目标类型的任意一个节点为路由目标"/>
+  <const name="RT_BROADCAST" value="3" type="ui16"  desc="(广播)符合路由目标类型的所有节点为路由目标"/>
+  <const name="RT_WITHOUT_SPECIFIED" value="0" type="ui16"  desc="(广播)指定dstIndex为以外的所有节点为路由目标"/>
   <proto from="RT" to="OS" name="RouteToOtherServer" desc= "路由给其他服务">
     <member name="dstNode" type="ui32"   desc=""/>
-    <member name="routerType" type="ui32"   desc="0为指定dstIndex路由, 1为任意一个, 2为广播"/>
+    <member name="routerType" type="ui32"   desc="RT_SPECIFIED为指定dstIndex路由, RT_RAND为任意一个, RT_BROADCAST为广播"/>
     <member name="dstIndex" type="ui32"   desc="optional"/>
   </proto>
 
 
-  <proto from="LS" to="AS" name="KickCharacter" desc= "踢掉指定角色, 该协议需要通过路由协议交给agent. 默认使用方式为广播形式路由给所有agent节点">
+  <proto from="LS" to="AS" name="CharacterLogin" desc= "玩家登录消息, 广播给所有agent">
   </proto>
-  <proto from="AS" to="LS" name="CharacterLogout" desc= "玩家登出, 被踢用户无该消息">
+  <proto from="AS" to="LS" name="CharacterLogout" desc= "玩家登出消息, 广播给所有logic">
   </proto>
 
 

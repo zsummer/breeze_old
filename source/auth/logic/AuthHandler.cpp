@@ -68,7 +68,7 @@ void CAuthHandler::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Re
 void CAuthHandler::mongo_GetAuthInfo(std::shared_ptr<mongo::DBClientCursor> & cursor, std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo info, const ProtoAuthReq & req)
 {
 	ProtoAuthAck ack;
-	ack.retCode = EC_AUTH_ERROR;
+	ack.retCode = EC_DB_ERROR;
 	ack.accountID = InvalidAccountID;
 	do
 	{
@@ -113,7 +113,7 @@ void CAuthHandler::mongo_GetAuthInfo(std::shared_ptr<mongo::DBClientCursor> & cu
 	ProtoRouteToOtherServer route;
 	route.dstNode = info.srcNode;
 	route.dstIndex = info.srcIndex;
-	route.routerType = 0;
+	route.routerType = RT_SPECIFIED;
 	info.srcNode = AgentNode;
 	info.srcIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
 	ws << ID_RT2OS_RouteToOtherServer << route << ID_AS2C_AuthAck << info << ack;
