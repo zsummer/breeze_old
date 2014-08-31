@@ -61,7 +61,7 @@ public:
 private:
 	std::unordered_map<AccountID, std::shared_ptr<AccountInfo> > m_accInfo;
 	std::unordered_map<CharacterID, std::shared_ptr<LogicCharacterInfo> > m_charInfo;
-	CharacterID m_seqCharID = 1;
+	GenObjectID m_genObjCharID;
 };
 
 

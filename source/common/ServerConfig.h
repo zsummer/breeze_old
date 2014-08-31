@@ -75,7 +75,7 @@ public:
 
 	ServerNode getOwnServerNode(){ return m_ownServerNode; }
 	NodeIndex getOwnNodeIndex(){ return m_ownNodeIndex; }
-	GameID getGameID() { return m_gameid; }
+	PlatID getPlatID() { return m_platid; }
 	AreaID getAreaID() { return m_areaid; }
 
 	inline const MongoConfig & getAuthMongoDB(){ return m_authMongo; }
@@ -85,7 +85,7 @@ public:
 private:
 	ServerNode m_ownServerNode = InvalideServerNode;
 	NodeIndex m_ownNodeIndex = InvalidNodeIndex;
-	GameID m_gameid = 0;
+	PlatID m_platid = 0;
 	AreaID m_areaid = 0;
 
 	std::vector<ListenConfig> m_configListen;

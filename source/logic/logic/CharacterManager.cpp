@@ -23,30 +23,27 @@ bool CCharacterManager::Init()
 bool CCharacterManager::mongo_LoadLastCharID()
 {
 	//初始化
-	m_seqCharID = GlobalFacade::getRef().getServerConfig().getAreaID();
-	long long nextArea = m_seqCharID + 1;
-	m_seqCharID = m_seqCharID << 32;
-	nextArea = nextArea << 32;
-	
+	m_genObjCharID.InitConfig(GlobalFacade::getRef().getServerConfig().getPlatID(), GlobalFacade::getRef().getServerConfig().getAreaID());
+
+
 	CMongoManager & mgr = GlobalFacade::getRef().getMongoManger();
 	std::string ns = GlobalFacade::getRef().getServerConfig().getInfoMongoDB().db;
 	ns += ".info_character";
 	mongo::BSONObjBuilder b;
-	b << "_id" << mongo::GTE << (long long)m_seqCharID << "_id" << mongo::LT << nextArea;
+	b << "_id" << mongo::GTE << (long long)m_genObjCharID.GetMinObjID() << "_id" << mongo::LT << (long long)m_genObjCharID.GetMaxObjID();
 	try
 	{
 		auto cursor = mgr.getInfoMongo()->query(ns, mongo::Query(b.obj()).sort("_id", -1), 1);
 		if (cursor->more())
 		{
 			auto obj = cursor->next();
-			m_seqCharID = obj.getField("_id").numberLong();
-			m_seqCharID++;
-			LOGI("mongo_LoadLastCharID lastCharID=" << m_seqCharID - 1 << ", next seq Char ID=" << m_seqCharID);
+			m_genObjCharID.SetCurObjID(obj.getField("_id").numberLong());
+			LOGI("mongo_LoadLastCharID minCharID=" << m_genObjCharID.GetMinObjID() << ", maxCharID=" << m_genObjCharID.GetMaxObjID() << ", curCharID=" << m_genObjCharID.GetCurObjID());
 			return true;
 		}
 		else
 		{
-			LOGW("not found any character. m_seqCharID=" << m_seqCharID);
+			LOGI("mongo_LoadLastCharID not found any character. minCharID=" << m_genObjCharID.GetMinObjID() << ", maxCharID=" << m_genObjCharID.GetMaxObjID() << ", curCharID=" << m_genObjCharID.GetCurObjID());
 			return true;
 		}
 	}
@@ -275,7 +272,7 @@ void CCharacterManager::msg_CreateCharacterReq(AccepterID aID, SessionID sID, Pr
 	}
 
 	LittleCharInfo lci;
-	lci.charID = m_seqCharID++;
+	lci.charID = m_genObjCharID.GenNewObjID();
 	lci.charName = req.charName;
 	lci.iconID = 0;
 	lci.level = 1;
