@@ -92,7 +92,7 @@ void CCharacterManager::msg_LoadAccountInfoReq(AccepterID aID, SessionID sID, Pr
 }
 
 
-void CCharacterManager::mongo_LoadAccountInfo(std::shared_ptr<CMongoManager::MongoRetDatas> & retDatas, std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info)
+void CCharacterManager::mongo_LoadAccountInfo(const std::shared_ptr<CMongoManager::MongoRetDatas> & retDatas, const std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info)
 {
 	try
 	{
@@ -177,7 +177,7 @@ void CCharacterManager::mongo_LoadAccountInfo(std::shared_ptr<CMongoManager::Mon
 	GlobalFacade::getRef().getNetManger().SendOrgDataToCenter(ws.GetStream(), ws.GetStreamLen());
 }
 
-void CCharacterManager::mongo_LoadLittleCharInfo(std::shared_ptr<CMongoManager::MongoRetDatas> & retDatas, std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info)
+void CCharacterManager::mongo_LoadLittleCharInfo(const std::shared_ptr<CMongoManager::MongoRetDatas> & retDatas, const std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info)
 {
 	try
 	{
@@ -293,7 +293,7 @@ void CCharacterManager::msg_CreateCharacterReq(AccepterID aID, SessionID sID, Pr
 
 
 
-void CCharacterManager::mongo_CreateCharacter(std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info, const LittleCharInfo & lci)
+void CCharacterManager::mongo_CreateCharacter(const std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info, const LittleCharInfo & lci)
 {
 	if (errMsg.empty())
 	{
@@ -427,7 +427,7 @@ void CCharacterManager::msg_CharacterLoginReq(AccepterID aID, SessionID sID, Pro
 }
 
 
-void CCharacterManager::mongo_LoadCharacterInfo(std::shared_ptr<CMongoManager::MongoRetDatas> & retDatas, std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info)
+void CCharacterManager::mongo_LoadCharacterInfo(const std::shared_ptr<CMongoManager::MongoRetDatas> & retDatas, const std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info)
 {
 	try
 	{
@@ -514,7 +514,7 @@ void CCharacterManager::mongo_LoadCharacterInfo(std::shared_ptr<CMongoManager::M
 
 
 
-void CCharacterManager::mongo_UpdateNormalHandler(std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info, const std::string & msg)
+void CCharacterManager::mongo_UpdateNormalHandler(const std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info, const std::string & msg)
 {
 	if (errMsg.empty())
 	{

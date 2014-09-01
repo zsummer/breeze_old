@@ -32,7 +32,7 @@ public:
 	~CAuthHandler(){}
 	virtual bool Init() override final;
 	void msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
-	void mongo_GetAuthInfo(std::shared_ptr<CMongoManager::MongoRetDatas>  &retDatas, std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo info, const ProtoAuthReq & req);
+	void mongo_GetAuthInfo(const std::shared_ptr<CMongoManager::MongoRetDatas>  &retDatas, const std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo info, const ProtoAuthReq & req);
 private:
 };
 

@@ -41,16 +41,16 @@ public:
 	virtual bool Init() override final;
 	bool mongo_LoadLastCharID();
 	void msg_LoadAccountInfoReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
-	void mongo_LoadAccountInfo(std::shared_ptr<CMongoManager::MongoRetDatas> & retDatas, std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info);
-	void mongo_LoadLittleCharInfo(std::shared_ptr<CMongoManager::MongoRetDatas> & retDatas, std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info);
+	void mongo_LoadAccountInfo(const std::shared_ptr<CMongoManager::MongoRetDatas> & retDatas, const std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info);
+	void mongo_LoadLittleCharInfo(const std::shared_ptr<CMongoManager::MongoRetDatas> & retDatas, const std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info);
 
 	void msg_CreateCharacterReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
-	void mongo_CreateCharacter(std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info, const LittleCharInfo & lci);
+	void mongo_CreateCharacter(const std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info, const LittleCharInfo & lci);
 
 	void msg_CharacterLoginReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
-	void mongo_LoadCharacterInfo(std::shared_ptr<CMongoManager::MongoRetDatas> & retDatas, std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info);
+	void mongo_LoadCharacterInfo(const std::shared_ptr<CMongoManager::MongoRetDatas> & retDatas, const std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info);
 
-	void mongo_UpdateNormalHandler(std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info, const std::string & msg);
+	void mongo_UpdateNormalHandler(const std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info, const std::string & msg);
 
 
 	void msg_CharacterLogout(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);

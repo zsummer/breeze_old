@@ -65,7 +65,7 @@ void CAuthHandler::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Re
 }
 
 
-void CAuthHandler::mongo_GetAuthInfo(std::shared_ptr<CMongoManager::MongoRetDatas>  &retDatas, std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo info, const ProtoAuthReq & req)
+void CAuthHandler::mongo_GetAuthInfo(const std::shared_ptr<CMongoManager::MongoRetDatas>  &retDatas, const std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo info, const ProtoAuthReq & req)
 {
 	ProtoAuthAck ack;
 	ack.retCode = EC_DB_ERROR;
