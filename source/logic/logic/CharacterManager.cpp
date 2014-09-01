@@ -92,7 +92,7 @@ void CCharacterManager::msg_LoadAccountInfoReq(AccepterID aID, SessionID sID, Pr
 }
 
 
-void CCharacterManager::mongo_LoadAccountInfo(std::shared_ptr<mongo::DBClientCursor> & cursor, std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info)
+void CCharacterManager::mongo_LoadAccountInfo(std::shared_ptr<CMongoManager::MongoRetDatas> & retDatas, std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info)
 {
 	try
 	{
@@ -103,11 +103,10 @@ void CCharacterManager::mongo_LoadAccountInfo(std::shared_ptr<mongo::DBClientCur
 		}
 		
 		std::shared_ptr<AccountInfo> pinfo(new AccountInfo);
-
-		bool bFound = true;
-		if (cursor->more())
+		
+		if (!retDatas->empty())
 		{
-			auto obj = cursor->next();
+			auto obj = retDatas->at(0);
 			pinfo->accID = info.accID;
 			pinfo->accName = obj.getField("accName").str();
 			pinfo->diamond = obj.getField("diamond").numberInt();
@@ -117,7 +116,6 @@ void CCharacterManager::mongo_LoadAccountInfo(std::shared_ptr<mongo::DBClientCur
 		}
 		else
 		{
-			bFound = false;
 			pinfo->accID = info.accID;
 			pinfo->diamond = 0;
 			pinfo->hisDiamond = 0;
@@ -128,7 +126,7 @@ void CCharacterManager::mongo_LoadAccountInfo(std::shared_ptr<mongo::DBClientCur
 		{
 			m_accInfo.insert(std::make_pair(pinfo->accID, pinfo));
 			CMongoManager & mgr = GlobalFacade::getRef().getMongoManger();
-			if (!bFound)
+			if (retDatas->empty())
 			{
 				std::string ns = GlobalFacade::getRef().getServerConfig().getInfoMongoDB().db;
 				ns += ".info_account";
@@ -179,7 +177,7 @@ void CCharacterManager::mongo_LoadAccountInfo(std::shared_ptr<mongo::DBClientCur
 	GlobalFacade::getRef().getNetManger().SendOrgDataToCenter(ws.GetStream(), ws.GetStreamLen());
 }
 
-void CCharacterManager::mongo_LoadLittleCharInfo(std::shared_ptr<mongo::DBClientCursor> & cursor, std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info)
+void CCharacterManager::mongo_LoadLittleCharInfo(std::shared_ptr<CMongoManager::MongoRetDatas> & retDatas, std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info)
 {
 	try
 	{
@@ -194,18 +192,16 @@ void CCharacterManager::mongo_LoadLittleCharInfo(std::shared_ptr<mongo::DBClient
 			LOGE("mongo_LoadLittleCharInfo error. not found account ID");
 			throw 2;
 		}
-		
-		while (cursor->more())
+		for (auto & obj : *retDatas)
 		{
-			auto obj = cursor->next();
 			LittleCharInfo charInfo;
 			charInfo.charID = obj.getField("_id").numberLong();
 			charInfo.charName = obj.getField("charName").str();
 			charInfo.iconID = obj.getField("iconID").numberInt();
 			charInfo.level = obj.getField("level").numberInt();
-			
 			founder->second->charInfos.push_back(charInfo);
 		}
+		
 		ProtoLoadAccountInfoAck ack;
 		ack.retCode = EC_SUCCESS;
 		ack.info = *founder->second;
@@ -431,7 +427,7 @@ void CCharacterManager::msg_CharacterLoginReq(AccepterID aID, SessionID sID, Pro
 }
 
 
-void CCharacterManager::mongo_LoadCharacterInfo(std::shared_ptr<mongo::DBClientCursor> & cursor, std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info)
+void CCharacterManager::mongo_LoadCharacterInfo(std::shared_ptr<CMongoManager::MongoRetDatas> & retDatas, std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info)
 {
 	try
 	{
@@ -442,9 +438,9 @@ void CCharacterManager::mongo_LoadCharacterInfo(std::shared_ptr<mongo::DBClientC
 		}
 		
 
-		if (cursor->more())
+		if (!retDatas->empty())
 		{
-			auto obj = cursor->next();
+			auto obj = retDatas->at(0);
 			std::shared_ptr<LogicCharacterInfo> plci(new LogicCharacterInfo);
 			plci->charInfo.charID = obj.getField("_id").numberLong();
 			plci->charInfo.charName = obj.getField("charName").str();

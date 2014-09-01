@@ -65,7 +65,7 @@ void CAuthHandler::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Re
 }
 
 
-void CAuthHandler::mongo_GetAuthInfo(std::shared_ptr<mongo::DBClientCursor> & cursor, std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo info, const ProtoAuthReq & req)
+void CAuthHandler::mongo_GetAuthInfo(std::shared_ptr<CMongoManager::MongoRetDatas>  &retDatas, std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo info, const ProtoAuthReq & req)
 {
 	ProtoAuthAck ack;
 	ack.retCode = EC_DB_ERROR;
@@ -74,9 +74,9 @@ void CAuthHandler::mongo_GetAuthInfo(std::shared_ptr<mongo::DBClientCursor> & cu
 	{
 		try
 		{
-			if (cursor->more())
+			if (!retDatas->empty())
 			{
-				auto obj = cursor->next();
+				auto obj = retDatas->at(0);
 				std::string pwd = obj.getField("pwd").str();
 				AccountID accID = obj.getField("accID").numberLong();
 				if (pwd == req.info.pwd)

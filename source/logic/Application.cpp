@@ -117,7 +117,7 @@ void Appliction::Stop()
 
 void Appliction::_Stop()
 {
-	if (GlobalFacade::getRef().getMongoManger().getPostCount() == GlobalFacade::getRef().getMongoManger().getPostCount())
+	if (GlobalFacade::getRef().getMongoManger().getPostCount() == GlobalFacade::getRef().getMongoManger().getFinalCount())
 	{
 		GlobalFacade::getRef().getMongoManger().StopPump();
 		CTcpSessionManager::getRef().Stop();
