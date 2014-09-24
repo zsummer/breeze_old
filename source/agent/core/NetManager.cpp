@@ -92,12 +92,12 @@ void CNetManager::event_OnConnect(ConnectorID cID)
 {
 	//auth
 	WriteStreamPack ws;
-	ProtoDirectServerAuth auth;
+	DT2OS_DirectServerAuth auth;
 	auth.srcNode = GlobalFacade::getRef().getServerConfig().getOwnServerNode();
 	auth.srcIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
 	ws << ID_DT2OS_DirectServerAuth << auth;
 	CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
-	LOGI("send ProtoDirectServerAuth cID=" << cID << ", node=" << auth.srcNode << ", index=" << auth.srcIndex)
+	LOGI("send DT2OS_DirectServerAuth cID=" << cID << ", node=" << auth.srcNode << ", index=" << auth.srcIndex)
 }
 
 
@@ -140,7 +140,7 @@ void CNetManager::event_OnSessionDisconnect(AccepterID aID, SessionID sID)
 		LOGI("CNetManager::event_OnSessionDisconnect. send ID_AS2LS_CharacterLogout. info=" << *founder->second);
 
 		{
-			ProtoRouteToOtherServer route;
+			RT2OS_RouteToOtherServer route;
 			route.dstNode = LogicNode;
 			route.routerType = RT_BROADCAST;
 			route.dstIndex = 0;
@@ -165,7 +165,7 @@ void CNetManager::event_OnSessionDisconnect(AccepterID aID, SessionID sID)
 
 void CNetManager::msg_ConnectServerAuth(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs)
 {
-	ProtoDirectServerAuth auth;
+	DT2OS_DirectServerAuth auth;
 	rs >> auth;
 	LOGI("msg_ConnectServerAuth. cID=" << cID << ", Node=" << auth.srcNode << ", index=" << auth.srcIndex);
 
@@ -202,13 +202,13 @@ void CNetManager::msg_ConnectServerAuth(ConnectorID cID, ProtocolID pID, ReadStr
 
 void CNetManager::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs)
 {
-	ProtoAuthReq req;
+	C2AS_AuthReq req;
 	rs >> req;
 	LOGD("ID_C2AS_AuthReq user=" << req.info.user << ", pwd=" << req.info.pwd);
 	if (m_onlineCenter.empty())
 	{
 		WriteStreamPack ws;
-		ProtoAuthAck ack;
+		AS2C_AuthAck ack;
 		ack.retCode = EC_SERVER_ERROR;
 		ws << ID_AS2C_AuthAck << ack;
 		CTcpSessionManager::getRef().SendOrgSessionData(aID, sID, ws.GetStream(), ws.GetStreamLen());
@@ -219,7 +219,7 @@ void CNetManager::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Rea
 	if (finditer != m_mapSession.end())
 	{
 		WriteStreamPack ws;
-		ProtoAuthAck ack;
+		AS2C_AuthAck ack;
 		ack.retCode = EC_AUTH_ING;
 		ws << ID_AS2C_AuthAck << ack;
 		CTcpSessionManager::getRef().SendOrgSessionData(aID, sID, ws.GetStream(), ws.GetStreamLen());
@@ -239,7 +239,7 @@ void CNetManager::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Rea
 	
 	//route
 	ProtocolID inProtoID = ID_RT2OS_RouteToOtherServer;
-	ProtoRouteToOtherServer route;
+	RT2OS_RouteToOtherServer route;
 	route.dstNode = AuthNode;
 	route.routerType = RT_ANY;
 	route.dstIndex = 0;
@@ -251,7 +251,7 @@ void CNetManager::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Rea
 void CNetManager::msg_AuthAck(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs)
 {
 	SessionInfo info;
-	ProtoAuthAck ack;
+	AS2C_AuthAck ack;
 	rs >> info;
 	rs >> ack;
 
@@ -287,7 +287,7 @@ void CNetManager::msg_CharacterLogin(ConnectorID cID, ProtocolID pID, ReadStream
 		CTcpSessionManager::getRef().KickSession(si.aID, si.sID);
 
 		LOGI("CNetManager::msg_CharacterLogin. send ID_AS2LS_CharacterLogout. info=" << *founder->second);
-		ProtoRouteToOtherServer route;
+		RT2OS_RouteToOtherServer route;
 		route.dstNode = LogicNode;
 		route.routerType = RT_BROADCAST;
 		route.dstIndex = 0;
@@ -348,7 +348,7 @@ void CNetManager::event_OnConnectorHeartbeat(ConnectorID cID)
 		return;
 	}
 	WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);
-	ProtoDirectServerPulse pulse;
+	DT2OS_DirectServerPulse pulse;
 	pulse.srcNode = GlobalFacade::getRef().getServerConfig().getOwnServerNode();
 	pulse.srcIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
 
@@ -376,7 +376,7 @@ void CNetManager::msg_OnClientPulse(AccepterID aID, SessionID sID, ProtocolID pI
 		return;
 	}
 	WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);
-	ProtoClientPulseAck ack;
+	AS2C_ClientPulseAck ack;
 	ack.svrTimeStamp = time(NULL);
 	ws << ID_AS2C_ClientPulseAck << ack;
 	CTcpSessionManager::getRef().SendOrgSessionData(aID, sID, ws.GetStream(), ws.GetStreamLen());
@@ -401,7 +401,7 @@ void CNetManager::msg_DefaultSessionReq(AccepterID aID, SessionID sID, ProtocolI
 
 	if (finditer == m_mapSession.end() || finditer->second->sInfo.accID == InvalidAccountID)
 	{
-		ProtoAuthAck ack;
+		AS2C_AuthAck ack;
 		ack.retCode = EC_AUTH_NOT_FOUND_USER;
 		ack.accountID = InvalidAccountID;
 		WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);
@@ -414,7 +414,7 @@ void CNetManager::msg_DefaultSessionReq(AccepterID aID, SessionID sID, ProtocolI
 		if (isNeedAuthClientPROTO(pID) && !m_onlineCenter.empty())
 		{
 			inProtoID = ID_RT2OS_RouteToOtherServer;
-			ProtoRouteToOtherServer route;
+			RT2OS_RouteToOtherServer route;
 			route.dstNode = LogicNode;
 			route.routerType = RT_ANY;
 			route.dstIndex = 0;

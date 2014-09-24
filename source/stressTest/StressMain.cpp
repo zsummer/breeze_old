@@ -80,7 +80,7 @@ public:
 	void OnConnecotrHeartbeatTimer(ConnectorID cID)
 	{
 		WriteStreamPack ws;
-		ws << ID_C2AS_ClientPulse << ProtoClientPulse();
+		ws << ID_C2AS_ClientPulse << C2AS_ClientPulse();
 		CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
 	}
 	void OnConnecotrDisconnect(ConnectorID cID)
@@ -114,7 +114,7 @@ public:
 		char userName[100];
 		sprintf(userName, "zhangyawei%04d", (int)cID);
 		WriteStreamPack ws;
-		ProtoAuthReq req;
+		C2AS_AuthReq req;
 		req.info.user = userName;
 		req.info.pwd = "123";
 		ws << ID_C2AS_AuthReq << req;
@@ -130,7 +130,7 @@ public:
 	inline void msg_AuthAck_fun(ConnectorID cID, ProtocolID pID, ReadStreamPack & rs)
 	{
 
-		ProtoAuthAck ack;
+		AS2C_AuthAck ack;
 		rs >> ack;
 		if (ack.retCode == EC_SUCCESS)
 		{
@@ -149,7 +149,7 @@ public:
 		if (g_stressType == ST_NORMAL)
 		{
 			WriteStreamPack ws;
-			ProtoLoadAccountInfoReq req;
+			C2LS_LoadAccountInfoReq req;
 			ws << ID_C2LS_LoadAccountInfoReq << req;
 			CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
 			LOGD("msg_AuthAck. Send LoginReq. cID=" << cID);
@@ -160,7 +160,7 @@ public:
 			char userName[100];
 			sprintf(userName, "zhangyawei%04d", (int)cID);
 			WriteStreamPack ws;
-			ProtoAuthReq req;
+			C2AS_AuthReq req;
 			req.info.user = userName;
 			req.info.pwd = "123";
 			ws << ID_C2AS_AuthReq << req;
@@ -174,7 +174,7 @@ public:
 
 	inline void msg_LoadAccountInfoAck_fun(ConnectorID cID, ProtocolID pID, ReadStreamPack & rs)
 	{
-		ProtoLoadAccountInfoAck ack;
+		LS2C_LoadAccountInfoAck ack;
 		rs >> ack;
 
 		g_totalRecvCount++;
@@ -192,7 +192,7 @@ public:
 			if (ack.info.charInfos.empty())
 			{
 				WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);
-				ProtoCreateCharacterReq req;
+				C2LS_CreateCharacterReq req;
 				req.charName = "test";
 				ws << ID_C2LS_CreateCharacterReq << req;
 				CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
@@ -203,7 +203,7 @@ public:
 			else
 			{
 				WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);
-				ProtoCharacterLoginReq req;
+				C2LS_CharacterLoginReq req;
 				req.charID = ack.info.charInfos.at(0).charID;
 				ws << ID_C2LS_CharacterLoginReq << req;
 				CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
@@ -214,7 +214,7 @@ public:
 		else if (g_stressType == ST_LOAD_ACCOUNT)
 		{
 			WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);
-			ProtoLoadAccountInfoReq req;
+			C2LS_LoadAccountInfoReq req;
 			ws << ID_C2LS_LoadAccountInfoReq << req;
 			CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
 			LOGD("msg_LoadAccountInfoAck_fun. Send ID_C2LS_LoadAccountInfoReq. cID=" << cID);
@@ -223,7 +223,7 @@ public:
 	}
 	inline void msg_CreateCharacterAck_fun(ConnectorID cID, ProtocolID pID, ReadStreamPack & rs)
 	{
-		ProtoCreateCharacterAck ack;
+		LS2C_CreateCharacterAck ack;
 		rs >> ack;
 
 		g_totalRecvCount++;
@@ -239,7 +239,7 @@ public:
 		if (g_stressType == ST_NORMAL)
 		{
 			WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);
-			ProtoCharacterLoginReq req;
+			C2LS_CharacterLoginReq req;
 			req.charID = ack.lci.charID;
 			ws << ID_C2LS_CharacterLoginReq << req;
 			CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
@@ -249,7 +249,7 @@ public:
 	}
 	inline void msg_CharacterLoginAck_fun(ConnectorID cID, ProtocolID pID, ReadStreamPack & rs)
 	{
-		ProtoCharacterLoginAck ack;
+		LS2C_CharacterLoginAck ack;
 		rs >> ack;
 
 		g_totalRecvCount++;

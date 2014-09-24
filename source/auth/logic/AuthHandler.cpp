@@ -16,7 +16,7 @@ bool CAuthHandler::Init()
 void CAuthHandler::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs)
 {
 	SessionInfo info;
-	ProtoAuthReq req;
+	C2AS_AuthReq req;
 	rs >> info >> req;
 	LOGD("ID_C2AS_AuthReq user=" << req.info.user << ", pwd=" << req.info.pwd);
 
@@ -65,9 +65,9 @@ void CAuthHandler::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Re
 }
 
 
-void CAuthHandler::mongo_GetAuthInfo(const std::shared_ptr<CMongoManager::MongoRetDatas>  &retDatas, const std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo info, const ProtoAuthReq & req)
+void CAuthHandler::mongo_GetAuthInfo(const std::shared_ptr<CMongoManager::MongoRetDatas>  &retDatas, const std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo info, const C2AS_AuthReq & req)
 {
-	ProtoAuthAck ack;
+	AS2C_AuthAck ack;
 	ack.retCode = EC_DB_ERROR;
 	ack.accountID = InvalidAccountID;
 	do
@@ -110,7 +110,7 @@ void CAuthHandler::mongo_GetAuthInfo(const std::shared_ptr<CMongoManager::MongoR
 
 
 	WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);
-	ProtoRouteToOtherServer route;
+	RT2OS_RouteToOtherServer route;
 	route.dstNode = info.srcNode;
 	route.dstIndex = info.srcIndex;
 	route.routerType = RT_SPECIFIED;

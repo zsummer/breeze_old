@@ -76,11 +76,11 @@ void CCharacterManager::msg_LoadAccountInfoReq(AccepterID aID, SessionID sID, Pr
 	}
 	else
 	{
-		ProtoLoadAccountInfoAck ack;
+		LS2C_LoadAccountInfoAck ack;
 		ack.retCode = EC_SUCCESS;
 		ack.info = *founder->second;
 		WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);;
-		ProtoRouteToOtherServer route;
+		RT2OS_RouteToOtherServer route;
 		route.dstIndex = info.agentIndex;
 		route.dstNode = AgentNode;
 		route.routerType = RT_SPECIFIED;
@@ -134,11 +134,11 @@ void CCharacterManager::mongo_LoadAccountInfo(const std::shared_ptr<CMongoManage
 					BSON("diamond" << pinfo->diamond << "hisDiamond" << pinfo->hisDiamond << "giftDmd" << pinfo->giftDmd << "hisGiftDmd" << pinfo->hisGiftDmd ), true,
 					std::bind(&CCharacterManager::mongo_UpdateNormalHandler, this, std::placeholders::_1, aID, sID, info, "insert account."));
 
-				ProtoLoadAccountInfoAck ack;
+				LS2C_LoadAccountInfoAck ack;
 				ack.retCode = EC_SUCCESS;
 				ack.info = *pinfo;
 				WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);;
-				ProtoRouteToOtherServer route;
+				RT2OS_RouteToOtherServer route;
 				route.dstIndex = info.agentIndex;
 				route.dstNode = AgentNode;
 				route.routerType = RT_SPECIFIED;
@@ -164,10 +164,10 @@ void CCharacterManager::mongo_LoadAccountInfo(const std::shared_ptr<CMongoManage
 		LOGW("mongo_LoadAccountInfo UNKNOWN ERROR");
 	}
 
-	ProtoLoadAccountInfoAck ack;
+	LS2C_LoadAccountInfoAck ack;
 	ack.retCode = EC_DB_ERROR;
 	WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);;
-	ProtoRouteToOtherServer route;
+	RT2OS_RouteToOtherServer route;
 	route.dstIndex = info.agentIndex;
 	route.dstNode = AgentNode;
 	route.routerType = RT_SPECIFIED;
@@ -202,11 +202,11 @@ void CCharacterManager::mongo_LoadLittleCharInfo(const std::shared_ptr<CMongoMan
 			founder->second->charInfos.push_back(charInfo);
 		}
 		
-		ProtoLoadAccountInfoAck ack;
+		LS2C_LoadAccountInfoAck ack;
 		ack.retCode = EC_SUCCESS;
 		ack.info = *founder->second;
 		WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);;
-		ProtoRouteToOtherServer route;
+		RT2OS_RouteToOtherServer route;
 		route.dstIndex = info.agentIndex;
 		route.dstNode = AgentNode;
 		route.routerType = RT_SPECIFIED;
@@ -224,10 +224,10 @@ void CCharacterManager::mongo_LoadLittleCharInfo(const std::shared_ptr<CMongoMan
 	{
 		LOGW("mongo_LoadLittleCharInfo UNKNOWN ERROR");
 	}
-	ProtoLoadAccountInfoAck ack;
+	LS2C_LoadAccountInfoAck ack;
 	ack.retCode = EC_SERVER_ERROR;
 	WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);;
-	ProtoRouteToOtherServer route;
+	RT2OS_RouteToOtherServer route;
 	route.dstIndex = info.agentIndex;
 	route.dstNode = AgentNode;
 	route.routerType = RT_SPECIFIED;
@@ -242,7 +242,7 @@ void CCharacterManager::mongo_LoadLittleCharInfo(const std::shared_ptr<CMongoMan
 void CCharacterManager::msg_CreateCharacterReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs)
 {
 	SessionInfo info;
-	ProtoCreateCharacterReq req;
+	C2LS_CreateCharacterReq req;
 	rs >> info >> req;
 	LOGD("msg_CreateCharacterReq accountID=" << info.accID);
 	
@@ -251,12 +251,12 @@ void CCharacterManager::msg_CreateCharacterReq(AccepterID aID, SessionID sID, Pr
 	auto founder = m_accInfo.find(info.accID);
 	if (founder == m_accInfo.end() || founder->second->charInfos.size() > 5)
 	{
-		ProtoCreateCharacterAck ack;
+		LS2C_CreateCharacterAck ack;
 		ack.retCode = EC_SERVER_ERROR;
 		ack.lci.charID = info.charID;
 		ack.lci.charName = req.charName;
 		WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);;
-		ProtoRouteToOtherServer route;
+		RT2OS_RouteToOtherServer route;
 		route.dstIndex = info.agentIndex;
 		route.dstNode = AgentNode;
 		route.routerType = RT_SPECIFIED;
@@ -300,11 +300,11 @@ void CCharacterManager::mongo_CreateCharacter(const std::string &errMsg, Accepte
 		auto founder = m_accInfo.find(info.accID);
 		assert(founder != m_accInfo.end());
 		founder->second->charInfos.push_back(lci);
-		ProtoCreateCharacterAck ack;
+		LS2C_CreateCharacterAck ack;
 		ack.retCode = EC_SUCCESS;
 		ack.lci = lci;
 		WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);;
-		ProtoRouteToOtherServer route;
+		RT2OS_RouteToOtherServer route;
 		route.dstIndex = info.agentIndex;
 		route.dstNode = AgentNode;
 		route.routerType = RT_SPECIFIED;
@@ -316,11 +316,11 @@ void CCharacterManager::mongo_CreateCharacter(const std::string &errMsg, Accepte
 	}
 	else
 	{
-		ProtoCreateCharacterAck ack;
+		LS2C_CreateCharacterAck ack;
 		ack.retCode = EC_SERVER_ERROR;
 		ack.lci = lci;
 		WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);;
-		ProtoRouteToOtherServer route;
+		RT2OS_RouteToOtherServer route;
 		route.dstIndex = info.agentIndex;
 		route.dstNode = AgentNode;
 		route.routerType = RT_SPECIFIED;
@@ -336,7 +336,7 @@ void CCharacterManager::mongo_CreateCharacter(const std::string &errMsg, Accepte
 void CCharacterManager::msg_CharacterLoginReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs)
 {
 	SessionInfo info;
-	ProtoCharacterLoginReq req;
+	C2LS_CharacterLoginReq req;
 	rs >> info >> req;
 	LOGD("msg_CreateCharacterReq accountID=" << info.accID);
 
@@ -361,10 +361,10 @@ void CCharacterManager::msg_CharacterLoginReq(AccepterID aID, SessionID sID, Pro
 
 	if (!checkValide)
 	{
-		ProtoCharacterLoginAck ack;
+		LS2C_CharacterLoginAck ack;
 		ack.retCode = EC_SERVER_ERROR;
 		WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);;
-		ProtoRouteToOtherServer route;
+		RT2OS_RouteToOtherServer route;
 		route.dstIndex = info.agentIndex;
 		route.dstNode = AgentNode;
 		route.routerType = RT_SPECIFIED;
@@ -397,7 +397,7 @@ void CCharacterManager::msg_CharacterLoginReq(AccepterID aID, SessionID sID, Pro
 	//登陆成功 踢人广播
 	{
 		WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);;
-		ProtoRouteToOtherServer route;
+		RT2OS_RouteToOtherServer route;
 		route.dstIndex = info.agentIndex;
 		route.dstNode = AgentNode;
 		route.routerType = RT_BROADCAST;
@@ -407,11 +407,11 @@ void CCharacterManager::msg_CharacterLoginReq(AccepterID aID, SessionID sID, Pro
 
 	//登陆成功 返回通知
 	{
-		ProtoCharacterLoginAck ack;
+		LS2C_CharacterLoginAck ack;
 		ack.retCode = EC_SUCCESS;
 		ack.info = founder->second->charInfo;
 		WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);;
-		ProtoRouteToOtherServer route;
+		RT2OS_RouteToOtherServer route;
 		route.dstIndex = info.agentIndex;
 		route.dstNode = AgentNode;
 		route.routerType = RT_SPECIFIED;
@@ -457,7 +457,7 @@ void CCharacterManager::mongo_LoadCharacterInfo(const std::shared_ptr<CMongoMana
 			//角色登陆广播
 			{
 				WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);;
-				ProtoRouteToOtherServer route;
+				RT2OS_RouteToOtherServer route;
 				route.dstIndex = info.agentIndex;
 				route.dstNode = AgentNode;
 				route.routerType = RT_BROADCAST;
@@ -466,11 +466,11 @@ void CCharacterManager::mongo_LoadCharacterInfo(const std::shared_ptr<CMongoMana
 			}
 
 			{
-				ProtoCharacterLoginAck ack;
+				LS2C_CharacterLoginAck ack;
 				ack.retCode = EC_SUCCESS;
 				ack.info = plci->charInfo;
 				WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);;
-				ProtoRouteToOtherServer route;
+				RT2OS_RouteToOtherServer route;
 				route.dstIndex = info.agentIndex;
 				route.dstNode = AgentNode;
 				route.routerType = RT_SPECIFIED;
@@ -497,10 +497,10 @@ void CCharacterManager::mongo_LoadCharacterInfo(const std::shared_ptr<CMongoMana
 		LOGW("mongo_LoadLittleCharInfo UNKNOWN ERROR");
 	}
 	{
-		ProtoCharacterLoginAck ack;
+		LS2C_CharacterLoginAck ack;
 		ack.retCode = EC_SERVER_ERROR;
 		WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);;
-		ProtoRouteToOtherServer route;
+		RT2OS_RouteToOtherServer route;
 		route.dstIndex = info.agentIndex;
 		route.dstNode = AgentNode;
 		route.routerType = RT_SPECIFIED;

@@ -63,12 +63,12 @@ bool CNetManager::Start()
 void CNetManager::event_OnConnect(ConnectorID cID)
 {
 	WriteStreamPack ws;
-	ProtoDirectServerAuth auth;
+	DT2OS_DirectServerAuth auth;
 	auth.srcNode = GlobalFacade::getRef().getServerConfig().getOwnServerNode();
 	auth.srcIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
 	ws << ID_DT2OS_DirectServerAuth << auth;
 	CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
-	LOGI("send ProtoDirectServerAuth cID=" << cID << ", node=" << auth.srcNode << ", index=" << auth.srcIndex)
+	LOGI("send DT2OS_DirectServerAuth cID=" << cID << ", node=" << auth.srcNode << ", index=" << auth.srcIndex)
 }
 
 void CNetManager::event_OnDisconnect(ConnectorID cID)
@@ -93,12 +93,12 @@ void CNetManager::event_OnDisconnect(ConnectorID cID)
 void CNetManager::event_OnSessionEstablished(AccepterID aID, SessionID sID)
 {
 	WriteStreamPack ws;
-	ProtoDirectServerAuth auth;
+	DT2OS_DirectServerAuth auth;
 	auth.srcNode = GlobalFacade::getRef().getServerConfig().getOwnServerNode();
 	auth.srcIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
 	ws << ID_DT2OS_DirectServerAuth << auth;
 	CTcpSessionManager::getRef().SendOrgSessionData(aID, sID, ws.GetStream(), ws.GetStreamLen());
-	LOGD("send ProtoDirectServerAuth aID=" << aID << ", sID=" << sID << ", node=" << auth.srcNode << ", index=" << auth.srcIndex);
+	LOGD("send DT2OS_DirectServerAuth aID=" << aID << ", sID=" << sID << ", node=" << auth.srcNode << ", index=" << auth.srcIndex);
 }
 
 void CNetManager::event_OnSessionDisconnect(AccepterID aID, SessionID sID)
@@ -115,7 +115,7 @@ void CNetManager::event_OnSessionDisconnect(AccepterID aID, SessionID sID)
 
 void CNetManager::msg_ConnectServerAuth(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs)
 {
-	ProtoDirectServerAuth auth;
+	DT2OS_DirectServerAuth auth;
 	rs >> auth;
 	LOGI("msg_ConnectServerAuth. cID=" << cID << ", Node=" << auth.srcNode << ", index=" << auth.srcIndex);
 
@@ -147,7 +147,7 @@ void CNetManager::msg_ConnectServerAuth(ConnectorID cID, ProtocolID pID, ReadStr
 
 void CNetManager::msg_SessionServerAuth(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs)
 {
-	ProtoDirectServerAuth auth;
+	DT2OS_DirectServerAuth auth;
 	rs >> auth;
 	LOGI("msg_SessionServerAuth. aID=" << aID << ", sID=" << sID << ", Node=" << auth.srcNode << ", index=" << auth.srcIndex);
 
@@ -193,7 +193,7 @@ void CNetManager::event_OnSessionHeartbeat(AccepterID aID, SessionID sID)
 	}
 
 	WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);
-	ProtoDirectServerPulse pulse;
+	DT2OS_DirectServerPulse pulse;
 	pulse.srcNode = GlobalFacade::getRef().getServerConfig().getOwnServerNode();
 	pulse.srcIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
 	ws << ID_DT2OS_DirectServerPulse << pulse;
