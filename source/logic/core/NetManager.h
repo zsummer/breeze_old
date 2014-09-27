@@ -56,7 +56,7 @@ public:
 	void msg_ConnectServerAuth(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs);
 	void msg_SessionServerAuth(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
 
-	void event_OnSessionHeartbeat(AccepterID aID, SessionID sID);
+	void event_OnSessionPulse(AccepterID aID, SessionID sID, unsigned int pulseInterval);
 	void msg_OnDirectServerPulse(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
 
 private:

@@ -72,8 +72,8 @@ public:
 	void msg_AuthAck(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs);
 	void msg_CharacterLogin(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs);
 
-	void event_OnSessionHeartbeat(AccepterID aID, SessionID sID);
-	void event_OnConnectorHeartbeat(ConnectorID cID);
+	void event_OnSessionPulse(AccepterID aID, SessionID sID, unsigned int pulseInterval);
+	void event_OnConnectorPulse(ConnectorID cID, unsigned int pulseInterval);
 	void msg_OnDirectServerPulse(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs);
 	void msg_OnClientPulse(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
 

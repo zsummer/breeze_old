@@ -62,8 +62,8 @@ public:
 
 	bool msg_OrgMessageReq(AccepterID aID, SessionID sID, const char * blockBegin, FrameStreamTraits::Integer blockSize);
 
-	void event_OnSessionHeartbeat(AccepterID aID, SessionID sID);
-	void event_OnConnectorHeartbeat(ConnectorID cID);
+	void event_OnSessionPulse(AccepterID aID, SessionID sID, unsigned int pulseInterval);
+	void event_OnConnectorPulse(ConnectorID cID, unsigned int pulseInterval);
 	void msg_OnConnectorPulse(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs);
 	void msg_OnSessionPulse(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
 

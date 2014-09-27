@@ -67,8 +67,8 @@ public:
 		//! 注册事件和消息
 		CMessageDispatcher::getRef().RegisterOnConnectorEstablished(std::bind(&CStressHeartBeatManager::OnConnecotrConnected, this,
 			std::placeholders::_1));
-		CMessageDispatcher::getRef().RegisterOnMyConnectorHeartbeatTimer(std::bind(&CStressHeartBeatManager::OnConnecotrHeartbeatTimer, this,
-			std::placeholders::_1));
+		CMessageDispatcher::getRef().RegisterOnConnectorPulse(std::bind(&CStressHeartBeatManager::OnConnecotrPulse, this,
+			std::placeholders::_1, std::placeholders::_2));
 		CMessageDispatcher::getRef().RegisterOnConnectorDisconnect(std::bind(&CStressHeartBeatManager::OnConnecotrDisconnect, this,
 			std::placeholders::_1));
 	}
@@ -77,11 +77,12 @@ public:
 	{
 		LOGI("connect sucess. cID=" << cID);
 	}
-	void OnConnecotrHeartbeatTimer(ConnectorID cID)
+	void OnConnecotrPulse(ConnectorID cID, unsigned int pulseInterval)
 	{
 		WriteStreamPack ws;
 		ws << ID_C2AS_ClientPulse << C2AS_ClientPulse();
 		CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
+		g_totalSendCount++;
 	}
 	void OnConnecotrDisconnect(ConnectorID cID)
 	{

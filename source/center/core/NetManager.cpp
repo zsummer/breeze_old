@@ -25,8 +25,8 @@ CNetManager::CNetManager()
 	CMessageDispatcher::getRef().RegisterOnSessionDisconnect(std::bind(&CNetManager::event_OnSessionDisconnect, this, std::placeholders::_1, std::placeholders::_2));
 
 	//注册心跳
-	CMessageDispatcher::getRef().RegisterOnMySessionHeartbeatTimer(std::bind(&CNetManager::event_OnSessionHeartbeat, this, std::placeholders::_1, std::placeholders::_2));
-	CMessageDispatcher::getRef().RegisterOnMyConnectorHeartbeatTimer(std::bind(&CNetManager::event_OnConnectorHeartbeat, this, std::placeholders::_1));
+	CMessageDispatcher::getRef().RegisterOnSessionPulse(std::bind(&CNetManager::event_OnSessionPulse, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	CMessageDispatcher::getRef().RegisterOnConnectorPulse(std::bind(&CNetManager::event_OnConnectorPulse, this, std::placeholders::_1, std::placeholders::_2));
 	CMessageDispatcher::getRef().RegisterSessionMessage(ID_DT2OS_DirectServerPulse,
 		std::bind(&CNetManager::msg_OnSessionPulse, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 	CMessageDispatcher::getRef().RegisterConnectorMessage(ID_DT2OS_DirectServerPulse,
@@ -187,7 +187,7 @@ void CNetManager::msg_DefaultSessionReq(AccepterID aID, SessionID sID, ProtocolI
 
 
 
-void CNetManager::event_OnSessionHeartbeat(AccepterID aID, SessionID sID)
+void CNetManager::event_OnSessionPulse(AccepterID aID, SessionID sID, unsigned int pulseInterval)
 {
 	auto founder = std::find_if(m_onlineSession.begin(), m_onlineSession.end(), [sID](const ServerAuthSession & sas) {return sas.sID == sID; });
 	if (founder == m_onlineSession.end())
@@ -196,7 +196,7 @@ void CNetManager::event_OnSessionHeartbeat(AccepterID aID, SessionID sID)
 		LOGW("close session because  not found sID in online center. sID=" << sID);
 		return;
 	}
-	if (founder->lastActiveTime + HEARTBEART_INTERVAL * 10 / 1000 < time(NULL))
+	if (founder->lastActiveTime + pulseInterval * 10 / 1000 < time(NULL))
 	{
 		CTcpSessionManager::getRef().KickSession(aID, sID);
 		LOGW("close session because  not found sID in online center. sID=" << sID << ", lastActiveTime=" << founder->lastActiveTime);
@@ -211,7 +211,7 @@ void CNetManager::event_OnSessionHeartbeat(AccepterID aID, SessionID sID)
 	CTcpSessionManager::getRef().SendOrgSessionData(aID, sID, ws.GetStream(), ws.GetStreamLen());
 }
 
-void CNetManager::event_OnConnectorHeartbeat(ConnectorID cID)
+void CNetManager::event_OnConnectorPulse(ConnectorID cID, unsigned int pulseInterval)
 {
 	auto founder = std::find_if(m_onlineConnect.begin(), m_onlineConnect.end(), [cID](const ServerAuthConnect & sac) {return sac.cID == cID; });
 	if (founder == m_onlineConnect.end())
@@ -220,7 +220,7 @@ void CNetManager::event_OnConnectorHeartbeat(ConnectorID cID)
 		LOGW("break connector because the connector not founder in online center. cID=" << cID);
 		return;
 	}
-	if (founder->lastActiveTime + HEARTBEART_INTERVAL * 10 / 1000 < time(NULL))
+	if (founder->lastActiveTime + pulseInterval * 10 / 1000 < time(NULL))
 	{
 		CTcpSessionManager::getRef().BreakConnector(cID);
 		LOGW("break connector because the connector heartbeat timeout. cID=" << cID << ", lastActiveTime=" << founder->lastActiveTime);
