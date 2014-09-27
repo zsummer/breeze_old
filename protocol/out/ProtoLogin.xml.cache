@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="UTF - 8"?>
+
+<md5>7d20f030c03b628dece318c46ff5f6fb</md5>
+
 <CacheNo>
 	<cache key = "ID_C2LS_CharacterLoginReq" No = "20206" /> 
 	<cache key = "ID_C2LS_CreateCharacterReq" No = "20204" /> 

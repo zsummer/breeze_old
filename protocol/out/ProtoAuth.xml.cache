@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="UTF - 8"?>
+
+<md5>90825f58af96d9c578390d47c166e474</md5>
+
 <CacheNo>
 	<cache key = "ID_AS2C_AuthAck" No = "20001" /> 
 	<cache key = "ID_C2AS_AuthReq" No = "20000" /> 
