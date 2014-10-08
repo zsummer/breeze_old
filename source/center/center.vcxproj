@@ -165,8 +165,6 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\common\BaseHander.h" />
-    <ClInclude Include="..\common\ServerConfig.h" />
     <ClInclude Include="Application.h" />
     <ClInclude Include="core\GlobalFacade.h" />
     <ClInclude Include="core\NetManager.h" />

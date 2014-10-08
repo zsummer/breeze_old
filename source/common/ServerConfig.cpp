@@ -16,9 +16,8 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#include <boost/lexical_cast.hpp>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/xml_parser.hpp>
+
+#include "tinyxml2.h"
 #include "ServerConfig.h"
 
 
@@ -87,83 +86,131 @@ bool ServerConfig::Parse(std::string filename, ServerNode ownNode, NodeIndex own
 {
 	m_ownServerNode = ownNode;
 	m_ownNodeIndex = ownIndex;
-	try
+	tinyxml2::XMLDocument doc;
+	if (doc.LoadFile(filename.c_str()) != tinyxml2::XML_SUCCESS)
 	{
-		boost::property_tree::ptree pt;
-		boost::property_tree::read_xml(filename, pt);
+		LOGE(filename << " Parse ServerConfig Error. ");
+		doc.PrintError();
+		return false;
+	}
 
-		auto server = pt.get_child("server");
-		m_platid = server.get<unsigned int>("<xmlattr>.platid");
-		m_areaid = server.get<unsigned int>("<xmlattr>.areaid");
+	//////////////////////////////////////////////////////////////////////////
+	auto elmTraits = doc.FirstChildElement("traits");
+	if (!elmTraits || ! elmTraits->Attribute("platid") || ! elmTraits->Attribute("areaid"))
+	{
+		LOGE(filename << " Parse ServerConfig Error. not have traits");
+		return false;
+	}
+	m_platid = elmTraits->IntAttribute("platid");
+	m_areaid = elmTraits->IntAttribute("areaid");
 
-		auto listener = pt.get_child("listen");
-		for (auto iter = listener.begin(); iter != listener.end(); ++iter)
+	//////////////////////////////////////////////////////////////////////////
+	{
+		auto elmListen = doc.FirstChildElement("listen");
+		if (!elmListen || !elmListen->FirstChildElement())
 		{
-			std::string strNode = iter->first;
+			LOGE(filename << " Parse ServerConfig Error. not have listen");
+			return false;
+		}
+		auto elmListenChild = elmListen->FirstChildElement();
+		do
+		{
+			std::string strNode = elmListenChild->Name();
+			if (!elmListenChild->Attribute("ip") || !elmListenChild->Attribute("port") || !elmListenChild->Attribute("index"))
+			{
+				LOGE(filename << " Parse ServerConfig Error. listen have invalide config.");
+				return false;
+			}
+
 			ListenConfig lconfig;
-			lconfig.ip = iter->second.get<std::string>("<xmlattr>.ip");
-			lconfig.port = iter->second.get<unsigned short>("<xmlattr>.port");
-			lconfig.index = iter->second.get<unsigned int>("<xmlattr>.index");
+			lconfig.ip = elmListenChild->Attribute("ip");
+			lconfig.port = elmListenChild->IntAttribute("port");
+			lconfig.index = elmListenChild->IntAttribute("index");
 			lconfig.node = toServerNode(strNode);
 			m_configListen.push_back(lconfig);
 			LOGD("strNode=" << strNode << ", ip=" << lconfig.ip << ", port=" << lconfig.port << ", lconfig.index=" << lconfig.index);
-		}
+			elmListenChild = elmListenChild->NextSiblingElement();
+		} while (elmListenChild);
+	}
 
 
-		auto connecter = pt.get_child("connect");
-		for (auto iter = connecter.begin(); iter != connecter.end(); ++iter)
+	//////////////////////////////////////////////////////////////////////////
+	{
+		auto elmConnect = doc.FirstChildElement("connect");
+		if (!elmConnect || !elmConnect->FirstChildElement())
 		{
-			std::string srcStrNode = iter->first;
+			LOGE(filename << " Parse ServerConfig Error. not have connect");
+			return false;
+		}
+		auto elmConnectChild = elmConnect->FirstChildElement();
+		do
+		{
+			std::string srcStrNode = elmConnectChild->Name();
+			if (!elmConnectChild->Attribute("ip")
+				|| !elmConnectChild->Attribute("port")
+				|| !elmConnectChild->Attribute("dstNode"))
+			{
+				LOGE(filename << " Parse ServerConfig Error. connect have invalide config.");
+				return false;
+			}
+
+
 			ConnectorConfig lconfig;
-			std::string dstStrNode = iter->second.get<std::string>("<xmlattr>.dstNode");
-			lconfig.remoteIP = iter->second.get<std::string>("<xmlattr>.ip");
-			lconfig.remotePort = iter->second.get<unsigned short>("<xmlattr>.port");
+			std::string dstStrNode = elmConnectChild->Attribute("dstNode");
+			lconfig.remoteIP = elmConnectChild->Attribute("ip");
+			lconfig.remotePort = elmConnectChild->IntAttribute("port");
 			lconfig.srcNode = toServerNode(srcStrNode);
 			lconfig.dstNode = toServerNode(dstStrNode);
 			m_configConnect.push_back(lconfig);
 			LOGD("srcStrNode=" << srcStrNode << ", remoteIP=" << lconfig.remoteIP << ", remotePort=" << lconfig.remotePort << ", dstStrNode=" << dstStrNode);
-		}
+			elmConnectChild = elmConnectChild->NextSiblingElement();
+		} while (elmConnectChild);
+	}
 
-		auto mongoParse = pt.get_child("mongo");
-		for (auto iter = mongoParse.begin(); iter != mongoParse.end(); ++iter)
+	//////////////////////////////////////////////////////////////////////////
+	{
+		auto elmMongo = doc.FirstChildElement("mongo");
+		if (!elmMongo || !elmMongo->FirstChildElement())
 		{
+			LOGE(filename << " Parse ServerConfig Error. not have mongo");
+			return false;
+		}
+		auto elmMongoChild = elmMongo->FirstChildElement();
+		do
+		{
+			std::string strNode = elmMongoChild->Name();
+			if (!elmMongoChild->Attribute("ip")
+				|| !elmMongoChild->Attribute("port")
+				|| !elmMongoChild->Attribute("db")
+				|| !elmMongoChild->Attribute("user")
+				|| !elmMongoChild->Attribute("pwd")
+				|| !elmMongoChild->Attribute("needAuth"))
+			{
+				LOGE(filename << " Parse ServerConfig Error. mongo have invalide config.");
+				return false;
+			}
+
 			MongoConfig lconfig;
-			lconfig.ip = iter->second.get<std::string>("<xmlattr>.ip");
-			lconfig.port = iter->second.get<unsigned short>("<xmlattr>.port");
-			lconfig.db = iter->second.get<std::string>("<xmlattr>.db");
-			lconfig.user = iter->second.get<std::string>("<xmlattr>.user");
-			lconfig.pwd = iter->second.get<std::string>("<xmlattr>.pwd");
-			lconfig.needAuth = iter->second.get<bool>("<xmlattr>.needAuth");
-			if (iter->first == AuthMongoDB)
+			lconfig.ip = elmMongoChild->Attribute("ip");
+			lconfig.port = elmMongoChild->IntAttribute("port");
+			lconfig.db = elmMongoChild->Attribute("db");
+			lconfig.user = elmMongoChild->Attribute("user");
+			lconfig.pwd = elmMongoChild->Attribute("pwd");
+			lconfig.needAuth = elmMongoChild->BoolAttribute("needAuth");
+			if (strNode == AuthMongoDB)
 			{
 				m_authMongo = lconfig;
 			}
-			else if (iter->first == InfoMongoDB)
+			else if (strNode == InfoMongoDB)
 			{
 				m_infoMongo = lconfig;
 			}
-			else if (iter->first == LogMongoDB)
+			else if (strNode == LogMongoDB)
 			{
 				m_logMongo = lconfig;
 			}
-			
-		}
-
-	}
-	catch (std::string err)
-	{
-		LOGE("ServerConfig catch exception: error=" << err);
-		return false;
-	}
-	catch (std::exception e)
-	{
-		LOGE("ServerConfig catch exception: error=" << e.what());
-		return false;
-	}
-	catch (...)
-	{
-		LOGE("ServerConfig catch exception: unknow exception.");
-		return false;
+			elmMongoChild = elmMongoChild->NextSiblingElement();
+		} while (elmMongoChild);
 	}
 	return true;
 }

@@ -65,26 +65,26 @@ public:
 	CStressHeartBeatManager()
 	{
 		//! 注册事件和消息
-		CMessageDispatcher::getRef().RegisterOnConnectorEstablished(std::bind(&CStressHeartBeatManager::OnConnecotrConnected, this,
+		CMessageDispatcher::getRef().RegisterOnSessionEstablished(std::bind(&CStressHeartBeatManager::OnConnecotrConnected, this,
 			std::placeholders::_1));
-		CMessageDispatcher::getRef().RegisterOnConnectorPulse(std::bind(&CStressHeartBeatManager::OnConnecotrPulse, this,
+		CMessageDispatcher::getRef().RegisterOnSessionPulse(std::bind(&CStressHeartBeatManager::OnConnecotrPulse, this,
 			std::placeholders::_1, std::placeholders::_2));
-		CMessageDispatcher::getRef().RegisterOnConnectorDisconnect(std::bind(&CStressHeartBeatManager::OnConnecotrDisconnect, this,
+		CMessageDispatcher::getRef().RegisterOnSessionDisconnect(std::bind(&CStressHeartBeatManager::OnConnecotrDisconnect, this,
 			std::placeholders::_1));
 	}
 	
-	void OnConnecotrConnected(ConnectorID cID)
+	void OnConnecotrConnected(SessionID cID)
 	{
 		LOGI("connect sucess. cID=" << cID);
 	}
-	void OnConnecotrPulse(ConnectorID cID, unsigned int pulseInterval)
+	void OnConnecotrPulse(SessionID cID, unsigned int pulseInterval)
 	{
 		WriteStreamPack ws;
 		ws << ID_C2AS_ClientPulse << C2AS_ClientPulse();
-		CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
+		CTcpSessionManager::getRef().SendOrgSessionData(cID, ws.GetStream(), ws.GetStreamLen());
 		g_totalSendCount++;
 	}
-	void OnConnecotrDisconnect(ConnectorID cID)
+	void OnConnecotrDisconnect(SessionID cID)
 	{
 		LOGI("Disconnect. cID=" << cID);
 	}
@@ -97,38 +97,38 @@ class CStressClientHandler
 public:
 	CStressClientHandler()
 	{
-		CMessageDispatcher::getRef().RegisterOnConnectorEstablished(std::bind(&CStressClientHandler::OnConnected, this, std::placeholders::_1));
-		CMessageDispatcher::getRef().RegisterConnectorMessage(ID_AS2C_AuthAck,
+		CMessageDispatcher::getRef().RegisterOnSessionEstablished(std::bind(&CStressClientHandler::OnConnected, this, std::placeholders::_1));
+		CMessageDispatcher::getRef().RegisterSessionMessage(ID_AS2C_AuthAck,
 			std::bind(&CStressClientHandler::msg_AuthAck_fun, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-		CMessageDispatcher::getRef().RegisterConnectorMessage(ID_LS2C_LoadAccountInfoAck,
+		CMessageDispatcher::getRef().RegisterSessionMessage(ID_LS2C_LoadAccountInfoAck,
 			std::bind(&CStressClientHandler::msg_LoadAccountInfoAck_fun, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-		CMessageDispatcher::getRef().RegisterConnectorMessage(ID_LS2C_CreateCharacterAck,
+		CMessageDispatcher::getRef().RegisterSessionMessage(ID_LS2C_CreateCharacterAck,
 			std::bind(&CStressClientHandler::msg_CreateCharacterAck_fun, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-		CMessageDispatcher::getRef().RegisterConnectorMessage(ID_LS2C_CharacterLoginAck,
+		CMessageDispatcher::getRef().RegisterSessionMessage(ID_LS2C_CharacterLoginAck,
 			std::bind(&CStressClientHandler::msg_CharacterLoginAck_fun, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-		CMessageDispatcher::getRef().RegisterOnConnectorDisconnect(std::bind(&CStressClientHandler::OnConnectDisconnect, this, std::placeholders::_1));
+		CMessageDispatcher::getRef().RegisterOnSessionDisconnect(std::bind(&CStressClientHandler::OnConnectDisconnect, this, std::placeholders::_1));
 	}
 
-	void OnConnected(ConnectorID cID)
+	void OnConnected(SessionID cID)
 	{
 		LOGI("OnConnected. ConnectorID=" << cID);
 		char userName[100];
-		sprintf(userName, "zhangyawei%04d", (int)cID);
+		sprintf(userName, "zhangyawei%04d", (unsigned int)cID - __MIDDLE_SEGMENT_VALUE);
 		WriteStreamPack ws;
 		C2AS_AuthReq req;
 		req.info.user = userName;
 		req.info.pwd = "123";
 		ws << ID_C2AS_AuthReq << req;
-		CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
+		CTcpSessionManager::getRef().SendOrgSessionData(cID, ws.GetStream(), ws.GetStreamLen());
 		LOGI("OnConnected. Send AuthReq. cID=" << cID << ", user=" << req.info.user << ", pwd=" << req.info.pwd);
 		g_totalSendCount++;
 	};
-	void OnConnectDisconnect(ConnectorID cID)
+	void OnConnectDisconnect(SessionID cID)
 	{
 		m_sessionStatus[cID] = false;
 	}
 
-	inline void msg_AuthAck_fun(ConnectorID cID, ProtocolID pID, ReadStreamPack & rs)
+	inline void msg_AuthAck_fun(SessionID cID, ProtoID pID, ReadStreamPack & rs)
 	{
 
 		AS2C_AuthAck ack;
@@ -152,7 +152,7 @@ public:
 			WriteStreamPack ws;
 			C2LS_LoadAccountInfoReq req;
 			ws << ID_C2LS_LoadAccountInfoReq << req;
-			CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
+			CTcpSessionManager::getRef().SendOrgSessionData(cID, ws.GetStream(), ws.GetStreamLen());
 			LOGD("msg_AuthAck. Send LoginReq. cID=" << cID);
 			g_totalSendCount++;
 		}
@@ -165,7 +165,7 @@ public:
 			req.info.user = userName;
 			req.info.pwd = "123";
 			ws << ID_C2AS_AuthReq << req;
-			CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
+			CTcpSessionManager::getRef().SendOrgSessionData(cID, ws.GetStream(), ws.GetStreamLen());
 			LOGD("msg_AuthAck. Send AuthReq. cID=" << cID << ", user=" << req.info.user << ", pwd=" << req.info.pwd);
 			g_totalSendCount++;
 			return;
@@ -173,7 +173,7 @@ public:
 
 	};
 
-	inline void msg_LoadAccountInfoAck_fun(ConnectorID cID, ProtocolID pID, ReadStreamPack & rs)
+	inline void msg_LoadAccountInfoAck_fun(SessionID cID, ProtoID pID, ReadStreamPack & rs)
 	{
 		LS2C_LoadAccountInfoAck ack;
 		rs >> ack;
@@ -196,7 +196,7 @@ public:
 				C2LS_CreateCharacterReq req;
 				req.charName = "test";
 				ws << ID_C2LS_CreateCharacterReq << req;
-				CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
+				CTcpSessionManager::getRef().SendOrgSessionData(cID, ws.GetStream(), ws.GetStreamLen());
 				LOGD("msg_LoadAccountInfoAck_fun. Send ID_C2LS_CreateCharacterReq. cID=" << cID);
 				g_totalSendCount++;
 			}
@@ -207,7 +207,7 @@ public:
 				C2LS_CharacterLoginReq req;
 				req.charID = ack.info.charInfos.at(0).charID;
 				ws << ID_C2LS_CharacterLoginReq << req;
-				CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
+				CTcpSessionManager::getRef().SendOrgSessionData(cID, ws.GetStream(), ws.GetStreamLen());
 				LOGD("msg_LoadAccountInfoAck_fun. Send ID_C2LS_CharacterLoginReq. cID=" << cID);
 				g_totalSendCount++;
 			}
@@ -217,12 +217,12 @@ public:
 			WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);
 			C2LS_LoadAccountInfoReq req;
 			ws << ID_C2LS_LoadAccountInfoReq << req;
-			CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
+			CTcpSessionManager::getRef().SendOrgSessionData(cID, ws.GetStream(), ws.GetStreamLen());
 			LOGD("msg_LoadAccountInfoAck_fun. Send ID_C2LS_LoadAccountInfoReq. cID=" << cID);
 			g_totalSendCount++;
 		}
 	}
-	inline void msg_CreateCharacterAck_fun(ConnectorID cID, ProtocolID pID, ReadStreamPack & rs)
+	inline void msg_CreateCharacterAck_fun(SessionID cID, ProtoID pID, ReadStreamPack & rs)
 	{
 		LS2C_CreateCharacterAck ack;
 		rs >> ack;
@@ -243,12 +243,12 @@ public:
 			C2LS_CharacterLoginReq req;
 			req.charID = ack.lci.charID;
 			ws << ID_C2LS_CharacterLoginReq << req;
-			CTcpSessionManager::getRef().SendOrgConnectorData(cID, ws.GetStream(), ws.GetStreamLen());
+			CTcpSessionManager::getRef().SendOrgSessionData(cID, ws.GetStream(), ws.GetStreamLen());
 			LOGD("msg_CreateCharacterAck_fun. Send ID_C2LS_CharacterLoginReq. cID=" << cID);
 			g_totalSendCount++;
 		}
 	}
-	inline void msg_CharacterLoginAck_fun(ConnectorID cID, ProtocolID pID, ReadStreamPack & rs)
+	inline void msg_CharacterLoginAck_fun(SessionID cID, ProtoID pID, ReadStreamPack & rs)
 	{
 		LS2C_CharacterLoginAck ack;
 		rs >> ack;
@@ -266,7 +266,7 @@ public:
 	}
 
 private:
-	std::unordered_map<ConnectorID, bool> m_sessionStatus;
+	std::unordered_map<SessionID, bool> m_sessionStatus;
 };
 
 void sigInt(int sig)
@@ -373,7 +373,6 @@ int main(int argc, char* argv[])
 	for (int i = 0; i < g_maxClient; ++i)
 	{
 		tagConnctorConfigTraits traits;
-		traits.cID = i;
 		traits.remoteIP = "127.0.0.1";
 		traits.remotePort = serverConfig.getConfigListen(AgentNode).port;
 		traits.reconnectInterval = 5000;

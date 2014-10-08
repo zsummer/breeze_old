@@ -49,16 +49,16 @@ public:
 			return;
 		}
 		const ServerAuthSession & sas = m_onlineCenter.at(0);
-		CTcpSessionManager::getRef().SendOrgSessionData(sas.aID, sas.sID, orgData, orgDataLen);
+		CTcpSessionManager::getRef().SendOrgSessionData(sas.sID, orgData, orgDataLen);
 	}
 
-	void event_OnSessionPulse(AccepterID aID, SessionID sID, unsigned int pulseInterval);
-	void msg_OnDirectServerPulse(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
+	void event_OnSessionPulse(SessionID sID, unsigned int pulseInterval);
+	void msg_OnDirectServerPulse(SessionID sID, ProtoID pID, ReadStreamPack & rs);
 
 	//register 
-	void event_OnSessionEstablished(AccepterID, SessionID);
-	void event_OnSessionDisconnect(AccepterID, SessionID);
-	void msg_SessionServerAuth(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
+	void event_OnSessionEstablished(SessionID);
+	void event_OnSessionDisconnect(SessionID);
+	void msg_SessionServerAuth(SessionID sID, ProtoID pID, ReadStreamPack & rs);
 
 private:
 	tagAcceptorConfigTraits m_configListen; //保存监听配置

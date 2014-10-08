@@ -46,37 +46,22 @@ public:
 	CNetManager();
 	//连接所有认证服务和中央服务
 	bool Start();
-	void event_OnConnect(ConnectorID cID);
-	void event_OnDisconnect(ConnectorID cID);
+	void event_OnSessionEstablished(SessionID sID);
+	void event_OnSessionDisconnect(SessionID sID);
 
-	void event_OnSessionEstablished(AccepterID aID, SessionID sID);
-	void event_OnSessionDisconnect(AccepterID aID, SessionID sID);
+	void msg_SessionServerAuth(SessionID sID, ProtoID pID, ReadStreamPack & rs);
 
-	void msg_ConnectServerAuth(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs);
-	void msg_SessionServerAuth(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
-
-
-	void msg_DefaultConnectReq(ConnectorID cID, ProtocolID pID, ReadStreamPack & rs);
-	void msg_DefaultSessionReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
+	void msg_DefaultSessionReq(SessionID sID, ProtoID pID, ReadStreamPack & rs);
 	
+	void event_OnSessionPulse(SessionID sID, unsigned int pulseInterval);
+	void msg_OnSessionPulse(SessionID sID, ProtoID pID, ReadStreamPack & rs);
 
-	bool msg_OrgMessageReq(AccepterID aID, SessionID sID, const char * blockBegin, FrameStreamTraits::Integer blockSize);
 
-	void event_OnSessionPulse(AccepterID aID, SessionID sID, unsigned int pulseInterval);
-	void event_OnConnectorPulse(ConnectorID cID, unsigned int pulseInterval);
-	void msg_OnConnectorPulse(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs);
-	void msg_OnSessionPulse(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
-
-protected:
-	void msg_TranslateToOtherServer(ProtocolID pID, ReadStreamPack & rs);
 private:
-	tagAcceptorConfigTraits m_configListen; //保存监听配置
 	bool m_bListening = false;
-	ConnectorID m_lastConnectID = 0; //自动递增的connectorID.
-	std::unordered_map<ConnectorID, tagConnctorConfigTraits> m_configConnect; //cID 对应的连接配置
-
+	tagAcceptorConfigTraits m_configListen; //保存监听配置
+	std::unordered_map<SessionID, tagConnctorConfigTraits> m_configConnect; //cID 对应的连接配置
 	std::vector<ServerAuthSession> m_onlineSession;
-	std::vector<ServerAuthConnect> m_onlineConnect;
 };
 
 

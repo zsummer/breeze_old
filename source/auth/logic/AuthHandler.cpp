@@ -8,12 +8,12 @@
 bool CAuthHandler::Init()
 {
 	CMessageDispatcher::getRef().RegisterSessionMessage(ID_C2AS_AuthReq,
-		std::bind(&CAuthHandler::msg_AuthReq, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+		std::bind(&CAuthHandler::msg_AuthReq, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	return true;
 }
 
 
-void CAuthHandler::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs)
+void CAuthHandler::msg_AuthReq(SessionID sID, ProtoID pID, ReadStreamPack & rs)
 {
 	SessionInfo info;
 	C2AS_AuthReq req;
@@ -34,7 +34,7 @@ void CAuthHandler::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Re
 	ns += ".cl_auth";
 	CMongoManager & mgr = GlobalFacade::getRef().getMongoManger();
 	mgr.async_query(mgr.getAuthMongo(), ns, QUERY("_id" << req.info.user),
-		std::bind(&CAuthHandler::mongo_GetAuthInfo, this, std::placeholders::_1, std::placeholders::_2, aID, sID, info, req));
+		std::bind(&CAuthHandler::mongo_GetAuthInfo, this, std::placeholders::_1, std::placeholders::_2, sID, info, req));
 
 	// 			//debug
 	// 			static long long seq = 0;
@@ -65,7 +65,7 @@ void CAuthHandler::msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, Re
 }
 
 
-void CAuthHandler::mongo_GetAuthInfo(const std::shared_ptr<CMongoManager::MongoRetDatas>  &retDatas, const std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo info, const C2AS_AuthReq & req)
+void CAuthHandler::mongo_GetAuthInfo(const std::shared_ptr<CMongoManager::MongoRetDatas>  &retDatas, const std::string &errMsg, SessionID sID, SessionInfo info, const C2AS_AuthReq & req)
 {
 	AS2C_AuthAck ack;
 	ack.retCode = EC_DB_ERROR;
@@ -117,6 +117,6 @@ void CAuthHandler::mongo_GetAuthInfo(const std::shared_ptr<CMongoManager::MongoR
 	info.srcNode = AgentNode;
 	info.srcIndex = GlobalFacade::getRef().getServerConfig().getOwnNodeIndex();
 	ws << ID_RT2OS_RouteToOtherServer << route << ID_AS2C_AuthAck << info << ack;
-	CTcpSessionManager::getRef().SendOrgSessionData(aID, sID, ws.GetStream(), ws.GetStreamLen());
+	CTcpSessionManager::getRef().SendOrgSessionData(sID, ws.GetStream(), ws.GetStreamLen());
 
 }

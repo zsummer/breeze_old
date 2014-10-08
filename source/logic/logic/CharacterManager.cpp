@@ -8,15 +8,13 @@ bool CCharacterManager::Init()
 {
 	//注册消息
 	CMessageDispatcher::getRef().RegisterSessionMessage(ID_C2LS_LoadAccountInfoReq,
-		std::bind(&CCharacterManager::msg_LoadAccountInfoReq, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+		std::bind(&CCharacterManager::msg_LoadAccountInfoReq, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	CMessageDispatcher::getRef().RegisterSessionMessage(ID_C2LS_CreateCharacterReq,
-		std::bind(&CCharacterManager::msg_CreateCharacterReq, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+		std::bind(&CCharacterManager::msg_CreateCharacterReq, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	CMessageDispatcher::getRef().RegisterSessionMessage(ID_C2LS_CharacterLoginReq,
-		std::bind(&CCharacterManager::msg_CharacterLoginReq, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+		std::bind(&CCharacterManager::msg_CharacterLoginReq, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	CMessageDispatcher::getRef().RegisterSessionMessage(ID_AS2LS_CharacterLogout,
-		std::bind(&CCharacterManager::msg_CharacterLogout, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-
-
+		std::bind(&CCharacterManager::msg_CharacterLogout, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	return mongo_LoadLastCharID();
 }
 
@@ -24,8 +22,6 @@ bool CCharacterManager::mongo_LoadLastCharID()
 {
 	//初始化
 	m_genObjCharID.InitConfig(GlobalFacade::getRef().getServerConfig().getPlatID(), GlobalFacade::getRef().getServerConfig().getAreaID());
-
-
 	CMongoManager & mgr = GlobalFacade::getRef().getMongoManger();
 	std::string ns = GlobalFacade::getRef().getServerConfig().getInfoMongoDB().db;
 	ns += ".info_character";
@@ -59,7 +55,7 @@ bool CCharacterManager::mongo_LoadLastCharID()
 	return false;
 }
 
-void CCharacterManager::msg_LoadAccountInfoReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs)
+void CCharacterManager::msg_LoadAccountInfoReq(SessionID sID, ProtoID pID, ReadStreamPack & rs)
 {
 	SessionInfo info;
 	rs >> info;
@@ -72,7 +68,7 @@ void CCharacterManager::msg_LoadAccountInfoReq(AccepterID aID, SessionID sID, Pr
 		std::string ns = GlobalFacade::getRef().getServerConfig().getInfoMongoDB().db;
 		ns += ".info_account";
 		mgr.async_query(mgr.getInfoMongo(), ns, QUERY("_id" << (long long)info.accID),
-			std::bind(&CCharacterManager::mongo_LoadAccountInfo, this, std::placeholders::_1, std::placeholders::_2, aID, sID, info));
+			std::bind(&CCharacterManager::mongo_LoadAccountInfo, this, std::placeholders::_1, std::placeholders::_2, sID, info));
 	}
 	else
 	{
@@ -92,7 +88,7 @@ void CCharacterManager::msg_LoadAccountInfoReq(AccepterID aID, SessionID sID, Pr
 }
 
 
-void CCharacterManager::mongo_LoadAccountInfo(const std::shared_ptr<CMongoManager::MongoRetDatas> & retDatas, const std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info)
+void CCharacterManager::mongo_LoadAccountInfo(const std::shared_ptr<CMongoManager::MongoRetDatas> & retDatas, const std::string &errMsg, SessionID sID, SessionInfo & info)
 {
 	try
 	{
@@ -132,7 +128,7 @@ void CCharacterManager::mongo_LoadAccountInfo(const std::shared_ptr<CMongoManage
 				ns += ".info_account";
 				mgr.async_update(mgr.getInfoMongo(), ns, QUERY("_id" << (long long)pinfo->accID), 
 					BSON("diamond" << pinfo->diamond << "hisDiamond" << pinfo->hisDiamond << "giftDmd" << pinfo->giftDmd << "hisGiftDmd" << pinfo->hisGiftDmd ), true,
-					std::bind(&CCharacterManager::mongo_UpdateNormalHandler, this, std::placeholders::_1, aID, sID, info, "insert account."));
+					std::bind(&CCharacterManager::mongo_UpdateNormalHandler, this, std::placeholders::_1, sID, info, "insert account."));
 
 				LS2C_LoadAccountInfoAck ack;
 				ack.retCode = EC_SUCCESS;
@@ -151,7 +147,7 @@ void CCharacterManager::mongo_LoadAccountInfo(const std::shared_ptr<CMongoManage
 			std::string ns = GlobalFacade::getRef().getServerConfig().getInfoMongoDB().db;
 			ns += ".info_character";
 			mgr.async_query(mgr.getInfoMongo(), ns, QUERY("accID" << (long long)pinfo->accID),
-				std::bind(&CCharacterManager::mongo_LoadLittleCharInfo, this, std::placeholders::_1, std::placeholders::_2, aID, sID, info));
+				std::bind(&CCharacterManager::mongo_LoadLittleCharInfo, this, std::placeholders::_1, std::placeholders::_2, sID, info));
 			return;
 		}
 	}
@@ -177,7 +173,7 @@ void CCharacterManager::mongo_LoadAccountInfo(const std::shared_ptr<CMongoManage
 	GlobalFacade::getRef().getNetManger().SendOrgDataToCenter(ws.GetStream(), ws.GetStreamLen());
 }
 
-void CCharacterManager::mongo_LoadLittleCharInfo(const std::shared_ptr<CMongoManager::MongoRetDatas> & retDatas, const std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info)
+void CCharacterManager::mongo_LoadLittleCharInfo(const std::shared_ptr<CMongoManager::MongoRetDatas> & retDatas, const std::string &errMsg, SessionID sID, SessionInfo & info)
 {
 	try
 	{
@@ -239,7 +235,7 @@ void CCharacterManager::mongo_LoadLittleCharInfo(const std::shared_ptr<CMongoMan
 
 
 
-void CCharacterManager::msg_CreateCharacterReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs)
+void CCharacterManager::msg_CreateCharacterReq(SessionID sID, ProtoID pID, ReadStreamPack & rs)
 {
 	SessionInfo info;
 	C2LS_CreateCharacterReq req;
@@ -286,14 +282,14 @@ void CCharacterManager::msg_CreateCharacterReq(AccepterID aID, SessionID sID, Pr
 		ns, QUERY("_id" << (long long)ci.charID), 
 		BSON("level" << ci.level << "accID" << (long long)ci.accID << "charName" << ci.charName << "iconID" << ci.iconID), 
 		true,
-		std::bind(&CCharacterManager::mongo_CreateCharacter, this, std::placeholders::_1, aID, sID, info, lci));
+		std::bind(&CCharacterManager::mongo_CreateCharacter, this, std::placeholders::_1, sID, info, lci));
 
 	return;
 }
 
 
 
-void CCharacterManager::mongo_CreateCharacter(const std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info, const LittleCharInfo & lci)
+void CCharacterManager::mongo_CreateCharacter(const std::string &errMsg, SessionID sID, SessionInfo & info, const LittleCharInfo & lci)
 {
 	if (errMsg.empty())
 	{
@@ -333,7 +329,7 @@ void CCharacterManager::mongo_CreateCharacter(const std::string &errMsg, Accepte
 }
 
 
-void CCharacterManager::msg_CharacterLoginReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs)
+void CCharacterManager::msg_CharacterLoginReq(SessionID sID, ProtoID pID, ReadStreamPack & rs)
 {
 	SessionInfo info;
 	C2LS_CharacterLoginReq req;
@@ -382,7 +378,7 @@ void CCharacterManager::msg_CharacterLoginReq(AccepterID aID, SessionID sID, Pro
 		info.charID = req.charID;
 		info.loginTime = time(NULL);
 		mgr.async_query(mgr.getInfoMongo(), ns, QUERY("_id" << (long long)req.charID),
-			std::bind(&CCharacterManager::mongo_LoadCharacterInfo, this, std::placeholders::_1, std::placeholders::_2, aID, sID, info));
+			std::bind(&CCharacterManager::mongo_LoadCharacterInfo, this, std::placeholders::_1, std::placeholders::_2,  sID, info));
 		return;
 	}
 
@@ -390,10 +386,13 @@ void CCharacterManager::msg_CharacterLoginReq(AccepterID aID, SessionID sID, Pro
 	{
 		info.charID = founder->second->charInfo.charID;
 		info.loginTime = time(NULL);
+		if (founder->second->sInfo.sID != InvalidSeesionID)
+		{
+			on_CharLogout(founder->second->sInfo);
+		}
 		founder->second->sInfo = info;
 		on_CharLogin(founder->second->sInfo);
 	}
-
 	//登陆成功 踢人广播
 	{
 		WriteStreamPack ws(zsummer::proto4z::UBT_STATIC_AUTO);;
@@ -427,7 +426,7 @@ void CCharacterManager::msg_CharacterLoginReq(AccepterID aID, SessionID sID, Pro
 }
 
 
-void CCharacterManager::mongo_LoadCharacterInfo(const std::shared_ptr<CMongoManager::MongoRetDatas> & retDatas, const std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info)
+void CCharacterManager::mongo_LoadCharacterInfo(const std::shared_ptr<CMongoManager::MongoRetDatas> & retDatas, const std::string &errMsg, SessionID sID, SessionInfo & info)
 {
 	try
 	{
@@ -477,8 +476,6 @@ void CCharacterManager::mongo_LoadCharacterInfo(const std::shared_ptr<CMongoMana
 				ws << ID_RT2OS_RouteToOtherServer << route << ID_LS2C_CharacterLoginAck << info << ack;
 				GlobalFacade::getRef().getNetManger().SendOrgDataToCenter(ws.GetStream(), ws.GetStreamLen());
 			}
-
-
 			return;
 		}
 		else
@@ -514,20 +511,20 @@ void CCharacterManager::mongo_LoadCharacterInfo(const std::shared_ptr<CMongoMana
 
 
 
-void CCharacterManager::mongo_UpdateNormalHandler(const std::string &errMsg, AccepterID aID, SessionID sID, SessionInfo & info, const std::string & msg)
+void CCharacterManager::mongo_UpdateNormalHandler(const std::string &errMsg, SessionID sID, SessionInfo & info, const std::string & msg)
 {
 	if (errMsg.empty())
 	{
-		LOGD("CCharacterManager::mongo_UpdateNormalHandler Success. aID=" << aID << ", sID=" << sID << info << ", msg=" << msg);
+		LOGD("CCharacterManager::mongo_UpdateNormalHandler Success. sID=" << sID << info << ", msg=" << msg);
 	}
 	else
 	{
-		LOGE("CCharacterManager::mongo_UpdateNormalHandler Failed. aID=" << aID << ", sID=" << sID << info << ", msg=" << msg << ",mongoErrorMsg=" << errMsg);
+		LOGE("CCharacterManager::mongo_UpdateNormalHandler Failed. sID=" << sID << info << ", msg=" << msg << ",mongoErrorMsg=" << errMsg);
 	}
 }
 
 
-void CCharacterManager::msg_CharacterLogout(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs)
+void CCharacterManager::msg_CharacterLogout(SessionID sID, ProtoID pID, ReadStreamPack & rs)
 {
 	SessionInfo info;
 	rs >> info;
@@ -541,7 +538,6 @@ void CCharacterManager::msg_CharacterLogout(AccepterID aID, SessionID sID, Proto
 			&& sInfo.agentIndex == info.agentIndex)
 		{
 			sInfo.agentIndex = InvalidNodeIndex;
-			sInfo.aID = InvalidAccepterID;
 			sInfo.sID = InvalidSeesionID;
 		}
 	}
@@ -559,7 +555,7 @@ void CCharacterManager::on_CharLogin(const SessionInfo & info)
 	mgr.async_insert(mgr.getLogMongo(), ns, 
 		BSON(mongo::GENOID << "accID" << (long long)info.accID << "charID" << (long long)info.charID << "login" << true << "logTime" << (long long)info.loginTime
 		<< "agentIndex" << info.agentIndex << "sID" << info.sID),
-		std::bind(&CCharacterManager::mongo_UpdateNormalHandler, this, std::placeholders::_1, info.aID, info.sID, info, "insert log login."));
+		std::bind(&CCharacterManager::mongo_UpdateNormalHandler, this, std::placeholders::_1, info.sID, info, "insert log login."));
 }
 void CCharacterManager::on_CharLogout(const SessionInfo & info)
 {
@@ -580,7 +576,7 @@ void CCharacterManager::on_CharLogout(const SessionInfo & info)
 	mgr.async_insert(mgr.getLogMongo(), ns,
 		BSON(mongo::GENOID << "accID" << (long long)info.accID << "charID" << (long long)info.charID << "login" << false << "logTime" << (long long)info.loginTime
 		<< "agentIndex" << info.agentIndex << "sID" << info.sID << "onlineTime" << (long long)onlineTime),
-		std::bind(&CCharacterManager::mongo_UpdateNormalHandler, this, std::placeholders::_1, info.aID, info.sID, info, "insert log logout."));
+		std::bind(&CCharacterManager::mongo_UpdateNormalHandler, this, std::placeholders::_1, info.sID, info, "insert log logout."));
 }
 
 

@@ -105,7 +105,6 @@ struct SessionInfo
 	AccountID accID = InvalidAccountID;
 	CharacterID charID = InvalidCharacterID;
 	NodeIndex agentIndex = InvalideNodeIndex;
-	AccepterID aID = InvalidAccepterID;
 	SessionID sID = InvalidSeesionID;
 	//internal
 	ServerNode srcNode = InvalideServerNode;
@@ -118,7 +117,7 @@ template <class STM>
 inline STM & operator << (STM & stm, const SessionInfo & info)
 {
 	stm << info.accID << info.charID
-		<< info.agentIndex << info.aID << info.sID
+		<< info.agentIndex  << info.sID
 		<< info.srcNode << info.srcIndex
 		<< info.loginTime;
 	return stm;
@@ -127,7 +126,7 @@ template <class STM>
 inline STM & operator >> (STM & stm, SessionInfo & info)
 {
 	stm >> info.accID >> info.charID
-		>> info.agentIndex >> info.aID >> info.sID
+		>> info.agentIndex >> info.sID
 		>> info.srcNode >> info.srcIndex
 		>> info.loginTime;
 	return stm;
@@ -137,7 +136,7 @@ template <>
 inline zsummer::log4z::CStringStream & operator << (zsummer::log4z::CStringStream & stm, const SessionInfo & info)
 {
 	stm << "accID=" << info.accID << ", charID=" << info.charID
-		<< ",agentIndex=" << info.agentIndex << ", aID=" << info.aID
+		<< ",agentIndex=" << info.agentIndex
 		<< ", sID=" << info.sID
 		<< ",srcNode=" << info.srcNode
 		<< ", loginTime=" << info.loginTime;
@@ -164,23 +163,11 @@ inline zsummer::log4z::CStringStream & operator << (zsummer::log4z::CStringStrea
 
 struct ServerAuthSession
 {
-	AccepterID aID = InvalidAccepterID;
 	SessionID sID = InvalidSeesionID;
 	ServerNode node = InvalideServerNode;
 	NodeIndex index = InvalidNodeIndex;
 	time_t  lastActiveTime = time(NULL);
 };
-
-struct ServerAuthConnect
-{
-	ConnectorID cID = InvalidConnectorID;
-	ServerNode node = InvalideServerNode;
-	NodeIndex index = InvalidNodeIndex;
-	time_t  lastActiveTime = time(NULL);
-};
-
-
-
 
 
 class GenObjectID
@@ -200,8 +187,6 @@ public:
 	inline ui64 GetCurObjID(){ return m_seqObjID; }
 
 	inline ui64 GenNewObjID(){ return ++m_seqObjID; }
-
-
 	inline void SetCurObjID(ui64 seq){ m_seqObjID = seq; }
 protected:
 private:

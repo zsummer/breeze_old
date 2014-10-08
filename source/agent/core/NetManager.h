@@ -56,26 +56,23 @@ public:
 	//连接所有认证服务和中央服务
 	bool Start();
 	bool Stop();
-	void event_OnConnect(ConnectorID cID);
-	void event_OnDisconnect(ConnectorID cID);
 
-	void event_OnSessionEstablished(AccepterID, SessionID);
-	void event_OnSessionDisconnect(AccepterID, SessionID);
+	void event_OnSessionEstablished(SessionID);
+	void event_OnSessionDisconnect(SessionID);
 
-	void msg_ConnectServerAuth(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs);
+	void msg_SessionServerAuth(SessionID sID, ProtoID pID, ReadStreamPack &rs);
 
-	void msg_DefaultConnectReq(ConnectorID cID, ProtocolID pID, ReadStreamPack & rs);
-	void msg_DefaultSessionReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
+	void msg_DefaultSessionReq(SessionID sID, ProtoID pID, ReadStreamPack & rs);
 
 
-	void msg_AuthReq(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
-	void msg_AuthAck(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs);
-	void msg_CharacterLogin(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs);
+	void msg_AuthReq(SessionID sID, ProtoID pID, ReadStreamPack & rs);
+	void msg_AuthAck(SessionID cID, ProtoID pID, ReadStreamPack &rs);
+	void msg_CharacterLogin(SessionID cID, ProtoID pID, ReadStreamPack &rs);
 
-	void event_OnSessionPulse(AccepterID aID, SessionID sID, unsigned int pulseInterval);
-	void event_OnConnectorPulse(ConnectorID cID, unsigned int pulseInterval);
-	void msg_OnDirectServerPulse(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs);
-	void msg_OnClientPulse(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
+	void event_OnSessionPulse(SessionID sID, unsigned int pulseInterval);
+	void event_OnConnectorPulse(SessionID cID, unsigned int pulseInterval);
+	void msg_OnDirectServerPulse(SessionID cID, ProtoID pID, ReadStreamPack &rs);
+	void msg_OnClientPulse(SessionID sID, ProtoID pID, ReadStreamPack & rs);
 
 private:
 	std::unordered_map<SessionID, std::shared_ptr<AgentSessionInfo>> m_mapSession;
@@ -84,10 +81,8 @@ private:
 	tagAcceptorConfigTraits m_configListen; //保存监听配置
 	bool m_bListening = false;
 
-	ConnectorID m_lastConnectID = 0; //自动递增的connectorID.
-	std::unordered_map<ConnectorID, tagConnctorConfigTraits> m_configCenter;  //cID 对应的连接配置
-
-	std::vector<ServerAuthConnect> m_onlineCenter;
+	std::unordered_map<SessionID, tagConnctorConfigTraits> m_configCenter;  //cID 对应的连接配置
+	std::vector<ServerAuthSession> m_onlineCenter;
 };
 
 

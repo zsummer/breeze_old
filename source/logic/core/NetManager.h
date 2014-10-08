@@ -37,39 +37,28 @@
 
 class CNetManager
 {
-public:
-	inline void SendOrgDataToCenter(const char * orgData, unsigned int orgDataLen);
-	inline void SendOrgDataToDBAgent(const char * orgData, unsigned int orgDataLen);
 private:
 	std::vector<ServerAuthSession> m_onlineSession;
-	std::vector<ServerAuthConnect> m_onlineConnect;
-
 public:
 	CNetManager();
 	bool Start();
-	void event_OnConnect(ConnectorID cID);
-	void event_OnDisconnect(ConnectorID cID);
+	void event_OnSessionEstablished(SessionID sID);
+	void event_OnSessionDisconnect(SessionID sID);
 
-	void event_OnSessionEstablished(AccepterID aID, SessionID sID);
-	void event_OnSessionDisconnect(AccepterID aID, SessionID sID);
-
-	void msg_ConnectServerAuth(ConnectorID cID, ProtocolID pID, ReadStreamPack &rs);
-	void msg_SessionServerAuth(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
-
-	void event_OnSessionPulse(AccepterID aID, SessionID sID, unsigned int pulseInterval);
-	void msg_OnDirectServerPulse(AccepterID aID, SessionID sID, ProtocolID pID, ReadStreamPack & rs);
-
+	void msg_SessionServerAuth(SessionID sID, ProtoID pID, ReadStreamPack & rs);
+	void event_OnSessionPulse(SessionID sID, unsigned int pulseInterval);
+	void msg_OnDirectServerPulse(SessionID sID, ProtoID pID, ReadStreamPack & rs);
+	void SendOrgDataToCenter(const char * orgData, unsigned int orgDataLen);
 private:
 	tagAcceptorConfigTraits m_configListen; //保存监听配置
-	ConnectorID m_lastConnectID = 0; //自动递增的connectorID.
-	std::unordered_map<ConnectorID, tagConnctorConfigTraits> m_configConnect; //cID 对应的连接配置
+	std::unordered_map<SessionID, tagConnctorConfigTraits> m_configConnect; //cID 对应的连接配置
 };
 
 
 
 
 //helper
-void CNetManager::SendOrgDataToCenter(const char * orgData, unsigned int orgDataLen)
+inline void CNetManager::SendOrgDataToCenter(const char * orgData, unsigned int orgDataLen)
 {
 	if (m_onlineSession.empty())
 	{
@@ -77,20 +66,8 @@ void CNetManager::SendOrgDataToCenter(const char * orgData, unsigned int orgData
 		return;
 	}
 	const ServerAuthSession & sas = m_onlineSession.at(0);
-	CTcpSessionManager::getRef().SendOrgSessionData(sas.aID, sas.sID, orgData, orgDataLen);
+	CTcpSessionManager::getRef().SendOrgSessionData(sas.sID, orgData, orgDataLen);
 }
-
-void CNetManager::SendOrgDataToDBAgent(const char * orgData, unsigned int orgDataLen)
-{
-	if (m_onlineConnect.empty())
-	{
-		LOGW("not found any dbAgent. protocol send lost");
-		return;
-	}
-	const ServerAuthConnect & sac = m_onlineConnect.at(0);
-	CTcpSessionManager::getRef().SendOrgConnectorData(sac.cID, orgData, orgDataLen);
-}
-
 
 
 

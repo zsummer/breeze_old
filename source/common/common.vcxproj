@@ -23,10 +23,12 @@
     <ClInclude Include="MongoManager.h" />
     <ClInclude Include="ProtoDefine.h" />
     <ClInclude Include="ServerConfig.h" />
+    <ClInclude Include="tinyxml2.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MongoManager.cpp" />
     <ClCompile Include="ServerConfig.cpp" />
+    <ClCompile Include="tinyxml2.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{AE557081-EA4D-49A7-A629-49EA151806DF}</ProjectGuid>
@@ -99,6 +101,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>./</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
