@@ -23,10 +23,6 @@
 #include <ProtoCommon.h>
 #include <ProtoAuth.h>
 #include <ProtoLogin.h>
-
-#include <zsummerX/FrameHeader.h>
-#include <zsummerX/FrameTcpSessionManager.h>
-#include <zsummerX/FrameMessageDispatch.h>
 #include <unordered_map>
 
 using namespace zsummer::log4z;

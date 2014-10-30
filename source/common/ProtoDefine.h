@@ -32,7 +32,7 @@
 
 #include <string>
 #include <algorithm>
-#include <zsummerX/FrameHeader.h>
+#include <zsummerX/frameX.h>
 
 
 //! 基本类型
@@ -213,8 +213,7 @@ private:
 
 #include <ProtoServerControl.h>
 #include <ProtoCommon.h>
-#include <zsummerX/FrameTcpSessionManager.h>
-#include <zsummerX/FrameMessageDispatch.h>
+
 
 
 #endif

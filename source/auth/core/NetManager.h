@@ -28,8 +28,6 @@
 #define _NET_MANAGER_H_
 
 #include "../core/GlobalFacade.h"
-#include <zsummerX/FrameMessageDispatch.h>
-#include <zsummerX/FrameTcpSessionManager.h>
 #include <ProtoDefine.h>
 
 

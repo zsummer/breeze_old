@@ -17,9 +17,7 @@
 */
 
 #include "Application.h"
-#include <zsummerX/FrameHeader.h>
-#include <zsummerX/FrameTcpSessionManager.h>
-#include <zsummerX/FrameMessageDispatch.h>
+#include <zsummerX/frameX.h>
 #include <unordered_map>
 using namespace zsummer::log4z;
 

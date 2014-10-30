@@ -51,7 +51,7 @@ public:
 	typedef std::shared_ptr<mongo::DBClientConnection> MongoPtr;
 	typedef std::vector<mongo::BSONObj> MongoRetDatas;
 public:
-	CMongoManager(){}
+	CMongoManager();
 	~CMongoManager();
 	bool StartPump();
 	bool StopPump();
@@ -88,7 +88,7 @@ private:
 	std::shared_ptr<mongo::DBClientConnection> m_infoMongo;
 	std::shared_ptr<mongo::DBClientConnection> m_logMongo;
 	std::shared_ptr<std::thread> m_thread;
-	zsummer::network::CZSummer m_summer;
+	zsummer::network::ZSummerPtr m_summer;
 
 	bool m_bRuning = false;
 	char __tmpAlignas1[128];
@@ -116,7 +116,7 @@ void CMongoManager::Run()
 		}
 		try
 		{
-			m_summer.RunOnce();
+			m_summer->RunOnce();
 		}
 		catch (...)
 		{

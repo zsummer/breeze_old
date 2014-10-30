@@ -20,7 +20,11 @@
 #include "MongoManager.h"
 #include <ProtoDefine.h>
 #include <boost/lexical_cast.hpp>
-#include <zsummerX/FrameTcpSessionManager.h>
+
+CMongoManager::CMongoManager()
+{
+	m_summer = std::make_shared<zsummer::network::ZSummer>();
+}
 
 CMongoManager::~CMongoManager()
 {
@@ -29,7 +33,7 @@ CMongoManager::~CMongoManager()
 
 bool CMongoManager::StartPump()
 {
-	bool ret = m_summer.Initialize();
+	bool ret = m_summer->Initialize();
 	if (!ret)
 	{
 		return false;
@@ -96,7 +100,7 @@ void CMongoManager::async_query(MongoPtr & mongoPtr, const string &ns, const mon
 	const std::function<void(std::shared_ptr<MongoRetDatas> , std::string )> &handler)
 {
 	m_uPostCount++;
-	m_summer.Post(std::bind(&CMongoManager::_async_query, this, mongoPtr, ns, query, handler));
+	m_summer->Post(std::bind(&CMongoManager::_async_query, this, mongoPtr, ns, query, handler));
 }
 
 
@@ -135,7 +139,7 @@ void CMongoManager::async_update(MongoPtr &mongoPtr, const string &ns, const mon
 	const std::function<void(std::string )> & handler)
 {
 	m_uPostCount++;
-	m_summer.Post(std::bind(&CMongoManager::_async_update, this, mongoPtr, ns, query, obj, upsert, handler));
+	m_summer->Post(std::bind(&CMongoManager::_async_update, this, mongoPtr, ns, query, obj, upsert, handler));
 }
 
 
@@ -165,7 +169,7 @@ void CMongoManager::async_insert(MongoPtr &mongoPtr, const string &ns, const mon
 	const std::function<void(std::string )> & handler)
 {
 	m_uPostCount++;
-	m_summer.Post(std::bind(&CMongoManager::_async_insert, this, mongoPtr, ns, obj, handler));
+	m_summer->Post(std::bind(&CMongoManager::_async_insert, this, mongoPtr, ns, obj, handler));
 }
 
 void CMongoManager::_async_insert(MongoPtr &mongoPtr, const string &ns, const mongo::BSONObj &obj,

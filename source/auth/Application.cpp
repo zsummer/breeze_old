@@ -6,8 +6,6 @@
 
 #include <ServerConfig.h>
 #include <log4z/log4z.h>
-#include <zsummerX/FrameTcpSessionManager.h>
-#include <zsummerX/FrameMessageDispatch.h>
 using namespace zsummer::log4z;
 
 Appliction::Appliction()

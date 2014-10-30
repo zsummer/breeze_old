@@ -33,9 +33,6 @@
 #include <ProtoDefine.h>
 #include <ProtoAuth.h>
 #include "GlobalFacade.h"
-
-#include <zsummerX/FrameMessageDispatch.h>
-#include <zsummerX/FrameTcpSessionManager.h>
 #include <unordered_map>
 
 
